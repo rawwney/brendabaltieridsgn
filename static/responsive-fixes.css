@@ -1,0 +1,251 @@
+/* Fidelity-preserving responsive fixes layered over the original portfolio. */
+
+:where(h1, h2, h3, h4, h5, h6, strong, b, a, button, .project-title, .software-name) {
+  hyphens: none;
+  word-break: normal;
+}
+
+.mega {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.work > .mega {
+  font-size: clamp(30px, 10.25vw, 190px);
+  line-height: 0.78;
+}
+
+.mega .inline-mark,
+.brand-note .note-mark,
+.copy-confirmation .button-mark,
+.marquee-item .marquee-mark {
+  break-before: avoid;
+  white-space: nowrap;
+}
+
+.project-cta,
+.project-number,
+.poster-index,
+.language-switch,
+.socials a,
+.case-nav button,
+.modal-top button,
+footer a {
+  white-space: nowrap;
+}
+
+.project-image img,
+.popup-slide img,
+.tag-project-card img {
+  image-rendering: auto;
+}
+
+.project-grid > .project {
+  border: 1px solid var(--white) !important;
+  transition: border-color 180ms ease;
+}
+
+.project-grid > .project:is(:hover, :focus-within) {
+  border-color: var(--acid) !important;
+}
+
+.project-grid > .project:is(:hover, :focus-within) .project-info {
+  background: var(--acid) !important;
+  color: var(--ink) !important;
+}
+
+.project-grid > .project:is(:hover, :focus-within) .project-tags {
+  color: var(--ink) !important;
+}
+
+.project-grid > .project:is(:hover, :focus-within) .project-image img {
+  filter: saturate(1.08) !important;
+  transform: scale(1.06) !important;
+}
+
+.project-grid > .project .project-image[role="button"] {
+  cursor: pointer;
+}
+
+.project-grid > .project .project-image[role="button"]:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: -3px;
+}
+
+@media (max-width: 760px) {
+  :is(
+      .work > .mega,
+      .about .mega,
+      .experience > .mega,
+      .contact > .mega,
+      .courses article h3,
+      .timeline h3,
+      .software-name,
+      .project-title,
+      .contact-option strong,
+      .case header h2,
+      .case-intro h3,
+      .tag-popup-header h2
+    ) {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  :is(.work > .mega, .about .mega, .experience > .mega, .contact > .mega) {
+    white-space: nowrap !important;
+  }
+
+  .work > .mega {
+    margin-block: 22vw;
+    font-size: clamp(30px, 10.25vw, 78px);
+  }
+
+  .about .mega {
+    font-size: 18vw;
+  }
+
+  .experience .mega {
+    overflow-wrap: normal;
+    white-space: nowrap;
+    font-size: 10.5vw;
+  }
+
+  .experience .mega em {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  .contact .mega {
+    overflow-wrap: normal;
+    white-space: nowrap;
+    font-size: 10.8vw;
+  }
+
+  :is(
+      .courses article h3,
+      .timeline h3,
+      .software-name,
+      .project-title,
+      .contact-option strong,
+      .case header h2,
+      .case-intro h3,
+      .tag-popup-header h2
+    ) {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .timeline h3 {
+    font-size: clamp(23px, 6.8vw, 34px);
+  }
+
+  .project-grid .project-info > .project-title,
+  .project-grid .project:hover .project-info > .project-title {
+    font-size: clamp(20px, 5.9vw, 31px);
+    text-wrap: balance;
+  }
+
+  .case header h2 {
+    font-size: clamp(38px, 10.5vw, 66px);
+    text-wrap: balance;
+  }
+
+  .case-intro h3 {
+    font-size: clamp(27px, 7.5vw, 44px);
+    text-wrap: balance;
+  }
+
+  .tag-popup-header h2 {
+    font-size: clamp(31px, 8.5vw, 52px);
+    text-wrap: balance;
+  }
+
+  .contact-option strong {
+    font-size: clamp(30px, 9vw, 44px);
+    text-wrap: balance;
+  }
+
+  .contact-option small {
+    overflow-wrap: normal;
+    white-space: nowrap;
+    font-size: clamp(8px, 2.65vw, 10px);
+  }
+
+  .section-label {
+    gap: 14px;
+    font-size: clamp(8px, 2.4vw, 10px);
+  }
+
+  .section-label > span,
+  .hero-kicker > span {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .education h2 {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
+@media (max-width: 390px) {
+  .work > .mega {
+    font-size: 9.8vw;
+  }
+
+  .about .mega {
+    font-size: 17vw;
+  }
+
+  .contact .mega {
+    font-size: 10.2vw;
+  }
+
+  .section-label {
+    letter-spacing: 0.07em;
+  }
+}
+
+/* The two ticker bands framing the About section share one treatment. */
+.about + .marquee {
+  background: var(--ink) !important;
+  color: var(--acid) !important;
+  border-top-color: var(--acid) !important;
+  border-bottom-color: var(--acid) !important;
+}
+
+.about + .marquee > .marquee-track,
+.about + .marquee .marquee-item,
+.about + .marquee .marquee-mark,
+.about + .marquee .mark-alt {
+  color: var(--acid) !important;
+}
+
+/* Account for the portfolio's intentional outer gutter inside the declared
+   width, so the work section is centered instead of extending to the right. */
+.work {
+  width: calc(100% - var(--work-outer) - var(--work-outer)) !important;
+  max-width: calc(100% - var(--work-outer) - var(--work-outer)) !important;
+}
+
+/* Desktop projects sit in balanced pairs. This removes the asymmetric spans
+   and offsets from the original masonry layout while preserving each image. */
+@media (min-width: 901px) {
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    align-items: start !important;
+    column-gap: clamp(28px, 3.5vw, 72px) !important;
+    row-gap: clamp(56px, 7vw, 128px) !important;
+  }
+
+  .project-grid > .project,
+  .project-grid > .project:nth-child(n) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    align-self: start !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
