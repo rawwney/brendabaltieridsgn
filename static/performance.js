@@ -103,60 +103,6 @@
   buildProjectArchive();
   window.setTimeout(buildProjectArchive, 1400);
 
-  function enableProjectStepScroll() {
-    if (document.documentElement.dataset.projectStepScroll === 'true') return;
-    document.documentElement.dataset.projectStepScroll = 'true';
-
-    let accumulatedDelta = 0;
-    let resetTimer = 0;
-    let locked = false;
-
-    window.addEventListener('wheel', (event) => {
-      if (window.innerWidth <= 900 || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      if (event.target.closest('.project-popup, [data-native-scroll]')) return;
-
-      const shell = document.querySelector('.work-projects-shell');
-      const projects = Array.from(shell?.querySelectorAll('.project-grid > .project') || []);
-      if (!shell || projects.length < 2) return;
-
-      const shellRect = shell.getBoundingClientRect();
-      const topOffset = 94;
-      const isInsideArchive = shellRect.top <= topOffset + 20 && shellRect.bottom > window.innerHeight * 0.45;
-      if (!isInsideArchive) return;
-
-      const direction = Math.sign(event.deltaY);
-      const currentIndex = projects.reduce((closest, project, index) => {
-        const distance = Math.abs(project.getBoundingClientRect().top - topOffset);
-        return distance < closest.distance ? { index, distance } : closest;
-      }, { index: 0, distance: Infinity }).index;
-
-      if ((direction < 0 && currentIndex === 0) || (direction > 0 && currentIndex === projects.length - 1)) {
-        accumulatedDelta = 0;
-        return;
-      }
-
-      event.preventDefault();
-      if (locked) return;
-
-      window.clearTimeout(resetTimer);
-      accumulatedDelta += event.deltaY;
-      resetTimer = window.setTimeout(() => { accumulatedDelta = 0; }, 140);
-      if (Math.abs(accumulatedDelta) < 45) return;
-
-      const targetIndex = Math.max(0, Math.min(projects.length - 1, currentIndex + Math.sign(accumulatedDelta)));
-      const targetTop = window.scrollY + projects[targetIndex].getBoundingClientRect().top - topOffset;
-      accumulatedDelta = 0;
-      locked = true;
-      window.scrollTo({
-        top: targetTop,
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      });
-      window.setTimeout(() => { locked = false; }, 620);
-    }, { passive: false });
-  }
-
-  enableProjectStepScroll();
-
   const observer = new MutationObserver((records) => {
     for (const record of records) {
       for (const node of record.addedNodes) {
