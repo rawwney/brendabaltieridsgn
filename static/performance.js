@@ -51,6 +51,66 @@
   enhanceImages();
   enhanceProjects();
 
+  function buildProjectArchive() {
+    const work = document.querySelector('.work');
+    const grid = work?.querySelector('.project-grid');
+    if (!work || !grid || grid.closest('.work-projects-shell')) return;
+
+    const projects = Array.from(grid.querySelectorAll(':scope > .project'));
+    if (!projects.length) return;
+
+    const shell = document.createElement('div');
+    shell.className = 'work-projects-shell';
+
+    const rail = document.createElement('nav');
+    rail.className = 'project-rail';
+    rail.setAttribute('aria-label', 'Índice de projetos');
+    rail.innerHTML = '<div class="project-rail__heading"><span>ÍNDICE / OBRAS</span><span class="project-rail__count">00</span></div><div class="project-rail__list"></div>';
+    rail.querySelector('.project-rail__count').textContent = String(projects.length).padStart(2, '0');
+    const list = rail.querySelector('.project-rail__list');
+
+    projects.forEach((project, index) => {
+      project.style.setProperty('--project-order', String(index % 4));
+      project.id = `projeto-${String(index + 1).padStart(2, '0')}`;
+      const title = project.querySelector('.project-title')?.textContent?.trim() || `Projeto ${index + 1}`;
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'project-rail__item';
+      item.setAttribute('aria-label', `Ir para ${title}`);
+      item.innerHTML = `<span class="project-rail__number">${String(index + 1).padStart(2, '0')}</span><span class="project-rail__name"></span><span class="project-rail__arrow">↘</span>`;
+      item.querySelector('.project-rail__name').textContent = title;
+      item.addEventListener('click', () => project.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      list.append(item);
+      project.dataset.archiveIndex = String(index);
+    });
+
+    grid.before(shell);
+    shell.append(rail, grid);
+
+    const setActive = (index) => {
+      list.querySelectorAll('.project-rail__item').forEach((item, itemIndex) => {
+        item.toggleAttribute('aria-current', itemIndex === index);
+      });
+    };
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        visible.forEach((entry) => entry.target.classList.add('is-in-view'));
+        if (visible.length) {
+          visible.sort((a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
+          setActive(Number(visible[0].target.dataset.archiveIndex));
+        }
+      }, { rootMargin: '-18% 0px -45% 0px', threshold: 0.08 });
+      projects.forEach((project) => observer.observe(project));
+    } else {
+      projects.forEach((project) => project.classList.add('is-in-view'));
+    }
+    setActive(0);
+  }
+
+  buildProjectArchive();
+
   const observer = new MutationObserver((records) => {
     for (const record of records) {
       for (const node of record.addedNodes) {
