@@ -66,7 +66,7 @@
     image.decoding = 'async';
 
     figure.append(image);
-    copy.after(figure);
+    copy.before(figure);
     grid.classList.add('about-gif-layout');
     grid.dataset.aboutGif = 'true';
   }
