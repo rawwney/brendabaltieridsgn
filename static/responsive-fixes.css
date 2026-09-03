@@ -343,8 +343,8 @@ footer a {
    the About section begins. */
 @media (min-width: 901px) {
   .work-projects-shell {
-    grid-template-columns: clamp(174px, 16.5vw, 258px) minmax(0, 1fr);
-    gap: clamp(30px, 5.2vw, 96px);
+    grid-template-columns: clamp(250px, 22vw, 360px) minmax(0, 1fr);
+    gap: clamp(36px, 4.5vw, 82px);
   }
 
   .work-projects-shell .project-grid {
@@ -355,7 +355,11 @@ footer a {
   .work-projects-shell .project-grid > .project,
   .work-projects-shell .project-grid > .project:nth-child(n) {
     grid-column: 1 !important;
-    width: 100% !important;
+    justify-self: center;
+    width: min(100%, calc((100svh - 230px) * 1.3333)) !important;
+    max-width: 1040px;
+    scroll-margin-top: 104px;
+    --project-info-height: clamp(128px, 8vw, 150px);
   }
 
   .project-rail {
@@ -367,16 +371,16 @@ footer a {
     background: var(--ink);
     border: 0;
     color: var(--paper);
-    padding: clamp(16px, 1.8vw, 30px);
+    padding: clamp(24px, 2.4vw, 42px);
   }
 
-  .project-rail__masthead { display: grid; grid-template-columns: auto 1fr; gap: clamp(14px, 1.7vw, 28px); height: 100%; }
-  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(25px, 3.1vw, 54px); letter-spacing: -.075em; line-height: .76; writing-mode: vertical-rl; transform: rotate(180deg); }
-  .project-rail__context { align-content: start; display: grid; gap: 12px; font-size: 9px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
+  .project-rail__masthead { display: flex; flex-direction: column; gap: clamp(28px, 4vh, 50px); height: 100%; }
+  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(31px, 3.1vw, 50px); letter-spacing: -.065em; line-height: .82; writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
+  .project-rail__context { align-content: start; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 20px; font-size: 10px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
   .project-rail__context > span:first-child { color: var(--acid); }
-  .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(38px, 4vw, 68px); font-weight: 400; letter-spacing: -.08em; line-height: .8; }
-  .project-rail__total { color: #ffffff90; margin-top: -8px; }
-  .project-rail__context p { border-top: 1px solid #ffffff45; margin: 10px 0 0; padding-top: 10px; }
+  .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(48px, 5vw, 82px); font-weight: 400; letter-spacing: -.08em; line-height: .76; grid-column: 1 / -1; }
+  .project-rail__total { align-self: end; color: #ffffff90; }
+  .project-rail__context p { border-top: 1px solid #ffffff45; grid-column: 1 / -1; margin: 2px 0 0; padding-top: 13px; }
 }
 
 @media (max-width: 900px) {

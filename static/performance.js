@@ -103,6 +103,50 @@
   buildProjectArchive();
   window.setTimeout(buildProjectArchive, 1400);
 
+  function enableSmoothWheel() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (window.innerWidth <= 900 || reducedMotion.matches || document.documentElement.dataset.smoothWheel === 'true') return;
+
+    document.documentElement.dataset.smoothWheel = 'true';
+    let current = window.scrollY;
+    let target = current;
+    let frame = 0;
+
+    const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const render = () => {
+      current += (target - current) * 0.115;
+      if (Math.abs(target - current) < 0.35) {
+        current = target;
+        window.scrollTo(0, current);
+        frame = 0;
+        document.documentElement.classList.remove('is-smooth-scrolling');
+        return;
+      }
+      window.scrollTo(0, current);
+      frame = window.requestAnimationFrame(render);
+    };
+
+    window.addEventListener('wheel', (event) => {
+      if (event.defaultPrevented || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (event.target.closest('.project-popup, [data-native-scroll]')) return;
+      event.preventDefault();
+      const multiplier = event.deltaMode === 1 ? 18 : event.deltaMode === 2 ? window.innerHeight : 1;
+      target = Math.max(0, Math.min(limit(), target + event.deltaY * multiplier));
+      document.documentElement.classList.add('is-smooth-scrolling');
+      if (!frame) {
+        current = window.scrollY;
+        frame = window.requestAnimationFrame(render);
+      }
+    }, { passive: false });
+
+    window.addEventListener('scroll', () => {
+      if (!frame) current = target = window.scrollY;
+    }, { passive: true });
+  }
+
+  enableSmoothWheel();
+  window.addEventListener('resize', enableSmoothWheel, { passive: true });
+
   const observer = new MutationObserver((records) => {
     for (const record of records) {
       for (const node of record.addedNodes) {
