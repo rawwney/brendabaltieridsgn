@@ -546,6 +546,7 @@ footer a {
   grid-column: 5 / 13;
   margin: 0;
   max-width: 1080px;
+  padding-top: clamp(34px, 2.4vw, 48px);
 }
 
 .about-grid.about-gif-layout .about-copy small {
@@ -595,6 +596,7 @@ footer a {
     grid-column: 1;
     margin: 0;
     max-width: 100%;
+    padding-top: 0;
     width: 100%;
   }
 
