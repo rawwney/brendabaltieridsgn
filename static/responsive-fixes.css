@@ -382,3 +382,48 @@ footer a {
 @media (max-width: 1040px) {
   .project-rail__masthead { display: none; }
 }
+
+/* Brand-level selection and scroll treatments. Touch devices keep their native
+   scrollbar for a familiar, reliable gesture experience. */
+::selection {
+  background: var(--acid);
+  color: var(--ink);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: var(--acid);
+  color: var(--ink);
+  text-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html, body, .project-popup {
+    scrollbar-color: var(--acid) var(--ink);
+    scrollbar-width: thin;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  .project-popup::-webkit-scrollbar { width: 14px; height: 14px; }
+
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track,
+  .project-popup::-webkit-scrollbar-track {
+    background: var(--ink);
+    border-left: 1px solid #ffffff38;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb,
+  .project-popup::-webkit-scrollbar-thumb {
+    background: var(--acid);
+    border: 3px solid var(--ink);
+    border-radius: 0;
+    box-shadow: inset 0 0 0 1px #00000044;
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover,
+  .project-popup::-webkit-scrollbar-thumb:hover { background: #d9ff9d; }
+}
