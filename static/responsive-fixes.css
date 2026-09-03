@@ -342,6 +342,8 @@ footer a {
    a time. The sticky boundary is the projects shell, so it releases before
    the About section begins. */
 @media (min-width: 901px) {
+  .work > .mega { display: none !important; }
+
   .work-projects-shell {
     grid-template-columns: clamp(250px, 22vw, 360px) minmax(0, 1fr);
     gap: clamp(36px, 4.5vw, 82px);
@@ -375,7 +377,7 @@ footer a {
   }
 
   .project-rail__masthead { display: flex; flex-direction: column; gap: clamp(24px, 3.5vh, 42px); height: 100%; }
-  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(23px, 1.9vw, 30px); letter-spacing: -.055em; line-height: .9; order: 2; writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
+  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(42px, 3.4vw, 60px); font-weight: 900; letter-spacing: -.075em; line-height: .78; margin-top: auto; order: 2; padding-top: 28px; writing-mode: horizontal-tb; transform: none; white-space: normal; }
   .project-rail__context { align-content: start; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 20px; font-size: 10px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
   .project-rail__context > span:first-child { color: var(--acid); }
   .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(48px, 5vw, 82px); font-weight: 400; letter-spacing: -.08em; line-height: .76; grid-column: 1 / -1; }

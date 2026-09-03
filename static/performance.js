@@ -65,7 +65,7 @@
     const rail = document.createElement('nav');
     rail.className = 'project-rail';
     rail.setAttribute('aria-label', 'Informações sobre os projetos selecionados');
-    rail.innerHTML = '<div class="project-rail__masthead"><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div><span class="project-rail__vertical">SELECTED WORKS</span></div>';
+    rail.innerHTML = '<div class="project-rail__masthead"><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div><span class="project-rail__vertical">SELECTED<br>WORKS</span></div>';
     rail.querySelector('.project-rail__total').textContent = `DE ${String(projects.length).padStart(2, '0')}`;
 
     projects.forEach((project, index) => {
@@ -103,50 +103,59 @@
   buildProjectArchive();
   window.setTimeout(buildProjectArchive, 1400);
 
-  function enableSmoothWheel() {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (window.innerWidth <= 900 || reducedMotion.matches || document.documentElement.dataset.smoothWheel === 'true') return;
+  function enableProjectStepScroll() {
+    if (document.documentElement.dataset.projectStepScroll === 'true') return;
+    document.documentElement.dataset.projectStepScroll = 'true';
 
-    document.documentElement.dataset.smoothWheel = 'true';
-    let current = window.scrollY;
-    let target = current;
-    let frame = 0;
-
-    const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const render = () => {
-      current += (target - current) * 0.22;
-      if (Math.abs(target - current) < 0.5) {
-        current = target;
-        window.scrollTo(0, current);
-        frame = 0;
-        document.documentElement.classList.remove('is-smooth-scrolling');
-        return;
-      }
-      window.scrollTo(0, current);
-      frame = window.requestAnimationFrame(render);
-    };
+    let accumulatedDelta = 0;
+    let resetTimer = 0;
+    let locked = false;
 
     window.addEventListener('wheel', (event) => {
-      if (event.defaultPrevented || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (window.innerWidth <= 900 || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       if (event.target.closest('.project-popup, [data-native-scroll]')) return;
-      event.preventDefault();
-      const multiplier = event.deltaMode === 1 ? 14 : event.deltaMode === 2 ? window.innerHeight * 0.72 : 0.72;
-      const movement = Math.max(-420, Math.min(420, event.deltaY * multiplier));
-      target = Math.max(0, Math.min(limit(), target + movement));
-      document.documentElement.classList.add('is-smooth-scrolling');
-      if (!frame) {
-        current = window.scrollY;
-        frame = window.requestAnimationFrame(render);
-      }
-    }, { passive: false });
 
-    window.addEventListener('scroll', () => {
-      if (!frame) current = target = window.scrollY;
-    }, { passive: true });
+      const shell = document.querySelector('.work-projects-shell');
+      const projects = Array.from(shell?.querySelectorAll('.project-grid > .project') || []);
+      if (!shell || projects.length < 2) return;
+
+      const shellRect = shell.getBoundingClientRect();
+      const topOffset = 94;
+      const isInsideArchive = shellRect.top <= topOffset + 20 && shellRect.bottom > window.innerHeight * 0.45;
+      if (!isInsideArchive) return;
+
+      const direction = Math.sign(event.deltaY);
+      const currentIndex = projects.reduce((closest, project, index) => {
+        const distance = Math.abs(project.getBoundingClientRect().top - topOffset);
+        return distance < closest.distance ? { index, distance } : closest;
+      }, { index: 0, distance: Infinity }).index;
+
+      if ((direction < 0 && currentIndex === 0) || (direction > 0 && currentIndex === projects.length - 1)) {
+        accumulatedDelta = 0;
+        return;
+      }
+
+      event.preventDefault();
+      if (locked) return;
+
+      window.clearTimeout(resetTimer);
+      accumulatedDelta += event.deltaY;
+      resetTimer = window.setTimeout(() => { accumulatedDelta = 0; }, 140);
+      if (Math.abs(accumulatedDelta) < 45) return;
+
+      const targetIndex = Math.max(0, Math.min(projects.length - 1, currentIndex + Math.sign(accumulatedDelta)));
+      const targetTop = window.scrollY + projects[targetIndex].getBoundingClientRect().top - topOffset;
+      accumulatedDelta = 0;
+      locked = true;
+      window.scrollTo({
+        top: targetTop,
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+      window.setTimeout(() => { locked = false; }, 620);
+    }, { passive: false });
   }
 
-  enableSmoothWheel();
-  window.addEventListener('resize', enableSmoothWheel, { passive: true });
+  enableProjectStepScroll();
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
