@@ -64,23 +64,13 @@
 
     const rail = document.createElement('nav');
     rail.className = 'project-rail';
-    rail.setAttribute('aria-label', 'Índice de projetos');
-    rail.innerHTML = '<div class="project-rail__heading"><span>ÍNDICE / OBRAS</span><span class="project-rail__count">00</span></div><div class="project-rail__list"></div>';
-    rail.querySelector('.project-rail__count').textContent = String(projects.length).padStart(2, '0');
-    const list = rail.querySelector('.project-rail__list');
+    rail.setAttribute('aria-label', 'Informações sobre os projetos selecionados');
+    rail.innerHTML = '<div class="project-rail__masthead"><span class="project-rail__vertical">SELECTED WORKS</span><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div></div>';
+    rail.querySelector('.project-rail__total').textContent = `DE ${String(projects.length).padStart(2, '0')}`;
 
     projects.forEach((project, index) => {
       project.style.setProperty('--project-order', String(index % 4));
       project.id = `projeto-${String(index + 1).padStart(2, '0')}`;
-      const title = project.querySelector('.project-title')?.textContent?.trim() || `Projeto ${index + 1}`;
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = 'project-rail__item';
-      item.setAttribute('aria-label', `Ir para ${title}`);
-      item.innerHTML = `<span class="project-rail__number">${String(index + 1).padStart(2, '0')}</span><span class="project-rail__name"></span><span class="project-rail__arrow">↘</span>`;
-      item.querySelector('.project-rail__name').textContent = title;
-      item.addEventListener('click', () => project.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-      list.append(item);
       project.dataset.archiveIndex = String(index);
     });
 
@@ -88,9 +78,7 @@
     shell.append(rail, grid);
 
     const setActive = (index) => {
-      list.querySelectorAll('.project-rail__item').forEach((item, itemIndex) => {
-        item.toggleAttribute('aria-current', itemIndex === index);
-      });
+      rail.querySelector('.project-rail__current').textContent = String(index + 1).padStart(2, '0');
     };
 
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {

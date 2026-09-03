@@ -336,3 +336,49 @@ footer a {
 @media (max-width: 760px) {
   .work-projects-shell .project { opacity: 1; transform: none; }
 }
+
+/* The archive turns into a two-part editorial spread on wide screens: the
+   fixed black spine carries context while the work itself reads one image at
+   a time. The sticky boundary is the projects shell, so it releases before
+   the About section begins. */
+@media (min-width: 1041px) {
+  .work-projects-shell {
+    grid-template-columns: clamp(174px, 16.5vw, 258px) minmax(0, 1fr);
+    gap: clamp(30px, 5.2vw, 96px);
+  }
+
+  .work-projects-shell .project-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: clamp(70px, 10vw, 180px) !important;
+  }
+
+  .work-projects-shell .project-grid > .project,
+  .work-projects-shell .project-grid > .project:nth-child(n) {
+    grid-column: 1 !important;
+    width: 100% !important;
+  }
+
+  .project-rail {
+    align-self: stretch;
+    top: 78px;
+    max-height: calc(100svh - 94px);
+    min-height: min(620px, calc(100svh - 94px));
+    overflow: hidden;
+    background: var(--ink);
+    border: 0;
+    color: var(--paper);
+    padding: clamp(16px, 1.8vw, 30px);
+  }
+
+  .project-rail__masthead { display: grid; grid-template-columns: auto 1fr; gap: clamp(14px, 1.7vw, 28px); height: 100%; }
+  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(25px, 3.1vw, 54px); letter-spacing: -.075em; line-height: .76; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .project-rail__context { align-content: start; display: grid; gap: 12px; font-size: 9px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
+  .project-rail__context > span:first-child { color: var(--acid); }
+  .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(38px, 4vw, 68px); font-weight: 400; letter-spacing: -.08em; line-height: .8; }
+  .project-rail__total { color: #ffffff90; margin-top: -8px; }
+  .project-rail__context p { border-top: 1px solid #ffffff45; margin: 10px 0 0; padding-top: 10px; }
+}
+
+@media (max-width: 1040px) {
+  .project-rail__masthead { display: none; }
+}
