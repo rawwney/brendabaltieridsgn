@@ -328,7 +328,7 @@ footer a {
   }
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 900px) {
   .work-projects-shell { display: block; }
   .project-rail { display: none; }
 }
@@ -341,7 +341,7 @@ footer a {
    fixed black spine carries context while the work itself reads one image at
    a time. The sticky boundary is the projects shell, so it releases before
    the About section begins. */
-@media (min-width: 1041px) {
+@media (min-width: 901px) {
   .work-projects-shell {
     grid-template-columns: clamp(174px, 16.5vw, 258px) minmax(0, 1fr);
     gap: clamp(30px, 5.2vw, 96px);
@@ -379,7 +379,7 @@ footer a {
   .project-rail__context p { border-top: 1px solid #ffffff45; margin: 10px 0 0; padding-top: 10px; }
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 900px) {
   .project-rail__masthead { display: none; }
 }
 
