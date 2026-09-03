@@ -48,8 +48,37 @@
     root.querySelectorAll?.('.project-grid > .project').forEach(enhanceProject);
   }
 
+  function enhanceAboutGrid(grid) {
+    if (grid.dataset.aboutGif === 'true') return;
+
+    const copy = grid.querySelector('.about-copy');
+    if (!copy) return;
+
+    grid.querySelectorAll('.portrait-placeholder').forEach((portrait) => portrait.remove());
+
+    const figure = document.createElement('figure');
+    figure.className = 'about-gif';
+
+    const image = document.createElement('img');
+    image.src = '/brand/brenda-about.gif';
+    image.alt = 'Ilustração animada de Brenda Baltieri com fones verdes';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+
+    figure.append(image);
+    copy.after(figure);
+    grid.classList.add('about-gif-layout');
+    grid.dataset.aboutGif = 'true';
+  }
+
+  function enhanceAbout(root = document) {
+    if (root.matches?.('.about-grid')) enhanceAboutGrid(root);
+    root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
+  }
+
   enhanceImages();
   enhanceProjects();
+  enhanceAbout();
 
   function buildHorizontalArchive() {
     const work = document.querySelector('.work');
@@ -114,6 +143,7 @@
   // remains present even when React replaces the initial project grid.
   buildHorizontalArchive();
   window.setTimeout(buildHorizontalArchive, 1400);
+  window.setTimeout(enhanceAbout, 1400);
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
@@ -122,6 +152,7 @@
         if (node.matches('img[src^="/projects/"]')) enhanceImage(node);
         enhanceImages(node);
         enhanceProjects(node);
+        enhanceAbout(node);
         buildHorizontalArchive();
       }
     }

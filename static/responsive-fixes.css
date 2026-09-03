@@ -523,3 +523,91 @@ footer a {
   body::-webkit-scrollbar-thumb:hover,
   .project-popup::-webkit-scrollbar-thumb:hover { background: #d9ff9d; }
 }
+
+/* About: the biography and Brenda's animated mark share one compact editorial
+   row. The large decorative mark and the former portrait no longer compete
+   with the text. */
+.about .about-content {
+  padding-bottom: clamp(64px, 6vw, 112px);
+}
+
+.about-grid.about-gif-layout {
+  align-items: center;
+  column-gap: clamp(32px, 5vw, 96px);
+  row-gap: 0;
+}
+
+.about-grid.about-gif-layout > .mega {
+  grid-column: 1 / -1;
+  margin-block: clamp(82px, 8vw, 150px) clamp(54px, 5vw, 92px);
+}
+
+.about-grid.about-gif-layout .about-copy {
+  grid-column: 1 / 9;
+  margin: 0;
+  max-width: 1080px;
+}
+
+.about-grid.about-gif-layout .about-copy small {
+  max-width: 720px;
+  width: 82%;
+}
+
+.about-grid.about-gif-layout .about-gif {
+  aspect-ratio: 1;
+  grid-column: 9 / 13;
+  justify-self: end;
+  margin: 0;
+  max-width: 430px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.about-grid.about-gif-layout .about-gif img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.about-grid.about-gif-layout .about-mark,
+.about-grid.about-gif-layout .portrait-placeholder {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .about .about-content {
+    padding-bottom: clamp(52px, 16vw, 76px);
+  }
+
+  .about-grid.about-gif-layout {
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about-grid.about-gif-layout > .mega {
+    grid-column: 1;
+    margin-block: clamp(72px, 22vw, 104px) clamp(42px, 13vw, 64px);
+  }
+
+  .about-grid.about-gif-layout .about-copy {
+    grid-column: 1;
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .about-grid.about-gif-layout .about-copy small {
+    margin-top: 28px;
+    width: 100%;
+  }
+
+  .about-grid.about-gif-layout .about-gif {
+    grid-column: 1;
+    justify-self: center;
+    margin-top: clamp(34px, 11vw, 54px);
+    max-width: 320px;
+    width: min(76vw, 320px);
+  }
+}
