@@ -73,6 +73,67 @@ footer a {
 }
 
 @media (max-width: 760px) {
+  .hero-stage {
+    min-height: 72svh;
+    padding: 82px 14px 14px;
+  }
+
+  .hero h1 {
+    z-index: 4;
+    width: 100%;
+    margin: auto 0 0;
+    font-size: clamp(58px, 18vw, 78px);
+    letter-spacing: -.065em;
+    line-height: .82;
+  }
+
+  .hero h1 .hero-name-line {
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  .hero-stage > .hero-mark {
+    z-index: 1;
+    top: 31%;
+    right: -8vw;
+    font-size: 43vw;
+    opacity: .82;
+  }
+
+  .hero-shapes { z-index: 1; }
+
+  .hero-shapes .shape-square-outline {
+    width: clamp(64px, 21vw, 86px);
+    top: 18%;
+    right: 8%;
+    left: auto;
+  }
+
+  .hero-shapes .shape-triangle-fill {
+    width: clamp(68px, 23vw, 92px);
+    top: 34%;
+    left: 24%;
+  }
+
+  .hero-bottom {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 18px;
+    padding: 22px 14px 24px;
+  }
+
+  .hero-bottom > * {
+    grid-column: 1 !important;
+    justify-self: start;
+    max-width: 100%;
+    text-align: left !important;
+  }
+
+  .hero-bottom h2 {
+    max-width: 13ch;
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
   :is(
       .work > .mega,
       .about .mega,
@@ -336,57 +397,85 @@ footer a {
   .work-projects-shell .project { opacity: 1; transform: none; }
 }
 
-/* The archive turns into a two-part editorial spread on wide screens: the
-   fixed black spine carries context while the work itself reads one image at
-   a time. The sticky boundary is the projects shell, so it releases before
-   the About section begins. */
-@media (min-width: 901px) {
-  .work > :is(.mega, .section-label) { display: none !important; }
-
-  .work-projects-shell {
-    grid-template-columns: clamp(220px, 16vw, 280px) minmax(0, 1fr);
-    gap: clamp(24px, 3vw, 48px);
-  }
-
-  .work-projects-shell .project-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-    row-gap: clamp(70px, 10vw, 180px) !important;
-  }
-
-  .work-projects-shell .project-grid > .project,
-  .work-projects-shell .project-grid > .project:nth-child(n) {
-    grid-column: 1 !important;
-    justify-self: start;
-    width: min(100%, calc((100svh - 230px) * 1.3333)) !important;
-    max-width: 1040px;
-    scroll-margin-top: 104px;
-    --project-info-height: clamp(128px, 8vw, 150px);
-  }
-
-  .project-rail {
-    align-self: stretch;
-    top: 78px;
-    max-height: calc(100svh - 94px);
-    min-height: min(620px, calc(100svh - 94px));
-    overflow: hidden;
-    background: var(--ink);
-    border: 0;
-    border-right: 1px solid #ffffff2e;
-    color: var(--paper);
-    padding: clamp(22px, 2vw, 32px);
-  }
-
-  .project-rail__masthead { display: flex; flex-direction: column; gap: clamp(24px, 3.5vh, 42px); height: 100%; }
-  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(38px, 2.65vw, 50px); font-weight: 900; letter-spacing: -.07em; line-height: .8; margin-top: auto; order: 2; padding-top: 28px; writing-mode: horizontal-tb; transform: none; white-space: normal; }
-  .project-rail__context { align-content: start; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 20px; font-size: 10px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
-  .project-rail__context > span:first-child { color: var(--acid); }
-  .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(48px, 5vw, 82px); font-weight: 400; letter-spacing: -.08em; line-height: .76; grid-column: 1 / -1; }
-  .project-rail__total { align-self: end; color: #ffffff90; }
-  .project-rail__context p { border-top: 1px solid #ffffff38; grid-column: 1 / -1; margin: 2px 0 0; padding-top: 13px; }
+/* Desktop turns vertical page progress into a horizontal project narrative.
+   The wheel remains native: the sticky viewport only maps that progress onto
+   the project track, then releases naturally into the About section. */
+.work-horizontal-shell {
+  min-width: 0;
+  height: auto;
+  position: relative;
 }
 
-@media (max-width: 900px) {
-  .project-rail__masthead { display: none; }
+.work-horizontal-sticky {
+  min-width: 0;
+  position: static;
+}
+
+@media (min-width: 901px) {
+  .work > .section-label { margin-bottom: 0; }
+
+  .work > .mega {
+    margin-block: clamp(90px, 9vw, 170px);
+  }
+
+  .work-horizontal-shell.is-horizontal {
+    height: calc(100svh + var(--horizontal-distance, 0px));
+  }
+
+  .work-horizontal-shell.is-horizontal .work-horizontal-sticky {
+    align-items: center;
+    display: flex;
+    height: calc(100svh - 66px);
+    overflow: hidden;
+    position: sticky;
+    top: 66px;
+  }
+
+  .work-horizontal-shell.is-horizontal .project-grid {
+    --horizontal-card-width: min(78vw, 1080px, calc((100svh - 220px) * 1.3333));
+    align-items: center !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: clamp(24px, 2.25vw, 44px) !important;
+    grid-template-columns: none !important;
+    padding-right: clamp(40px, 8vw, 150px);
+    transform: translate3d(0, 0, 0);
+    transition: none;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .work-horizontal-shell.is-horizontal .project-grid > .project,
+  .work-horizontal-shell.is-horizontal .project-grid > .project:nth-child(n) {
+    --project-info-height: clamp(116px, 7vw, 132px);
+    flex: 0 0 var(--horizontal-card-width);
+    grid-column: auto !important;
+    margin: 0 !important;
+    opacity: 1;
+    transform: none;
+    width: var(--horizontal-card-width) !important;
+  }
+}
+
+@media (max-width: 900px), (prefers-reduced-motion: reduce) {
+  .work-horizontal-shell,
+  .work-horizontal-shell.is-horizontal { height: auto; }
+
+  .work-horizontal-sticky,
+  .work-horizontal-shell.is-horizontal .work-horizontal-sticky {
+    display: block;
+    height: auto;
+    overflow: visible;
+    position: static;
+  }
+
+  .work-horizontal-shell .project-grid,
+  .work-horizontal-shell.is-horizontal .project-grid {
+    transform: none !important;
+    width: 100%;
+  }
+
+  .work-horizontal-shell .project .poster { aspect-ratio: 4 / 3; }
 }
 
 /* Brand-level selection and scroll treatments. Touch devices keep their native

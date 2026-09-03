@@ -51,57 +51,69 @@
   enhanceImages();
   enhanceProjects();
 
-  function buildProjectArchive() {
+  function buildHorizontalArchive() {
     const work = document.querySelector('.work');
     const grid = work?.querySelector('.project-grid');
-    if (!work || !grid || grid.closest('.work-projects-shell')) return;
+    if (!work || !grid || grid.closest('.work-horizontal-shell')) return;
 
     const projects = Array.from(grid.querySelectorAll(':scope > .project'));
     if (!projects.length) return;
 
     const shell = document.createElement('div');
-    shell.className = 'work-projects-shell';
+    shell.className = 'work-horizontal-shell';
 
-    const rail = document.createElement('nav');
-    rail.className = 'project-rail';
-    rail.setAttribute('aria-label', 'Informações sobre os projetos selecionados');
-    rail.innerHTML = '<div class="project-rail__masthead"><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div><span class="project-rail__vertical">SELECTED<br>WORKS</span></div>';
-    rail.querySelector('.project-rail__total').textContent = `DE ${String(projects.length).padStart(2, '0')}`;
+    const sticky = document.createElement('div');
+    sticky.className = 'work-horizontal-sticky';
 
     projects.forEach((project, index) => {
-      project.style.setProperty('--project-order', String(index % 4));
       project.id = `projeto-${String(index + 1).padStart(2, '0')}`;
       project.dataset.archiveIndex = String(index);
+      project.classList.add('is-in-view');
     });
 
     grid.before(shell);
-    shell.append(rail, grid);
+    sticky.append(grid);
+    shell.append(sticky);
 
-    const setActive = (index) => {
-      rail.querySelector('.project-rail__current').textContent = String(index + 1).padStart(2, '0');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+
+    const updatePosition = () => {
+      frame = 0;
+      if (!shell.isConnected) return;
+
+      const horizontal = window.innerWidth > 900 && !reducedMotion.matches;
+      shell.classList.toggle('is-horizontal', horizontal);
+      if (!horizontal) {
+        shell.style.removeProperty('--horizontal-distance');
+        grid.style.removeProperty('transform');
+        return;
+      }
+
+      const distance = Math.max(0, grid.scrollWidth - sticky.clientWidth);
+      shell.style.setProperty('--horizontal-distance', `${distance}px`);
+      const travel = Math.max(1, shell.offsetHeight - sticky.offsetHeight);
+      const progress = Math.max(0, Math.min(1, (66 - shell.getBoundingClientRect().top) / travel));
+      grid.style.transform = `translate3d(${-distance * progress}px, 0, 0)`;
     };
 
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        visible.forEach((entry) => entry.target.classList.add('is-in-view'));
-        if (visible.length) {
-          visible.sort((a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
-          setActive(Number(visible[0].target.dataset.archiveIndex));
-        }
-      }, { rootMargin: '-18% 0px -45% 0px', threshold: 0.08 });
-      projects.forEach((project) => observer.observe(project));
-    } else {
-      projects.forEach((project) => project.classList.add('is-in-view'));
-    }
-    setActive(0);
+    const requestUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updatePosition);
+    };
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    reducedMotion.addEventListener?.('change', requestUpdate);
+    if ('ResizeObserver' in window) new ResizeObserver(requestUpdate).observe(grid);
+    window.requestAnimationFrame(updatePosition);
+    window.setTimeout(updatePosition, 600);
   }
 
   // The portfolio hydrates after the static HTML appears. Run once now for a
   // quick first paint, then once more after hydration so the editorial shell
   // remains present even when React replaces the initial project grid.
-  buildProjectArchive();
-  window.setTimeout(buildProjectArchive, 1400);
+  buildHorizontalArchive();
+  window.setTimeout(buildHorizontalArchive, 1400);
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
@@ -110,7 +122,7 @@
         if (node.matches('img[src^="/projects/"]')) enhanceImage(node);
         enhanceImages(node);
         enhanceProjects(node);
-        buildProjectArchive();
+        buildHorizontalArchive();
       }
     }
   });
