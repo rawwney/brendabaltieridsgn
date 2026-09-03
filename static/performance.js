@@ -97,7 +97,11 @@
     setActive(0);
   }
 
+  // The portfolio hydrates after the static HTML appears. Run once now for a
+  // quick first paint, then once more after hydration so the editorial shell
+  // remains present even when React replaces the initial project grid.
   buildProjectArchive();
+  window.setTimeout(buildProjectArchive, 1400);
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
@@ -106,6 +110,7 @@
         if (node.matches('img[src^="/projects/"]')) enhanceImage(node);
         enhanceImages(node);
         enhanceProjects(node);
+        buildProjectArchive();
       }
     }
   });
