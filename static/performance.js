@@ -65,7 +65,7 @@
     const rail = document.createElement('nav');
     rail.className = 'project-rail';
     rail.setAttribute('aria-label', 'Informações sobre os projetos selecionados');
-    rail.innerHTML = '<div class="project-rail__masthead"><span class="project-rail__vertical">SELECTED WORKS</span><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div></div>';
+    rail.innerHTML = '<div class="project-rail__masthead"><div class="project-rail__context"><span>01 / PROJETOS</span><strong class="project-rail__current">01</strong><span class="project-rail__total">DE 00</span><p>ARQUIVO VISUAL<br>2024 — 2026</p><p>SÃO PAULO / BRASIL<br>REMOTO MUNDIAL</p></div><span class="project-rail__vertical">SELECTED WORKS</span></div>';
     rail.querySelector('.project-rail__total').textContent = `DE ${String(projects.length).padStart(2, '0')}`;
 
     projects.forEach((project, index) => {
@@ -114,8 +114,8 @@
 
     const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     const render = () => {
-      current += (target - current) * 0.115;
-      if (Math.abs(target - current) < 0.35) {
+      current += (target - current) * 0.22;
+      if (Math.abs(target - current) < 0.5) {
         current = target;
         window.scrollTo(0, current);
         frame = 0;
@@ -130,8 +130,9 @@
       if (event.defaultPrevented || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       if (event.target.closest('.project-popup, [data-native-scroll]')) return;
       event.preventDefault();
-      const multiplier = event.deltaMode === 1 ? 18 : event.deltaMode === 2 ? window.innerHeight : 1;
-      target = Math.max(0, Math.min(limit(), target + event.deltaY * multiplier));
+      const multiplier = event.deltaMode === 1 ? 14 : event.deltaMode === 2 ? window.innerHeight * 0.72 : 0.72;
+      const movement = Math.max(-420, Math.min(420, event.deltaY * multiplier));
+      target = Math.max(0, Math.min(limit(), target + movement));
       document.documentElement.classList.add('is-smooth-scrolling');
       if (!frame) {
         current = window.scrollY;

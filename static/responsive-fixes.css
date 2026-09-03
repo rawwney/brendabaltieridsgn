@@ -374,8 +374,8 @@ footer a {
     padding: clamp(24px, 2.4vw, 42px);
   }
 
-  .project-rail__masthead { display: flex; flex-direction: column; gap: clamp(28px, 4vh, 50px); height: 100%; }
-  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(31px, 3.1vw, 50px); letter-spacing: -.065em; line-height: .82; writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
+  .project-rail__masthead { display: flex; flex-direction: column; gap: clamp(24px, 3.5vh, 42px); height: 100%; }
+  .project-rail__vertical { color: var(--acid); font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(23px, 1.9vw, 30px); letter-spacing: -.055em; line-height: .9; order: 2; writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
   .project-rail__context { align-content: start; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 20px; font-size: 10px; font-weight: 700; letter-spacing: .11em; line-height: 1.35; }
   .project-rail__context > span:first-child { color: var(--acid); }
   .project-rail__current { font-family: Archivo Black, var(--font-idv), sans-serif !important; font-size: clamp(48px, 5vw, 82px); font-weight: 400; letter-spacing: -.08em; line-height: .76; grid-column: 1 / -1; }
