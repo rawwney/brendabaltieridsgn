@@ -76,9 +76,116 @@
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
   }
 
+  function enhanceMagneticHeroElement(hero) {
+    if (hero.dataset.magneticHero === 'true') return;
+
+    const stage = hero.querySelector('.hero-stage');
+    const mark = hero.querySelector('.hero-stage > .hero-mark');
+    const letters = Array.from(hero.querySelectorAll('h1 .hero-letter'));
+    if (!stage || !mark || !letters.length) return;
+
+    hero.classList.add('hero-magnetic');
+    hero.dataset.magneticHero = 'true';
+
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!finePointer.matches || reducedMotion.matches) return;
+
+    const state = { x: 0, y: 0, rotation: 0 };
+    const target = { x: 0, y: 0, rotation: 0 };
+    let frame = 0;
+    let rotationTimer = 0;
+
+    const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+
+    const render = () => {
+      frame = 0;
+      state.x += (target.x - state.x) * 0.105;
+      state.y += (target.y - state.y) * 0.105;
+      state.rotation += (target.rotation - state.rotation) * 0.09;
+
+      hero.style.setProperty('--magnetic-x', `${state.x.toFixed(2)}px`);
+      hero.style.setProperty('--magnetic-y', `${state.y.toFixed(2)}px`);
+      hero.style.setProperty('--magnetic-r', `${state.rotation.toFixed(2)}deg`);
+
+      const moving = Math.abs(target.x - state.x) > 0.08
+        || Math.abs(target.y - state.y) > 0.08
+        || Math.abs(target.rotation - state.rotation) > 0.08;
+      if (moving) frame = window.requestAnimationFrame(render);
+    };
+
+    const requestRender = () => {
+      if (!frame) frame = window.requestAnimationFrame(render);
+    };
+
+    const resetLetters = () => {
+      letters.forEach((letter) => {
+        letter.style.removeProperty('--letter-push-x');
+        letter.style.removeProperty('--letter-push-y');
+      });
+    };
+
+    const reactLetters = (pointerX, pointerY) => {
+      const radius = Math.min(190, window.innerWidth * 0.12);
+      const measurements = letters.map((letter) => {
+        const rect = letter.getBoundingClientRect();
+        const dx = rect.left + rect.width / 2 - pointerX;
+        const dy = rect.top + rect.height / 2 - pointerY;
+        const distance = Math.hypot(dx, dy);
+        return { letter, dx, dy, distance };
+      });
+
+      measurements.forEach(({ letter, dx, dy, distance }) => {
+        if (!distance || distance >= radius) {
+          letter.style.setProperty('--letter-push-x', '0px');
+          letter.style.setProperty('--letter-push-y', '0px');
+          return;
+        }
+
+        const force = Math.pow(1 - distance / radius, 1.6) * 16;
+        letter.style.setProperty('--letter-push-x', `${(dx / distance * force).toFixed(2)}px`);
+        letter.style.setProperty('--letter-push-y', `${(dy / distance * force).toFixed(2)}px`);
+      });
+    };
+
+    hero.addEventListener('pointermove', (event) => {
+      const rect = stage.getBoundingClientRect();
+      const horizontal = (event.clientX - rect.left) / Math.max(1, rect.width);
+      const vertical = (event.clientY - rect.top) / Math.max(1, rect.height);
+
+      target.x = clamp((horizontal - 0.72) * rect.width * 0.16, -175, 90);
+      target.y = clamp((vertical - 0.48) * rect.height * 0.18, -82, 82);
+      target.rotation = clamp(event.movementX * 0.65 + (horizontal - 0.5) * 10, -18, 18);
+      hero.classList.add('is-magnetic-active');
+      reactLetters(event.clientX, event.clientY);
+      requestRender();
+
+      window.clearTimeout(rotationTimer);
+      rotationTimer = window.setTimeout(() => {
+        target.rotation = (horizontal - 0.5) * 6;
+        requestRender();
+      }, 90);
+    });
+
+    hero.addEventListener('pointerleave', () => {
+      target.x = 0;
+      target.y = 0;
+      target.rotation = 0;
+      hero.classList.remove('is-magnetic-active');
+      resetLetters();
+      requestRender();
+    });
+  }
+
+  function enhanceMagneticHero(root = document) {
+    if (root.matches?.('.hero')) enhanceMagneticHeroElement(root);
+    root.querySelectorAll?.('.hero').forEach(enhanceMagneticHeroElement);
+  }
+
   enhanceImages();
   enhanceProjects();
   enhanceAbout();
+  enhanceMagneticHero();
 
   function buildHorizontalArchive() {
     const work = document.querySelector('.work');
@@ -144,6 +251,7 @@
   buildHorizontalArchive();
   window.setTimeout(buildHorizontalArchive, 1400);
   window.setTimeout(enhanceAbout, 1400);
+  window.setTimeout(enhanceMagneticHero, 1400);
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
@@ -153,6 +261,7 @@
         enhanceImages(node);
         enhanceProjects(node);
         enhanceAbout(node);
+        enhanceMagneticHero(node);
         buildHorizontalArchive();
       }
     }

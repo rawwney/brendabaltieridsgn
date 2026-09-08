@@ -458,6 +458,119 @@ footer a {
   }
 }
 
+/* Keep the About title mark visible on its violet surface. The masked acid
+   underlay retains the opposite color so the brush interaction still reads. */
+.about > .about-content .mega .inline-mark {
+  color: var(--acid) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.about .about-underlay .mega .inline-mark {
+  color: var(--violet) !important;
+}
+
+/* Magnetic editorial hero: one coherent symbol replaces the unrelated shape
+   collage. The asterisk responds with inertia while nearby name letters make
+   a restrained local displacement. */
+.hero.hero-magnetic {
+  --magnetic-x: 0px;
+  --magnetic-y: 0px;
+  --magnetic-r: 0deg;
+  background: var(--ink);
+  color: var(--white);
+}
+
+.hero-magnetic .hero-stage {
+  isolation: isolate;
+}
+
+.hero-magnetic .hero-shapes,
+.hero-magnetic .hero-underlay {
+  display: none !important;
+}
+
+.hero-magnetic h1 {
+  max-width: 76vw;
+  transform: none !important;
+}
+
+.hero-magnetic h1 .hero-letter {
+  animation: none !important;
+  transform: translate3d(var(--letter-push-x, 0px), var(--letter-push-y, 0px), 0) !important;
+  transition: transform 180ms cubic-bezier(.2, .75, .18, 1);
+  will-change: transform;
+}
+
+.hero-magnetic .hero-stage > .hero-mark {
+  animation: hero-magnetic-mark-in 780ms 160ms cubic-bezier(.18, .8, .2, 1) both !important;
+  color: var(--acid);
+  font-size: clamp(340px, 34vw, 620px);
+  mix-blend-mode: difference;
+  opacity: .96;
+  pointer-events: none;
+  right: clamp(20px, 3vw, 64px);
+  top: 50%;
+  transform: translate3d(var(--magnetic-x), calc(-50% + var(--magnetic-y)), 0)
+    rotate(calc(8deg + var(--magnetic-r)));
+  transform-origin: 50% 50%;
+  translate: none !important;
+  transition: filter 260ms ease;
+  will-change: transform;
+  z-index: 3;
+}
+
+.hero-magnetic.is-magnetic-active .hero-stage > .hero-mark {
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.hero-magnetic .hero-bottom {
+  background: var(--ink);
+  border-top: 1px solid var(--acid);
+  color: var(--white);
+  margin: 0;
+  padding: 20px 24px 24px;
+}
+
+@keyframes hero-magnetic-mark-in {
+  from { opacity: 0; scale: .72; }
+  to { opacity: .96; scale: 1; }
+}
+
+@media (max-width: 760px) {
+  .hero-magnetic h1 {
+    max-width: 100%;
+  }
+
+  .hero-magnetic .hero-stage > .hero-mark {
+    animation: hero-magnetic-mark-in 680ms 120ms cubic-bezier(.18, .8, .2, 1) both !important;
+    font-size: clamp(150px, 44vw, 205px);
+    mix-blend-mode: normal;
+    opacity: .86;
+    right: -6vw;
+    top: 42%;
+    transform: translate3d(0, -50%, 0) rotate(8deg);
+    z-index: 1;
+  }
+
+  .hero-magnetic .hero-bottom {
+    padding: 22px 14px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-magnetic h1 .hero-letter {
+    transform: none !important;
+    transition: none;
+  }
+
+  .hero-magnetic .hero-stage > .hero-mark {
+    animation: none !important;
+    transform: translate3d(0, -50%, 0) rotate(8deg);
+    transition: none;
+  }
+}
+
 @media (max-width: 900px), (prefers-reduced-motion: reduce) {
   .work-horizontal-shell,
   .work-horizontal-shell.is-horizontal { height: auto; }
