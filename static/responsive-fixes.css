@@ -748,18 +748,18 @@ footer a {
 .hero .hero-stage > .hero-mark {
   animation: hero-magnetic-mark-in 780ms 160ms cubic-bezier(.18, .8, .2, 1) both !important;
   color: var(--acid);
-  font-size: clamp(340px, 34vw, 620px);
+  font-size: clamp(430px, 46vw, 860px);
   mix-blend-mode: difference;
   opacity: .96;
   pointer-events: none;
-  right: clamp(20px, 3vw, 64px);
-  top: 50%;
+  right: -4vw;
+  top: 49%;
   transform: translate3d(var(--magnetic-x, 0px), calc(-50% + var(--magnetic-y, 0px)), 0)
     rotate(calc(8deg + var(--magnetic-r, 0deg)));
   transform-origin: 50% 50%;
   translate: none !important;
   will-change: transform;
-  z-index: 3;
+  z-index: 4;
 }
 
 .hero .hero-bottom {
@@ -773,11 +773,135 @@ footer a {
   .hero h1 { max-width: 100%; }
 
   .hero .hero-stage > .hero-mark {
-    font-size: clamp(150px, 44vw, 205px);
+    font-size: clamp(178px, 56vw, 244px);
     mix-blend-mode: normal;
-    right: -6vw;
-    top: 42%;
+    right: -12vw;
+    top: 43%;
     transform: translate3d(0, -50%, 0) rotate(8deg);
     z-index: 1;
+  }
+}
+
+/* Richness comes from one visual language: a larger cropped asterisk, delayed
+   echoes, an editorial grid and a color lens over the name. */
+.hero .hero-stage::before {
+  background-image:
+    linear-gradient(to right, #ffffff12 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff0d 1px, transparent 1px);
+  background-size: 12.5% 100%, 100% 25%;
+  content: '';
+  inset: 0;
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 88%, transparent);
+  opacity: .78;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.hero .hero-echo-layer {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.hero .hero-mark-echo {
+  color: var(--violet);
+  font-size: clamp(430px, 46vw, 860px);
+  pointer-events: none;
+  position: absolute;
+  right: -4vw;
+  top: 49%;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.hero .hero-mark-echo--one {
+  opacity: .24;
+  transform: translate3d(calc(var(--magnetic-x, 0px) - 22px), calc(-50% + var(--magnetic-y, 0px) + 14px), 0)
+    rotate(calc(-3deg + var(--magnetic-r, 0deg)));
+  transition: transform 240ms cubic-bezier(.16, .72, .2, 1), opacity 220ms ease;
+}
+
+.hero .hero-mark-echo--two {
+  opacity: .1;
+  transform: translate3d(calc(var(--magnetic-x, 0px) + 38px), calc(-50% + var(--magnetic-y, 0px) - 26px), 0)
+    rotate(calc(18deg + var(--magnetic-r, 0deg)));
+  transition: transform 420ms cubic-bezier(.16, .72, .2, 1), opacity 260ms ease;
+}
+
+.hero.is-magnetic-active .hero-mark-echo--one { opacity: .34; }
+.hero.is-magnetic-active .hero-mark-echo--two { opacity: .16; }
+
+.hero .hero-lens-title {
+  animation: none !important;
+  bottom: 0;
+  clip-path: circle(clamp(110px, 11vw, 210px) at var(--lens-x, -500px) var(--lens-y, -500px));
+  color: var(--violet);
+  left: 24px;
+  margin: 0 0 0 -10px !important;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute !important;
+  transition: opacity 180ms ease;
+  width: 76vw;
+  z-index: 3;
+}
+
+.hero .hero-lens-title * { animation: none !important; }
+.hero.is-magnetic-active .hero-lens-title { opacity: 1; }
+
+.hero .hero-field-meta {
+  align-items: center;
+  border-block: 1px solid #ffffff45;
+  color: var(--acid);
+  display: flex;
+  font-size: 9px;
+  justify-content: space-between;
+  letter-spacing: .12em;
+  padding-block: 8px;
+  pointer-events: none;
+  position: absolute;
+  right: 24px;
+  top: clamp(122px, 14vh, 156px);
+  width: min(31vw, 440px);
+  z-index: 5;
+}
+
+.hero .hero-field-coordinates { color: var(--white); }
+
+@media (min-width: 761px) {
+  .hero .hero-bottom > * + * {
+    border-left: 1px solid #ffffff35;
+    padding-left: clamp(18px, 1.7vw, 32px);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero .hero-stage::before {
+    opacity: .42;
+  }
+
+  .hero .hero-field-meta,
+  .hero .hero-lens-title,
+  .hero .hero-mark-echo--two {
+    display: none !important;
+  }
+
+  .hero .hero-mark-echo--one {
+    display: block;
+    font-size: clamp(178px, 56vw, 244px);
+    opacity: .2;
+    right: -9vw;
+    top: 44%;
+    transform: translate3d(-12px, -50%, 0) rotate(-4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-mark-echo,
+  .hero .hero-lens-title {
+    transition: none;
   }
 }

@@ -76,18 +76,48 @@
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
   }
 
-  function enhanceMagneticHeroElement(hero) {
-    if (hero.dataset.magneticHero === 'true') {
-      hero.classList.add('hero-magnetic');
-      return;
+  function ensureMagneticHeroDecor(stage, title, mark) {
+    if (!stage.querySelector(':scope > .hero-lens-title')) {
+      const lensTitle = title.cloneNode(true);
+      lensTitle.classList.add('hero-lens-title');
+      lensTitle.removeAttribute('aria-label');
+      lensTitle.setAttribute('aria-hidden', 'true');
+      title.after(lensTitle);
     }
 
+    if (!stage.querySelector(':scope > .hero-echo-layer')) {
+      const echoLayer = document.createElement('div');
+      echoLayer.className = 'hero-echo-layer';
+      echoLayer.setAttribute('aria-hidden', 'true');
+
+      ['one', 'two'].forEach((variant) => {
+        const echo = mark.cloneNode(true);
+        echo.className = `mark hero-mark-echo hero-mark-echo--${variant}`;
+        echo.querySelector('.mark-alt')?.remove();
+        echoLayer.append(echo);
+      });
+
+      stage.insertBefore(echoLayer, mark);
+    }
+
+    if (!stage.querySelector(':scope > .hero-field-meta')) {
+      const fieldMeta = document.createElement('div');
+      fieldMeta.className = 'hero-field-meta';
+      fieldMeta.setAttribute('aria-hidden', 'true');
+      fieldMeta.innerHTML = '<span>CAMPO MAGNÉTICO / BB—01</span><span class="hero-field-coordinates">X 072 / Y 048</span>';
+      stage.append(fieldMeta);
+    }
+  }
+
+  function enhanceMagneticHeroElement(hero) {
     const stage = hero.querySelector('.hero-stage');
     const mark = hero.querySelector('.hero-stage > .hero-mark');
-    const letters = Array.from(hero.querySelectorAll('h1 .hero-letter'));
-    if (!stage || !mark || !letters.length) return;
+    const title = hero.querySelector('.hero-stage > h1:not(.hero-lens-title)');
+    if (!stage || !mark || !title) return;
 
     hero.classList.add('hero-magnetic');
+    ensureMagneticHeroDecor(stage, title, mark);
+    if (hero.dataset.magneticHero === 'true') return;
     hero.dataset.magneticHero = 'true';
 
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -122,7 +152,7 @@
     };
 
     const resetLetters = () => {
-      letters.forEach((letter) => {
+      hero.querySelectorAll('.hero-stage > h1:not(.hero-lens-title) .hero-letter').forEach((letter) => {
         letter.style.removeProperty('--letter-push-x');
         letter.style.removeProperty('--letter-push-y');
       });
@@ -130,6 +160,9 @@
 
     const reactLetters = (pointerX, pointerY) => {
       const radius = Math.min(190, window.innerWidth * 0.12);
+      const letters = Array.from(
+        hero.querySelectorAll('.hero-stage > h1:not(.hero-lens-title) .hero-letter'),
+      );
       const measurements = letters.map((letter) => {
         const rect = letter.getBoundingClientRect();
         const dx = rect.left + rect.width / 2 - pointerX;
@@ -160,6 +193,18 @@
       target.y = clamp((vertical - 0.48) * rect.height * 0.18, -82, 82);
       target.rotation = clamp(event.movementX * 0.65 + (horizontal - 0.5) * 10, -18, 18);
       hero.classList.add('is-magnetic-active');
+      const liveTitle = hero.querySelector('.hero-stage > h1:not(.hero-lens-title)');
+      if (liveTitle) {
+        const titleRect = liveTitle.getBoundingClientRect();
+        hero.style.setProperty('--lens-x', `${(event.clientX - titleRect.left).toFixed(2)}px`);
+        hero.style.setProperty('--lens-y', `${(event.clientY - titleRect.top).toFixed(2)}px`);
+      }
+      const coordinates = hero.querySelector('.hero-field-coordinates');
+      if (coordinates) {
+        const x = String(Math.round(horizontal * 99)).padStart(3, '0');
+        const y = String(Math.round(vertical * 99)).padStart(3, '0');
+        coordinates.textContent = `X ${x} / Y ${y}`;
+      }
       reactLetters(event.clientX, event.clientY);
       requestRender();
 
