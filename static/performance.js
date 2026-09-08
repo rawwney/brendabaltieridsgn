@@ -77,7 +77,10 @@
   }
 
   function enhanceMagneticHeroElement(hero) {
-    if (hero.dataset.magneticHero === 'true') return;
+    if (hero.dataset.magneticHero === 'true') {
+      hero.classList.add('hero-magnetic');
+      return;
+    }
 
     const stage = hero.querySelector('.hero-stage');
     const mark = hero.querySelector('.hero-stage > .hero-mark');

@@ -726,3 +726,58 @@ footer a {
     width: min(76vw, 320px);
   }
 }
+
+/* Hydration-safe lock: these core visual changes do not depend on the helper
+   class because the retained React export may reconcile that class away. */
+.hero .hero-shapes,
+.hero .hero-underlay {
+  display: none !important;
+}
+
+.hero h1 {
+  max-width: 76vw;
+  transform: none !important;
+}
+
+.hero h1 .hero-letter {
+  animation: none !important;
+  transform: translate3d(var(--letter-push-x, 0px), var(--letter-push-y, 0px), 0) !important;
+  transition: transform 180ms cubic-bezier(.2, .75, .18, 1);
+}
+
+.hero .hero-stage > .hero-mark {
+  animation: hero-magnetic-mark-in 780ms 160ms cubic-bezier(.18, .8, .2, 1) both !important;
+  color: var(--acid);
+  font-size: clamp(340px, 34vw, 620px);
+  mix-blend-mode: difference;
+  opacity: .96;
+  pointer-events: none;
+  right: clamp(20px, 3vw, 64px);
+  top: 50%;
+  transform: translate3d(var(--magnetic-x, 0px), calc(-50% + var(--magnetic-y, 0px)), 0)
+    rotate(calc(8deg + var(--magnetic-r, 0deg)));
+  transform-origin: 50% 50%;
+  translate: none !important;
+  will-change: transform;
+  z-index: 3;
+}
+
+.hero .hero-bottom {
+  background: var(--ink);
+  border-top: 1px solid var(--acid);
+  color: var(--white);
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .hero h1 { max-width: 100%; }
+
+  .hero .hero-stage > .hero-mark {
+    font-size: clamp(150px, 44vw, 205px);
+    mix-blend-mode: normal;
+    right: -6vw;
+    top: 42%;
+    transform: translate3d(0, -50%, 0) rotate(8deg);
+    z-index: 1;
+  }
+}
