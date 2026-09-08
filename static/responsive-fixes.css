@@ -470,107 +470,6 @@ footer a {
   color: var(--violet) !important;
 }
 
-/* Magnetic editorial hero: one coherent symbol replaces the unrelated shape
-   collage. The asterisk responds with inertia while nearby name letters make
-   a restrained local displacement. */
-.hero.hero-magnetic {
-  --magnetic-x: 0px;
-  --magnetic-y: 0px;
-  --magnetic-r: 0deg;
-  background: var(--ink);
-  color: var(--white);
-}
-
-.hero-magnetic .hero-stage {
-  isolation: isolate;
-}
-
-.hero-magnetic .hero-shapes,
-.hero-magnetic .hero-underlay {
-  display: none !important;
-}
-
-.hero-magnetic h1 {
-  max-width: 76vw;
-  transform: none !important;
-}
-
-.hero-magnetic h1 .hero-letter {
-  animation: none !important;
-  transform: translate3d(var(--letter-push-x, 0px), var(--letter-push-y, 0px), 0) !important;
-  transition: transform 180ms cubic-bezier(.2, .75, .18, 1);
-  will-change: transform;
-}
-
-.hero-magnetic .hero-stage > .hero-mark {
-  animation: hero-magnetic-mark-in 780ms 160ms cubic-bezier(.18, .8, .2, 1) both !important;
-  color: var(--acid);
-  font-size: clamp(340px, 34vw, 620px);
-  mix-blend-mode: difference;
-  opacity: .96;
-  pointer-events: none;
-  right: clamp(20px, 3vw, 64px);
-  top: 50%;
-  transform: translate3d(var(--magnetic-x), calc(-50% + var(--magnetic-y)), 0)
-    rotate(calc(8deg + var(--magnetic-r)));
-  transform-origin: 50% 50%;
-  translate: none !important;
-  transition: filter 260ms ease;
-  will-change: transform;
-  z-index: 3;
-}
-
-.hero-magnetic.is-magnetic-active .hero-stage > .hero-mark {
-  filter: saturate(1.12) brightness(1.04);
-}
-
-.hero-magnetic .hero-bottom {
-  background: var(--ink);
-  border-top: 1px solid var(--acid);
-  color: var(--white);
-  margin: 0;
-  padding: 20px 24px 24px;
-}
-
-@keyframes hero-magnetic-mark-in {
-  from { opacity: 0; scale: .72; }
-  to { opacity: .96; scale: 1; }
-}
-
-@media (max-width: 760px) {
-  .hero-magnetic h1 {
-    max-width: 100%;
-  }
-
-  .hero-magnetic .hero-stage > .hero-mark {
-    animation: hero-magnetic-mark-in 680ms 120ms cubic-bezier(.18, .8, .2, 1) both !important;
-    font-size: clamp(150px, 44vw, 205px);
-    mix-blend-mode: normal;
-    opacity: .86;
-    right: -6vw;
-    top: 42%;
-    transform: translate3d(0, -50%, 0) rotate(8deg);
-    z-index: 1;
-  }
-
-  .hero-magnetic .hero-bottom {
-    padding: 22px 14px 24px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-magnetic h1 .hero-letter {
-    transform: none !important;
-    transition: none;
-  }
-
-  .hero-magnetic .hero-stage > .hero-mark {
-    animation: none !important;
-    transform: translate3d(0, -50%, 0) rotate(8deg);
-    transition: none;
-  }
-}
-
 @media (max-width: 900px), (prefers-reduced-motion: reduce) {
   .work-horizontal-shell,
   .work-horizontal-shell.is-horizontal { height: auto; }
@@ -727,149 +626,131 @@ footer a {
   }
 }
 
-/* Hydration-safe lock: these core visual changes do not depend on the helper
-   class because the retained React export may reconcile that class away. */
+/* Spatial hero: the asterisk is rendered as a real extruded mesh on canvas.
+   It overlaps the name while a low-contrast color wave gives the black field
+   depth without introducing another competing symbol. */
+.hero {
+  --hero-wave-x: 0px;
+  --hero-wave-y: 0px;
+  background: #000;
+  color: var(--white);
+}
+
+.hero .hero-stage {
+  isolation: isolate;
+}
+
 .hero .hero-shapes,
-.hero .hero-underlay {
+.hero .hero-underlay,
+.hero .hero-lens-title,
+.hero .hero-echo-layer,
+.hero .hero-field-meta {
   display: none !important;
 }
 
-.hero h1 {
-  max-width: 76vw;
-  transform: none !important;
-}
-
-.hero h1 .hero-letter {
-  animation: none !important;
-  transform: translate3d(var(--letter-push-x, 0px), var(--letter-push-y, 0px), 0) !important;
-  transition: transform 180ms cubic-bezier(.2, .75, .18, 1);
-}
-
-.hero .hero-stage > .hero-mark {
-  animation: hero-magnetic-mark-in 780ms 160ms cubic-bezier(.18, .8, .2, 1) both !important;
-  color: var(--acid);
-  font-size: clamp(430px, 46vw, 860px);
-  mix-blend-mode: difference;
-  opacity: .96;
-  pointer-events: none;
-  right: -4vw;
-  top: 49%;
-  transform: translate3d(var(--magnetic-x, 0px), calc(-50% + var(--magnetic-y, 0px)), 0)
-    rotate(calc(8deg + var(--magnetic-r, 0deg)));
-  transform-origin: 50% 50%;
-  translate: none !important;
-  will-change: transform;
-  z-index: 4;
-}
-
-.hero .hero-bottom {
-  background: var(--ink);
-  border-top: 1px solid var(--acid);
-  color: var(--white);
-  margin: 0;
-}
-
-@media (max-width: 760px) {
-  .hero h1 { max-width: 100%; }
-
-  .hero .hero-stage > .hero-mark {
-    font-size: clamp(178px, 56vw, 244px);
-    mix-blend-mode: normal;
-    right: -12vw;
-    top: 43%;
-    transform: translate3d(0, -50%, 0) rotate(8deg);
-    z-index: 1;
-  }
-}
-
-/* Richness comes from one visual language: a larger cropped asterisk, delayed
-   echoes, an editorial grid and a color lens over the name. */
 .hero .hero-stage::before {
-  background-image:
-    linear-gradient(to right, #ffffff12 1px, transparent 1px),
-    linear-gradient(to bottom, #ffffff0d 1px, transparent 1px);
-  background-size: 12.5% 100%, 100% 25%;
+  animation: hero-wave-drift 13s ease-in-out infinite alternate;
+  background:
+    radial-gradient(ellipse 54% 34% at 70% 52%, #590fe852 0%, #590fe826 31%, transparent 67%),
+    repeating-radial-gradient(
+      ellipse 63% 46% at 70% 52%,
+      transparent 0 8%,
+      #c2ff7312 8.4% 8.8%,
+      transparent 9.2% 15%
+    );
+  background-size: 100% 100%;
   content: '';
-  inset: 0;
-  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 88%, transparent);
-  opacity: .78;
+  filter: blur(18px) saturate(1.08);
+  inset: -24% -16%;
+  -webkit-mask-image: radial-gradient(ellipse 70% 62% at 70% 52%, #000 8%, #000 52%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 62% at 70% 52%, #000 8%, #000 52%, transparent 78%);
+  opacity: .9;
   pointer-events: none;
   position: absolute;
+  transform: translate3d(var(--hero-wave-x), var(--hero-wave-y), 0) rotate(-3deg) scale(1.05);
+  transform-origin: 70% 52%;
   z-index: 0;
 }
 
-.hero .hero-echo-layer {
-  inset: 0;
-  overflow: hidden;
+.hero .hero-stage::after {
+  background: linear-gradient(90deg, transparent, #ffffff18 50%, transparent);
+  content: '';
+  height: 1px;
+  left: 0;
+  opacity: .7;
   pointer-events: none;
   position: absolute;
+  right: 0;
+  top: 52%;
   z-index: 1;
 }
 
-.hero .hero-mark-echo {
-  color: var(--violet);
-  font-size: clamp(430px, 46vw, 860px);
-  pointer-events: none;
-  position: absolute;
-  right: -4vw;
-  top: 49%;
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
-
-.hero .hero-mark-echo--one {
-  opacity: .24;
-  transform: translate3d(calc(var(--magnetic-x, 0px) - 22px), calc(-50% + var(--magnetic-y, 0px) + 14px), 0)
-    rotate(calc(-3deg + var(--magnetic-r, 0deg)));
-  transition: transform 240ms cubic-bezier(.16, .72, .2, 1), opacity 220ms ease;
-}
-
-.hero .hero-mark-echo--two {
-  opacity: .1;
-  transform: translate3d(calc(var(--magnetic-x, 0px) + 38px), calc(-50% + var(--magnetic-y, 0px) - 26px), 0)
-    rotate(calc(18deg + var(--magnetic-r, 0deg)));
-  transition: transform 420ms cubic-bezier(.16, .72, .2, 1), opacity 260ms ease;
-}
-
-.hero.is-magnetic-active .hero-mark-echo--one { opacity: .34; }
-.hero.is-magnetic-active .hero-mark-echo--two { opacity: .16; }
-
-.hero .hero-lens-title {
-  animation: none !important;
-  bottom: 0;
-  clip-path: circle(clamp(110px, 11vw, 210px) at var(--lens-x, -500px) var(--lens-y, -500px));
-  color: var(--violet);
-  left: 24px;
-  margin: 0 0 0 -10px !important;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute !important;
-  transition: opacity 180ms ease;
-  width: 76vw;
+.hero .hero-stage > h1 {
+  color: var(--white);
+  max-width: 84vw;
+  position: relative;
+  transform: none !important;
   z-index: 3;
 }
 
-.hero .hero-lens-title * { animation: none !important; }
-.hero.is-magnetic-active .hero-lens-title { opacity: 1; }
+.hero .hero-stage > h1 .hero-letter {
+  animation: none !important;
+  transform: none !important;
+  transition: none;
+}
 
-.hero .hero-field-meta {
-  align-items: center;
-  border-block: 1px solid #ffffff45;
+.hero .hero-kicker {
+  position: relative;
+  z-index: 7;
+}
+
+.hero .hero-stage > .hero-mark {
   color: var(--acid);
-  display: flex;
-  font-size: 9px;
-  justify-content: space-between;
-  letter-spacing: .12em;
-  padding-block: 8px;
-  pointer-events: none;
-  position: absolute;
-  right: 24px;
-  top: clamp(122px, 14vh, 156px);
-  width: min(31vw, 440px);
+  font-size: min(39vw, 650px);
+  opacity: .96;
+  right: 1vw;
+  top: 50%;
+  transform: translateY(-48%) rotate(8deg);
   z-index: 5;
 }
 
-.hero .hero-field-coordinates { color: var(--white); }
+.hero .hero-asterisk-3d ~ .hero-mark {
+  display: none !important;
+}
+
+.hero-asterisk-3d {
+  animation: hero-asterisk-arrive 950ms 130ms cubic-bezier(.16, .82, .18, 1) both;
+  aspect-ratio: 1;
+  filter:
+    drop-shadow(18px 28px 22px #0000008c)
+    drop-shadow(0 0 30px #590fe844);
+  pointer-events: none;
+  position: absolute;
+  right: -2.5vw;
+  top: 51%;
+  transform: translate3d(0, -48%, 0);
+  transition: filter 420ms ease;
+  width: min(43vw, 720px);
+  z-index: 6;
+}
+
+.hero.is-asterisk-active .hero-asterisk-3d {
+  filter:
+    drop-shadow(22px 32px 25px #000000a8)
+    drop-shadow(0 0 42px #590fe866);
+}
+
+.hero-asterisk-canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.hero .hero-bottom {
+  background: #000;
+  border-top-color: var(--acid);
+  color: var(--white);
+}
 
 @media (min-width: 761px) {
   .hero .hero-bottom > * + * {
@@ -878,30 +759,77 @@ footer a {
   }
 }
 
+@keyframes hero-asterisk-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(8%, -45%, 0) scale(.72);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, -48%, 0) scale(1);
+  }
+}
+
+@keyframes hero-wave-drift {
+  0% {
+    background-position: -1.5% 0, 0 0;
+    transform: translate3d(var(--hero-wave-x), var(--hero-wave-y), 0) rotate(-4deg) scale(1.04);
+  }
+  50% {
+    background-position: 1.5% 1%, -1% 1%;
+  }
+  100% {
+    background-position: 0 -1%, 1% -1%;
+    transform: translate3d(var(--hero-wave-x), calc(var(--hero-wave-y) - 12px), 0) rotate(2deg) scale(1.1);
+  }
+}
+
 @media (max-width: 760px) {
   .hero .hero-stage::before {
-    opacity: .42;
+    background:
+      radial-gradient(ellipse 74% 42% at 76% 61%, #590fe84d 0%, #590fe81f 38%, transparent 72%),
+      repeating-radial-gradient(
+        ellipse 80% 50% at 76% 61%,
+        transparent 0 11%,
+        #c2ff7310 11.5% 12%,
+        transparent 12.5% 20%
+      );
+    filter: blur(14px);
+    inset: -12% -28%;
+    opacity: .78;
+    transform-origin: 76% 61%;
   }
 
-  .hero .hero-field-meta,
-  .hero .hero-lens-title,
-  .hero .hero-mark-echo--two {
-    display: none !important;
+  .hero .hero-stage::after {
+    opacity: .4;
+    top: 61%;
   }
 
-  .hero .hero-mark-echo--one {
-    display: block;
-    font-size: clamp(178px, 56vw, 244px);
-    opacity: .2;
-    right: -9vw;
-    top: 44%;
-    transform: translate3d(-12px, -50%, 0) rotate(-4deg);
+  .hero .hero-stage > h1 {
+    max-width: 100%;
+    z-index: 3;
+  }
+
+  .hero .hero-stage > .hero-mark {
+    font-size: min(56vw, 244px);
+    right: -7vw;
+    top: 66%;
+  }
+
+  .hero-asterisk-3d {
+    filter:
+      drop-shadow(10px 16px 14px #00000094)
+      drop-shadow(0 0 22px #590fe852);
+    right: -8vw;
+    top: 66%;
+    width: min(59vw, 250px);
+    z-index: 6;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero .hero-mark-echo,
-  .hero .hero-lens-title {
-    transition: none;
+  .hero .hero-stage::before,
+  .hero-asterisk-3d {
+    animation: none !important;
   }
 }
