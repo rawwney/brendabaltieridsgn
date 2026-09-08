@@ -1,4 +1,5 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -97,8 +98,28 @@ await writeFile(clientBundlePath, clientBundle, 'utf8');
 
 const indexPath = path.join(outputRoot, 'index.html');
 let indexHtml = await readFile(indexPath, 'utf8');
+
+const assetRevision = async (fileName) => createHash('sha256')
+  .update(await readFile(path.join(outputRoot, fileName)))
+  .digest('hex')
+  .slice(0, 10);
+
+const responsiveRevision = await assetRevision('responsive-fixes.css');
+const performanceRevision = await assetRevision('performance.js');
+indexHtml = indexHtml.replace(
+  /\/responsive-fixes\.css(?:\?v=[^"']*)?/g,
+  `/responsive-fixes.css?v=${responsiveRevision}`,
+);
 if (!indexHtml.includes('/performance.js')) {
-  indexHtml = indexHtml.replace('</body>', '<script src="/performance.js" defer></script></body>');
+  indexHtml = indexHtml.replace(
+    '</body>',
+    `<script src="/performance.js?v=${performanceRevision}" defer></script></body>`,
+  );
+} else {
+  indexHtml = indexHtml.replace(
+    /\/performance\.js(?:\?v=[^"']*)?/g,
+    `/performance.js?v=${performanceRevision}`,
+  );
 }
 
 const siteOrigin = process.env.SITE_ORIGIN?.replace(/\/$/, '');
