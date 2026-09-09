@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { patchAboutBrush } from './soften-about-brush.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, '..');
@@ -90,6 +91,7 @@ const clientBundlePath = path.join(
   'PortfolioClient-Cfijaua1.js',
 );
 let clientBundle = await readFile(clientBundlePath, 'utf8');
+clientBundle = patchAboutBrush(clientBundle);
 clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
   'loading:t===0?`eager`:`lazy`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
