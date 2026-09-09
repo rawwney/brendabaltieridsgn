@@ -48,11 +48,34 @@
     root.querySelectorAll?.('.project-grid > .project').forEach(enhanceProject);
   }
 
+  function ensureAboutHeadphoneFilter() {
+    if (document.getElementById('about-headphone-colors')) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'about-headphone-colors';
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+    svg.style.position = 'absolute';
+    // Key only green-dominant pixels. Skin (red-dominant), black hair and
+    // transparency stay unchanged; both layers share the same animated GIF.
+    svg.innerHTML = `<defs>
+      <filter id="about-purple-headphones" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -8 8 0 0 0" result="greenKey"/>
+        <feComposite in="greenKey" in2="SourceAlpha" operator="in" result="headphoneMask"/>
+        <feFlood flood-color="#590fe8" result="purple"/>
+        <feComposite in="purple" in2="headphoneMask" operator="in" result="purpleHeadphones"/>
+        <feComposite in="purpleHeadphones" in2="SourceGraphic" operator="over"/>
+      </filter>
+    </defs>`;
+    document.body.append(svg);
+  }
+
   function enhanceAboutGrid(grid) {
     if (grid.dataset.aboutGif === 'true') return;
 
     const copy = grid.querySelector('.about-copy');
     if (!copy) return;
+    ensureAboutHeadphoneFilter();
 
     grid.querySelectorAll('.portrait-placeholder').forEach((portrait) => portrait.remove());
 
@@ -61,7 +84,7 @@
 
     const image = document.createElement('img');
     image.src = '/brand/brenda-about.gif';
-    image.alt = 'Ilustração animada de Brenda Baltieri com fones verdes';
+    image.alt = 'Ilustração animada de Brenda Baltieri com fones';
     image.loading = 'lazy';
     image.decoding = 'async';
 
@@ -74,6 +97,25 @@
   function enhanceAbout(root = document) {
     if (root.matches?.('.about-grid')) enhanceAboutGrid(root);
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
+  }
+
+  function enhanceEducationSection(section) {
+    const education = section.querySelector('.education');
+    const label = section.querySelector('.section-label');
+    if (!education || !label) return;
+    let heading = section.querySelector('.education-title');
+    if (!heading) {
+      heading = document.createElement('h2');
+      heading.className = 'mega education-title';
+      education.before(heading);
+    }
+    const title = label.textContent.includes('EDUCATION') ? 'EDUCATION' : 'FORMAÇÃO';
+    if (heading.textContent !== title) heading.textContent = title;
+  }
+
+  function enhanceEducation(root = document) {
+    if (root.matches?.('.skills')) enhanceEducationSection(root);
+    root.querySelectorAll?.('.skills').forEach(enhanceEducationSection);
   }
 
   function createAsteriskOutline() {
@@ -126,6 +168,8 @@
     let elapsed = 0;
     let destroyed = false;
     let previousPointer = null;
+    let previousClientPointer = null;
+    let lastPointerSample = 0;
     let trail = [];
     const listeners = new AbortController();
     const observers = [];
@@ -141,6 +185,8 @@
     const clearWaves = () => {
       trail = [];
       previousPointer = null;
+      previousClientPointer = null;
+      lastPointerSample = 0;
       waveContext?.clearRect(0, 0, waveWidth, waveHeight);
     };
 
@@ -266,8 +312,9 @@
       if (!reducedMotion.matches) elapsed += delta;
       drawWaves(time);
 
-      state.x += (target.x - state.x) * 0.055;
-      state.y += (target.y - state.y) * 0.055;
+      const pointerEase = 1 - Math.exp(-delta / 240);
+      state.x += (target.x - state.x) * pointerEase;
+      state.y += (target.y - state.y) * pointerEase;
       state.active += (target.active - state.active) * 0.06;
 
       const still = reducedMotion.matches;
@@ -370,7 +417,14 @@
     };
 
     const onPointerMove = (event) => {
-      if (!finePointer.matches || reducedMotion.matches) return;
+      if (!finePointer.matches || reducedMotion.matches || document.hidden || !visible) return;
+      if (event.pointerType && !['mouse', 'pen'].includes(event.pointerType)) return;
+      // Scrolling can move the stage under a stationary cursor. Only changes
+      // in screen-space pointer coordinates are allowed to emit a trail.
+      const clientDistance = previousClientPointer
+        ? Math.hypot(event.clientX - previousClientPointer.x, event.clientY - previousClientPointer.y) : 0;
+      if (previousClientPointer && clientDistance < 1.5) return;
+      previousClientPointer = { x: event.clientX, y: event.clientY };
       const stage = hero.querySelector('.hero-stage');
       const rect = stage?.getBoundingClientRect() ?? hero.getBoundingClientRect();
       const px = event.clientX - rect.left;
@@ -382,13 +436,18 @@
       hero.classList.add('is-asterisk-active');
       const now = performance.now();
       const distance = previousPointer ? Math.hypot(px - previousPointer.x, py - previousPointer.y) : 0;
-      if (!previousPointer || distance >= .75) {
+      if (previousPointer && now - lastPointerSample < 8) return;
+      if (previousPointer && (now - lastPointerSample > 160 || distance > Math.min(240, rect.width * .35))) {
+        previousPointer = null;
+      }
+      if (!previousPointer || distance >= 1.5) {
         // Seed a new gesture at its own position so re-entry never draws a
         // diagonal connector from the previous cursor location.
         if (!previousPointer) trail = [];
         trail.push({ x: px, y: py, time: now });
         if (trail.length > 160) trail.shift();
         previousPointer = { x: px, y: py };
+        lastPointerSample = now;
       }
       start();
     };
@@ -398,6 +457,7 @@
       target.y = 0;
       target.active = 0;
       previousPointer = null;
+      previousClientPointer = null;
       hero.classList.remove('is-asterisk-active');
       start();
     };
@@ -405,6 +465,9 @@
     const eventOptions = { passive: true, signal: listeners.signal };
     stage.addEventListener('pointermove', onPointerMove, eventOptions);
     stage.addEventListener('pointerleave', onPointerLeave, eventOptions);
+    stage.addEventListener('pointercancel', () => { onPointerLeave(); clearWaves(); }, eventOptions);
+    window.addEventListener('blur', () => { onPointerLeave(); clearWaves(); }, eventOptions);
+    window.addEventListener('scroll', () => { onPointerLeave(); clearWaves(); }, eventOptions);
 
     if ('ResizeObserver' in window) {
       const resizeObserver = new ResizeObserver(() => {
@@ -425,6 +488,7 @@
       const intersectionObserver = new IntersectionObserver(([entry]) => {
         visible = Boolean(entry?.isIntersecting);
         lastFrame = 0;
+        if (!visible) { onPointerLeave(); clearWaves(); }
         if (visible) start();
         else if (frame) {
           window.cancelAnimationFrame(frame);
@@ -507,6 +571,7 @@
   enhanceImages();
   enhanceProjects();
   enhanceAbout();
+  enhanceEducation();
   enhanceSpatialHero();
 
   function buildHorizontalArchive() {
@@ -573,14 +638,18 @@
   buildHorizontalArchive();
   window.setTimeout(buildHorizontalArchive, 1400);
   window.setTimeout(enhanceAbout, 1400);
+  window.setTimeout(enhanceEducation, 1400);
   window.setTimeout(enhanceSpatialHero, 1400);
 
   const observer = new MutationObserver((records) => {
     const changedHeroes = new Set();
+    const changedEducation = new Set();
     for (const record of records) {
       if (record.target instanceof Element) {
         const hero = record.target.closest('.hero');
         if (hero) changedHeroes.add(hero);
+        const education = record.target.closest('.skills');
+        if (education) changedEducation.add(education);
       }
       for (const node of record.addedNodes) {
         if (!(node instanceof Element)) continue;
@@ -588,6 +657,7 @@
         enhanceImages(node);
         enhanceProjects(node);
         enhanceAbout(node);
+        enhanceEducation(node);
         enhanceSpatialHero(node);
         buildHorizontalArchive();
       }
@@ -595,6 +665,9 @@
     changedHeroes.forEach((hero) => {
       if (hero.isConnected) enhanceSpatialHeroElement(hero);
       else heroRenderers.get(hero)?.destroy();
+    });
+    changedEducation.forEach((section) => {
+      if (section.isConnected) enhanceEducationSection(section);
     });
   });
 

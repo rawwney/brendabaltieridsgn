@@ -583,6 +583,11 @@ footer a {
   width: 100%;
 }
 
+/* Recolor only the revealed layer, keeping the original animation in sync. */
+.about-underlay .about-gif img {
+  filter: url(#about-purple-headphones);
+}
+
 .about-grid.about-gif-layout .about-mark,
 .about-grid.about-gif-layout .portrait-placeholder {
   display: none !important;
@@ -647,11 +652,12 @@ footer a {
   width: 100%;
   max-width: 100%;
   margin: auto 0 !important;
-  font-size: min(17vw, 27svh, 284px);
+  font-size: min(18.4vw, 29.2svh, 308px);
   line-height: .84;
   text-align: center;
   position: relative;
-  transform: none !important;
+  /* Optical correction for the uppercase font's space below the baseline. */
+  transform: translateY(.065em) !important;
   z-index: 3;
 }
 .hero .hero-stage > h1 .hero-name-line { white-space: nowrap; }
@@ -718,7 +724,7 @@ footer a {
   .hero .hero-stage { min-height: 68svh; padding: 110px 14px; }
   .hero .hero-kicker { top: 86px; left: 14px; right: 14px; }
   .hero .hero-stage > h1 {
-    font-size: 17vw;
+    font-size: 17.4vw;
     letter-spacing: -.045em;
     line-height: .88;
   }
@@ -730,6 +736,79 @@ footer a {
 }
 
 /* Software levels: a quiet track with endpoint marks, not a dense ruler. */
+.skills .education-title {
+  font-size: clamp(76px, 13vw, 240px);
+  line-height: .82;
+  margin: 10vw 0;
+}
+.skills .education {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: clamp(28px, 3vw, 52px) 0;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+.skills .education > p {
+  order: 0;
+  margin: 0;
+  max-width: 1100px;
+  font-family: inherit;
+  font-size: clamp(34px, 4.8vw, 78px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -.025em;
+}
+.skills .education > p span {
+  display: block;
+  margin-top: 20px;
+  font: 500 14px/1.5 sans-serif;
+  letter-spacing: .04em;
+}
+.skills .education > h2 {
+  order: 1;
+  font-size: clamp(24px, 2.8vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -.025em;
+}
+.skills .courses {
+  display: block;
+  border-bottom: 1px solid currentColor;
+  padding: clamp(40px, 5vw, 72px) 0 0;
+}
+.skills .courses-label {
+  display: block;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+.skills .courses article {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 3fr) minmax(150px, 1fr);
+  align-items: start;
+  gap: 24px;
+  margin: 0;
+  padding: 28px 0;
+}
+.skills .courses article > span,
+.skills .courses article > p { font-size: 14px; line-height: 1.5; }
+.skills .courses article > h3 {
+  grid-column: 2;
+  font-size: clamp(25px, 3vw, 46px);
+  line-height: 1.05;
+}
+.skills .courses article > p { grid-column: 3; margin: 0; }
+@media (max-width: 760px) {
+  .skills .education-title {
+    font-size: 12.2vw;
+    margin: 24vw 0;
+    letter-spacing: -.045em;
+  }
+  .skills .courses article { grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+  .skills .courses article > p { grid-column: 2; }
+  .skills .courses article > h3 { font-size: clamp(24px, 7vw, 34px); }
+}
+
+/* Only endpoint marks remain on the software meters. */
 .software-skill .software-meter {
   height: 58px;
   background:
