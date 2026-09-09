@@ -626,8 +626,7 @@ footer a {
   }
 }
 
-/* Centered editorial hero. Each mesh cap is a continuous surface; background
-   waves are short-lived elements emitted only by actual pointer movement. */
+/* Centered editorial hero with continuous mesh caps and a fading pointer trail. */
 .hero { background: #000; color: var(--white); }
 .hero .hero-stage {
   isolation: isolate;
@@ -696,31 +695,17 @@ footer a {
 .hero-asterisk-canvas { display: block; width: 100%; height: 100%; }
 .hero-pointer-waves {
   position: absolute;
+  display: block;
   inset: 0;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  filter: blur(15px);
   pointer-events: none;
   z-index: 0;
 }
-.hero-pointer-wave {
-  position: absolute;
-  display: block;
-  width: clamp(180px, 24vw, 420px);
-  aspect-ratio: 1.3;
-  border-radius: 50%;
-  background: radial-gradient(ellipse,
-    transparent 20%, #590fe80d 34%, #7930ee42 47%,
-    #c2ff7315 52%, #590fe816 60%, transparent 72%);
-  filter: blur(12px);
-  animation: hero-pointer-ripple 1.8s ease-out both;
-}
-@keyframes hero-pointer-ripple {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.45); }
-  16% { opacity: .8; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.65); }
-}
 .hero .hero-bottom {
-  background: #000;
-  border-top-color: var(--acid);
+  background: var(--violet);
+  border-top-color: var(--violet);
   color: var(--white);
 }
 @media (min-width: 761px) {
@@ -742,5 +727,41 @@ footer a {
 }
 @media (prefers-reduced-motion: reduce), (hover: none) {
   .hero-pointer-waves { display: none; }
-  .hero-pointer-wave { animation: none; }
+}
+
+/* Software levels: a quiet track with endpoint marks, not a dense ruler. */
+.software-skill .software-meter {
+  height: 58px;
+  background:
+    linear-gradient(currentColor, currentColor) left 32px / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) left 27px / 1px 11px no-repeat,
+    linear-gradient(currentColor, currentColor) right 27px / 1px 11px no-repeat;
+}
+.software-skill .software-meter::before,
+.software-skill .software-meter::after {
+  display: block;
+  bottom: 0;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.software-skill .software-meter i {
+  top: 31px;
+  bottom: auto;
+  height: 4px;
+  clip-path: none;
+}
+.software-skill .software-meter i::after { display: none; }
+.software-skill .software-level,
+.software-skill:is(:hover, :focus-visible) .software-level {
+  top: 0;
+  bottom: auto;
+  right: auto;
+  left: clamp(42px, var(--skill-level), 100%);
+  padding: 3px 5px;
+  border: 0;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0;
+  transform: translateX(-100%);
 }

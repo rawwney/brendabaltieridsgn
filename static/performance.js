@@ -125,16 +125,62 @@
     let lastFrame = 0;
     let elapsed = 0;
     let destroyed = false;
-    let lastWave = 0;
     let previousPointer = null;
+    let trail = [];
     const listeners = new AbortController();
     const observers = [];
-    const waveTimers = new Set();
     const stage = hero.querySelector('.hero-stage');
-    const waves = document.createElement('div');
+    const waves = document.createElement('canvas');
     waves.className = 'hero-pointer-waves';
     waves.setAttribute('aria-hidden', 'true');
     stage.prepend(waves);
+    const waveContext = waves.getContext('2d', { alpha: true });
+    let waveWidth = 1;
+    let waveHeight = 1;
+
+    const clearWaves = () => {
+      trail = [];
+      previousPointer = null;
+      waveContext?.clearRect(0, 0, waveWidth, waveHeight);
+    };
+
+    // A single connected curve is repainted each frame. There are no separate
+    // rings, emission timers, or gaps between samples, even during fast moves.
+    const drawWaves = (time) => {
+      if (!waveContext) return;
+      waveContext.clearRect(0, 0, waveWidth, waveHeight);
+      trail = trail.filter((point) => time - point.time < 1900);
+      if (trail.length < 2 || reducedMotion.matches || !finePointer.matches) return;
+      const first = trail[0];
+      const last = trail[trail.length - 1];
+      const fade = Math.max(0, 1 - (time - last.time) / 1900);
+      waveContext.globalAlpha = fade * fade;
+      waveContext.lineCap = 'round';
+      waveContext.lineJoin = 'round';
+      const layers = [
+        { width: 110, color: 'rgba(89,15,232,0.28)' },
+        { width: 46, color: 'rgba(133,55,255,0.22)' },
+        { width: 10, color: 'rgba(194,255,115,0.07)' },
+      ];
+      layers.forEach((layer) => {
+        const gradient = waveContext.createLinearGradient(first.x, first.y, last.x + .01, last.y + .01);
+        gradient.addColorStop(0, 'transparent');
+        gradient.addColorStop(.45, layer.color);
+        gradient.addColorStop(1, layer.color);
+        waveContext.strokeStyle = gradient;
+        waveContext.lineWidth = layer.width;
+        waveContext.beginPath();
+        waveContext.moveTo(first.x, first.y);
+        for (let index = 1; index < trail.length - 1; index += 1) {
+          const point = trail[index];
+          const next = trail[index + 1];
+          waveContext.quadraticCurveTo(point.x, point.y, (point.x + next.x) / 2, (point.y + next.y) / 2);
+        }
+        waveContext.lineTo(last.x, last.y);
+        waveContext.stroke();
+      });
+      waveContext.globalAlpha = 1;
+    };
 
     const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
@@ -186,6 +232,17 @@
         canvas.height = nextHeight;
       }
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      waveWidth = Math.max(1, stage.clientWidth);
+      waveHeight = Math.max(1, stage.clientHeight);
+      const waveRatio = Math.min(ratio, 1.5);
+      const nextWaveWidth = Math.round(waveWidth * waveRatio);
+      const nextWaveHeight = Math.round(waveHeight * waveRatio);
+      if (waves.width !== nextWaveWidth || waves.height !== nextWaveHeight) {
+        waves.width = nextWaveWidth;
+        waves.height = nextWaveHeight;
+        clearWaves();
+      }
+      waveContext?.setTransform(waveRatio, 0, 0, waveRatio, 0, 0);
     };
 
     const draw = (time = 0) => {
@@ -207,6 +264,7 @@
       const delta = lastFrame ? Math.min(time - lastFrame, 60) : 16.67;
       lastFrame = time;
       if (!reducedMotion.matches) elapsed += delta;
+      drawWaves(time);
 
       state.x += (target.x - state.x) * 0.055;
       state.y += (target.y - state.y) * 0.055;
@@ -324,21 +382,14 @@
       hero.classList.add('is-asterisk-active');
       const now = performance.now();
       const distance = previousPointer ? Math.hypot(px - previousPointer.x, py - previousPointer.y) : 0;
-      if (previousPointer && distance > 18 && now - lastWave > 100) {
-        const wave = document.createElement('span');
-        wave.className = 'hero-pointer-wave';
-        wave.style.left = `${px}px`;
-        wave.style.top = `${py}px`;
-        if (waves.children.length >= 8) waves.firstElementChild.remove();
-        waves.append(wave);
-        const timer = window.setTimeout(() => {
-          wave.remove();
-          waveTimers.delete(timer);
-        }, 1800);
-        waveTimers.add(timer);
-        lastWave = now;
+      if (!previousPointer || distance >= .75) {
+        // Seed a new gesture at its own position so re-entry never draws a
+        // diagonal connector from the previous cursor location.
+        if (!previousPointer) trail = [];
+        trail.push({ x: px, y: py, time: now });
+        if (trail.length > 160) trail.shift();
         previousPointer = { x: px, y: py };
-      } else if (!previousPointer) previousPointer = { x: px, y: py };
+      }
       start();
     };
 
@@ -361,6 +412,7 @@
         start();
       });
       resizeObserver.observe(canvas);
+      resizeObserver.observe(stage);
       observers.push(resizeObserver);
     } else {
       window.addEventListener('resize', () => {
@@ -385,8 +437,7 @@
 
     reducedMotion.addEventListener?.('change', () => {
       state.x = state.y = target.x = target.y = 0;
-      waves.replaceChildren();
-      previousPointer = null;
+      clearWaves();
       start();
     }, eventOptions);
     document.addEventListener('visibilitychange', () => {
@@ -394,7 +445,7 @@
       if (document.hidden) {
         window.cancelAnimationFrame(frame);
         frame = 0;
-        waves.replaceChildren();
+        clearWaves();
       } else start();
     }, eventOptions);
 
@@ -404,7 +455,6 @@
       window.cancelAnimationFrame(frame);
       listeners.abort();
       observers.forEach((observer) => observer.disconnect());
-      waveTimers.forEach((timer) => window.clearTimeout(timer));
       waves.remove();
     }
     resize();
