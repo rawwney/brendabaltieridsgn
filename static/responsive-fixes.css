@@ -811,7 +811,7 @@ footer a {
 .skills.section {
   --ink: #000;
   --acid: #c2ff73;
-  --education-line: #ffffff50;
+  --education-line: var(--acid);
   background: var(--ink);
   color: var(--white);
   padding: 40px 24px 80px;
@@ -836,7 +836,6 @@ footer a {
   gap: 24px 40px;
   padding: clamp(28px, 4vw, 56px);
   border: 1px solid var(--education-line);
-  border-top: 3px solid var(--violet);
   background: #000;
   color: var(--white);
 }
@@ -862,7 +861,7 @@ footer a {
   grid-row: 2;
   margin: 0;
   padding-top: 20px;
-  border-top: 1px solid #ffffff40;
+  border-top: 1px solid var(--education-line);
   color: var(--acid);
   font-size: clamp(24px, 2.5vw, 38px);
   line-height: 1.1;
@@ -947,7 +946,7 @@ footer a {
   width: 36px;
   height: 36px;
   background: var(--violet);
-  border: 1px solid var(--violet);
+  border: 1px solid var(--education-line);
   color: var(--white);
 }
 .skills .courses article > p { margin: auto 0 0; padding-top: 8px; }
@@ -959,7 +958,7 @@ footer a {
   padding-top: 40px;
 }
 .skills .skill-cols > div {
-  --education-line: #ffffff50;
+  --education-line: var(--acid);
   background: transparent;
   color: var(--white);
   min-width: 0;
@@ -1045,21 +1044,23 @@ footer a {
   display: grid !important;
   position: relative;
   grid-template-columns: minmax(0, 1fr) !important;
-  gap: 12px;
-  padding: 16px 0 !important;
-  border-color: #ffffff35;
+  gap: 0;
+  min-height: 60px;
+  padding: 18px 0 !important;
+  border-color: var(--education-line);
   font-size: clamp(18px, 1.65vw, 25px);
   line-height: 1.1;
   background: transparent;
   color: var(--white);
 }
-.skills .software-skill .software-name { padding-right: 64px; margin: 0; font-size: inherit; line-height: 1.25; }
+.skills .software-skill .software-name { padding-right: 0; margin: 0; font-size: inherit; line-height: 1.25; }
 .skills .software-skill .software-meter {
+  display: none !important;
   position: static;
   height: 8px;
   width: 100%;
   background:
-    linear-gradient(#9872ef, #9872ef) left 3px / 100% 1px no-repeat,
+    linear-gradient(var(--acid), var(--acid)) left 3px / 100% 1px no-repeat,
     linear-gradient(currentColor, currentColor) left top / 1px 8px no-repeat,
     linear-gradient(currentColor, currentColor) right top / 1px 8px no-repeat;
   color: var(--acid);
@@ -1094,8 +1095,8 @@ footer a {
 }
 
 /* An editorial instrument panel: selection at left, evidence at right. */
-.skills .skill-cols > div:first-child { grid-column: 1; grid-row: 1 / 3; }
-.skills .skill-cols > div:nth-child(2) { grid-column: 2; grid-row: 1; }
+.skills .skill-cols > div:first-child { grid-column: 1; grid-row: 1; align-self: stretch; }
+.skills .skill-cols > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
 .skills .software-select {
   position: absolute;
   inset: 0;
@@ -1106,15 +1107,16 @@ footer a {
   cursor: pointer;
 }
 .skills .software-select:focus-visible { outline: 2px solid var(--acid); outline-offset: 4px; }
-.skills .software-skill:has(.software-select[aria-pressed="true"]) .software-name { color: var(--acid); }
-.skills .software-skill:has(.software-select[aria-pressed="true"]) { box-shadow: -4px 0 var(--violet); }
-.skills .software-skill:has(.software-select:hover) { background: #ffffff0a; }
+.skills .software-select:not(:focus-visible) { outline: none; box-shadow: none; }
+.skills .software-skill:has(.software-select[aria-pressed="true"]) .software-name,
+.skills .software-skill:has(.software-select:hover) .software-name { color: var(--acid); }
+.skills .skill-cols b.software-skill:is(:hover, :focus-within) { background: transparent; box-shadow: none; }
 .skills .software-detail {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
+  align-self: stretch;
   min-width: 0;
   border: 1px solid var(--education-line);
-  border-top: 3px solid var(--violet);
   padding: clamp(22px, 3vw, 40px);
   color: var(--white);
   background: #000;
@@ -1131,9 +1133,17 @@ footer a {
   line-height: 1.1;
   overflow-wrap: anywhere;
   margin: 0 0 24px;
+  min-height: 2.2em;
 }
+.skills .software-detail-body {
+  display: grid;
+  grid-template-columns: minmax(112px, .7fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(20px, 2vw, 32px);
+}
+.skills .software-detail-body > div { min-width: 0; }
 .skills .software-detail-chart {
-  width: clamp(132px, 13vw, 190px);
+  width: min(100%, 190px);
   aspect-ratio: 1;
   border-radius: 50%;
   display: grid;
@@ -1144,7 +1154,7 @@ footer a {
 .skills .software-detail-chart::before { content: ''; position: absolute; inset: 6px; background: #000; border-radius: 50%; }
 .skills .software-detail-chart strong { position: relative; font-size: clamp(32px, 4vw, 56px); line-height: 1; }
 .skills .software-detail-caption { font: 400 14px/1.5 sans-serif; color: #c9c9c9; margin: 14px 0 32px; }
-.skills .software-projects { display: grid; gap: 0; }
+.skills .software-projects { display: grid; gap: 0; align-content: start; min-height: 264px; }
 .skills .software-projects button {
   display: flex;
   align-items: center;
@@ -1157,15 +1167,22 @@ footer a {
   border-top: 1px solid var(--education-line);
   cursor: pointer;
   font: 700 16px/1.3 sans-serif;
+  min-height: 88px;
+  overflow-wrap: anywhere;
 }
 .skills .software-projects button:hover { color: var(--acid); }
 .skills .software-projects button span { margin: 0; font-size: inherit; }
 .skills .software-projects button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .skills .software-projects img { width: 76px; height: 58px; object-fit: cover; flex: 0 0 76px; }
 .skills .software-projects p { font: 400 16px/1.5 sans-serif; color: #c9c9c9; }
+@media (min-width: 761px) and (max-width: 1200px) {
+  .skills .software-projects img { width: 48px; height: 48px; flex-basis: 48px; }
+  .skills .software-projects button { gap: 10px; font-size: 14px; }
+}
 @media (max-width: 760px) {
   .skills .skill-cols > div:first-child,
   .skills .skill-cols > div:nth-child(2) { grid-column: 1; grid-row: auto; }
   .skills .software-detail { margin: 16px 0; padding: 20px 16px; }
   .skills .software-detail-chart { width: 132px; }
+  .skills .software-detail-body { grid-template-columns: minmax(0, 1fr); gap: 0; }
 }

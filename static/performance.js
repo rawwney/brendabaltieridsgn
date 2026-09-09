@@ -171,7 +171,16 @@
         empty.textContent = en ? 'No projects tagged with this tool yet.' : 'Ainda não há projetos marcados com esta ferramenta.';
         list.append(empty);
       }
-      state.panel.replaceChildren(label, title, chart, caption, projectLabel, list);
+      const body = document.createElement('div');
+      body.className = 'software-detail-body';
+      const visual = document.createElement('div');
+      visual.className = 'software-detail-visual';
+      visual.append(chart, caption);
+      const work = document.createElement('div');
+      work.className = 'software-detail-work';
+      work.append(projectLabel, list);
+      body.append(visual, work);
+      state.panel.replaceChildren(label, title, body);
       placePanel();
     };
     rows.forEach((row, index) => {
