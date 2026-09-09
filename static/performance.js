@@ -177,57 +177,17 @@
     let lastFrame = 0;
     let elapsed = 0;
     let destroyed = false;
-    let previousPointer = null;
     let previousClientPointer = null;
-    let lastPointerSample = 0;
-    let trail = [];
     const listeners = new AbortController();
     const observers = [];
     const stage = hero.querySelector('.hero-stage');
-    const waves = document.createElement('canvas');
-    waves.className = 'hero-pointer-waves';
-    waves.setAttribute('aria-hidden', 'true');
-    stage.prepend(waves);
-    const waveContext = waves.getContext('2d', { alpha: true });
-    let waveWidth = 1;
-    let waveHeight = 1;
-
-    const clearWaves = () => {
-      trail = [];
-      previousPointer = null;
-      previousClientPointer = null;
-      lastPointerSample = 0;
-      waveContext?.clearRect(0, 0, waveWidth, waveHeight);
-    };
-
-    // Each short segment keeps its own geometry and birth time. Reversing
-    // direction never relocates a shared gradient or restarts the old trail.
-    const drawWaves = (time) => {
-      if (!waveContext) return;
-      waveContext.clearRect(0, 0, waveWidth, waveHeight);
-      trail = trail.filter((segment) => time - segment.time < 1900);
-      if (!trail.length || reducedMotion.matches || !finePointer.matches) return;
-      waveContext.lineCap = 'round';
-      waveContext.lineJoin = 'round';
-      const layers = [
-        { width: 110, color: 'rgba(89,15,232,0.08)' },
-        { width: 46, color: 'rgba(133,55,255,0.06)' },
-        { width: 10, color: 'rgba(194,255,115,0.03)' },
-      ];
-      layers.forEach((layer) => {
-        waveContext.strokeStyle = layer.color;
-        waveContext.lineWidth = layer.width;
-        trail.forEach((segment) => {
-          const fade = Math.max(0, 1 - (time - segment.time) / 1900);
-          waveContext.globalAlpha = fade * fade;
-          waveContext.beginPath();
-          waveContext.moveTo(segment.from.x, segment.from.y);
-          waveContext.lineTo(segment.to.x, segment.to.y);
-          waveContext.stroke();
-        });
-      });
-      waveContext.globalAlpha = 1;
-    };
+    const registration = document.createElement('div');
+    registration.className = 'hero-registration';
+    registration.setAttribute('aria-hidden', 'true');
+    for (let index = 0; index < 4; index += 1) {
+      registration.append(document.createElement('i'));
+    }
+    stage.prepend(registration);
 
     const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
@@ -279,17 +239,6 @@
         canvas.height = nextHeight;
       }
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      waveWidth = Math.max(1, stage.clientWidth);
-      waveHeight = Math.max(1, stage.clientHeight);
-      const waveRatio = Math.min(ratio, 1.5);
-      const nextWaveWidth = Math.round(waveWidth * waveRatio);
-      const nextWaveHeight = Math.round(waveHeight * waveRatio);
-      if (waves.width !== nextWaveWidth || waves.height !== nextWaveHeight) {
-        waves.width = nextWaveWidth;
-        waves.height = nextWaveHeight;
-        clearWaves();
-      }
-      waveContext?.setTransform(waveRatio, 0, 0, waveRatio, 0, 0);
     };
 
     const draw = (time = 0) => {
@@ -311,12 +260,14 @@
       const delta = lastFrame ? Math.min(time - lastFrame, 60) : 16.67;
       lastFrame = time;
       if (!reducedMotion.matches) elapsed += delta;
-      drawWaves(time);
 
       const pointerEase = 1 - Math.exp(-delta / 240);
       state.x += (target.x - state.x) * pointerEase;
       state.y += (target.y - state.y) * pointerEase;
       state.active += (target.active - state.active) * 0.06;
+      registration.style.setProperty('--registration-x', `${(-state.x * 8).toFixed(2)}px`);
+      registration.style.setProperty('--registration-y', `${(-state.y * 6).toFixed(2)}px`);
+      registration.style.opacity = String(.22 + state.active * .48);
 
       const still = reducedMotion.matches;
       const xAngle = -0.25 + state.y * 0.34;
@@ -420,8 +371,7 @@
     const onPointerMove = (event) => {
       if (window.innerWidth <= 760 || !finePointer.matches || reducedMotion.matches || document.hidden || !visible) return;
       if (event.pointerType && !['mouse', 'pen'].includes(event.pointerType)) return;
-      // Scrolling can move the stage under a stationary cursor. Only changes
-      // in screen-space pointer coordinates are allowed to emit a trail.
+      // Only real pointer movement changes the print-registration alignment.
       const clientDistance = previousClientPointer
         ? Math.hypot(event.clientX - previousClientPointer.x, event.clientY - previousClientPointer.y) : 0;
       if (previousClientPointer && clientDistance < 1.5) return;
@@ -435,23 +385,6 @@
       target.y = clamp(((event.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 2, -1, 1);
       target.active = 1;
       hero.classList.add('is-asterisk-active');
-      const now = performance.now();
-      const distance = previousPointer ? Math.hypot(px - previousPointer.x, py - previousPointer.y) : 0;
-      if (previousPointer && now - lastPointerSample < 8) return;
-      if (previousPointer && (now - lastPointerSample > 160 || distance > Math.min(240, rect.width * .35))) {
-        previousPointer = null;
-      }
-      if (!previousPointer || distance >= 1.5) {
-        // A pause or re-entry starts a separate gesture, but existing segments
-        // remain visible until their own fade ends. No cross-screen connector.
-        if (previousPointer) {
-          trail.push({ from: previousPointer, to: { x: px, y: py }, time: now });
-        }
-        // At the 8ms sample interval, 256 covers the entire 1.9-second lifetime.
-        if (trail.length > 256) trail.shift();
-        previousPointer = { x: px, y: py };
-        lastPointerSample = now;
-      }
       start();
     };
 
@@ -459,7 +392,6 @@
       target.x = 0;
       target.y = 0;
       target.active = 0;
-      previousPointer = null;
       previousClientPointer = null;
       hero.classList.remove('is-asterisk-active');
       start();
@@ -468,9 +400,9 @@
     const eventOptions = { passive: true, signal: listeners.signal };
     stage.addEventListener('pointermove', onPointerMove, eventOptions);
     stage.addEventListener('pointerleave', onPointerLeave, eventOptions);
-    stage.addEventListener('pointercancel', () => { onPointerLeave(); clearWaves(); }, eventOptions);
-    window.addEventListener('blur', () => { onPointerLeave(); clearWaves(); }, eventOptions);
-    window.addEventListener('scroll', () => { onPointerLeave(); clearWaves(); }, eventOptions);
+    stage.addEventListener('pointercancel', onPointerLeave, eventOptions);
+    window.addEventListener('blur', onPointerLeave, eventOptions);
+    window.addEventListener('scroll', onPointerLeave, eventOptions);
 
     if ('ResizeObserver' in window) {
       const resizeObserver = new ResizeObserver(() => {
@@ -491,7 +423,7 @@
       const intersectionObserver = new IntersectionObserver(([entry]) => {
         visible = Boolean(entry?.isIntersecting);
         lastFrame = 0;
-        if (!visible) { onPointerLeave(); clearWaves(); }
+        if (!visible) onPointerLeave();
         if (visible) start();
         else if (frame) {
           window.cancelAnimationFrame(frame);
@@ -504,7 +436,8 @@
 
     reducedMotion.addEventListener?.('change', () => {
       state.x = state.y = target.x = target.y = 0;
-      clearWaves();
+      target.active = state.active = 0;
+      previousClientPointer = null;
       start();
     }, eventOptions);
     document.addEventListener('visibilitychange', () => {
@@ -512,7 +445,8 @@
       if (document.hidden) {
         window.cancelAnimationFrame(frame);
         frame = 0;
-        clearWaves();
+        target.x = target.y = target.active = 0;
+        previousClientPointer = null;
       } else start();
     }, eventOptions);
 
@@ -522,7 +456,7 @@
       window.cancelAnimationFrame(frame);
       listeners.abort();
       observers.forEach((observer) => observer.disconnect());
-      waves.remove();
+      registration.remove();
     }
     resize();
     start();

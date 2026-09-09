@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { patchAboutBrush } from './soften-about-brush.mjs';
+import { patchAboutBrush } from './about-paint-brush.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, '..');

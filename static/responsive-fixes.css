@@ -631,7 +631,7 @@ footer a {
   }
 }
 
-/* Centered editorial hero with continuous mesh caps and a fading pointer trail. */
+/* Centered editorial hero with print-registration marks and a dimensional symbol. */
 .hero { background: #000; color: var(--white); }
 .hero .hero-stage {
   isolation: isolate;
@@ -699,16 +699,23 @@ footer a {
   z-index: 6;
 }
 .hero-asterisk-canvas { display: block; width: 100%; height: 100%; }
-.hero-pointer-waves {
+.hero-registration {
   position: absolute;
-  display: block;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: blur(15px);
+  left: 50%;
+  top: 50%;
+  width: min(92%, 1450px);
+  height: clamp(240px, 58svh, 570px);
+  color: var(--acid);
+  opacity: .22;
+  transform: translate(calc(-50% + var(--registration-x, 0px)), calc(-50% + var(--registration-y, 0px)));
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
 }
+.hero-registration > i { position: absolute; width: 24px; height: 24px; border-color: currentColor; border-style: solid; border-width: 0; }
+.hero-registration > i:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.hero-registration > i:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.hero-registration > i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.hero-registration > i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
 .hero .hero-bottom {
   background: var(--violet);
   border-top-color: var(--violet);
@@ -755,7 +762,7 @@ footer a {
     font-size: min(28vw, 22svh, 150px);
     top: calc(50% + 42px);
   }
-  .hero .hero-pointer-waves { display: none; }
+  .hero .hero-registration { display: none; }
   .hero .hero-bottom {
     grid-template-columns: minmax(0, 1fr) auto !important;
     gap: 20px 12px;
@@ -788,14 +795,20 @@ footer a {
   }
 }
 @media (prefers-reduced-motion: reduce), (hover: none) {
-  .hero-pointer-waves { display: none; }
+  .hero-registration { display: none; }
 }
 
 /* Education: one featured qualification, course cards and two distinct panels. */
-.skills.section { padding: 48px clamp(16px, 5vw, 96px) 80px; }
+.skills.section {
+  --ink: var(--violet);
+  --acid: var(--white);
+  background: var(--white);
+  color: var(--violet);
+  padding: 40px 24px 80px;
+}
 .skills.section > * {
   width: 100%;
-  max-width: 1440px;
+  max-width: none;
   margin-left: auto;
   margin-right: auto;
 }
@@ -919,7 +932,7 @@ footer a {
 }
 .skills .skill-cols > div:last-child > b:hover { background: var(--violet); color: var(--white); }
 @media (max-width: 760px) {
-  .skills.section { padding-top: 36px; padding-bottom: 52px; }
+  .skills.section { padding: 40px 14px 52px; }
   .skills .education-title {
     font-size: 12.2vw;
     margin-block: 56px;
@@ -974,8 +987,9 @@ footer a {
 
 .skills .skill-cols b.software-skill {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 40% !important;
-  gap: 16px;
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px;
   padding: 16px 0 !important;
   border-color: #ffffff35;
   font-size: clamp(18px, 1.65vw, 25px);
@@ -983,14 +997,42 @@ footer a {
   background: transparent;
   color: var(--white);
 }
+.skills .software-skill .software-name { padding-right: 64px; }
 .skills .software-skill .software-meter {
+  position: static;
+  height: 8px;
+  width: 100%;
+  background:
+    linear-gradient(#ffffff45, #ffffff45) left 3px / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) left top / 1px 8px no-repeat,
+    linear-gradient(currentColor, currentColor) right top / 1px 8px no-repeat;
   color: var(--acid);
   opacity: 1;
   visibility: visible;
   transform: none;
 }
-.skills .software-skill .software-meter i { width: var(--skill-level); background: var(--acid); }
-.skills .software-skill .software-level { opacity: 1; background: var(--ink); color: var(--acid); }
-@media (max-width: 400px) {
-  .skills .skill-cols b.software-skill { grid-template-columns: minmax(0, 1fr) !important; gap: 10px; }
+.skills .software-skill .software-meter::before,
+.skills .software-skill .software-meter::after { display: none; }
+.skills .software-skill .software-meter i {
+  display: block;
+  position: relative;
+  top: 2px;
+  left: auto;
+  bottom: auto;
+  height: 3px;
+  width: var(--skill-level);
+  background: var(--acid);
+}
+.skills .software-skill .software-level,
+.skills .software-skill:is(:hover, :focus-visible) .software-level {
+  top: 20px;
+  right: 0;
+  bottom: auto;
+  left: auto;
+  padding: 0;
+  opacity: 1;
+  transform: none;
+  background: transparent;
+  color: var(--acid);
+  font-size: 14px;
 }
