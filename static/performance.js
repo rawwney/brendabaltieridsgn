@@ -111,6 +111,16 @@
     }
     const title = label.textContent.includes('EDUCATION') ? 'EDUCATION' : 'FORMAÇÃO';
     if (heading.textContent !== title) heading.textContent = title;
+    if (!education.querySelector('.education-emblem')) {
+      const brandMark = label.querySelector('.note-mark');
+      if (brandMark) {
+        const emblem = brandMark.cloneNode(true);
+        emblem.classList.remove('note-mark');
+        emblem.classList.add('education-emblem');
+        emblem.setAttribute('aria-hidden', 'true');
+        education.append(emblem);
+      }
+    }
   }
 
   function enhanceEducation(root = document) {
@@ -408,7 +418,7 @@
     };
 
     const onPointerMove = (event) => {
-      if (!finePointer.matches || reducedMotion.matches || document.hidden || !visible) return;
+      if (window.innerWidth <= 760 || !finePointer.matches || reducedMotion.matches || document.hidden || !visible) return;
       if (event.pointerType && !['mouse', 'pen'].includes(event.pointerType)) return;
       // Scrolling can move the stage under a stationary cursor. Only changes
       // in screen-space pointer coordinates are allowed to emit a trail.
