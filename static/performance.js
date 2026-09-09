@@ -137,10 +137,17 @@
       title.textContent = name;
       const chart = document.createElement('div');
       chart.className = 'software-detail-chart';
-      chart.style.setProperty('--level-angle', `${level * 3.6}deg`);
       const value = document.createElement('strong');
       value.textContent = `${level}%`;
-      chart.append(value);
+      const scale = document.createElement('div');
+      scale.className = 'software-detail-scale';
+      scale.setAttribute('aria-hidden', 'true');
+      for (let index = 0; index < 10; index += 1) {
+        const segment = document.createElement('i');
+        segment.style.setProperty('--segment-fill', `${Math.max(0, Math.min(100, (level - index * 10) * 10))}%`);
+        scale.append(segment);
+      }
+      chart.append(value, scale);
       const caption = document.createElement('p');
       caption.className = 'software-detail-caption';
       caption.textContent = en ? 'Self-assessed proficiency' : 'Nível de domínio autoavaliado';

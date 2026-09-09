@@ -952,7 +952,7 @@ footer a {
 .skills .courses article > p { margin: auto 0 0; padding-top: 8px; }
 .skills .skill-cols {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  grid-template-columns: minmax(240px, .65fr) minmax(0, 1.35fr);
   align-items: start;
   gap: 24px;
   padding-top: 40px;
@@ -1043,12 +1043,12 @@ footer a {
 .skills .skill-cols b.software-skill {
   display: grid !important;
   position: relative;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 0;
-  min-height: 60px;
-  padding: 18px 0 !important;
-  border-color: var(--education-line);
-  font-size: clamp(18px, 1.65vw, 25px);
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  gap: 12px;
+  min-height: 44px;
+  padding: 9px 0 !important;
+  border: 0;
+  font-size: clamp(16px, 1.25vw, 20px);
   line-height: 1.1;
   background: transparent;
   color: var(--white);
@@ -1095,8 +1095,16 @@ footer a {
 }
 
 /* An editorial instrument panel: selection at left, evidence at right. */
-.skills .skill-cols > div:first-child { grid-column: 1; grid-row: 1; align-self: stretch; }
+.skills .skill-cols > div:first-child { grid-column: 1; grid-row: 1; align-self: start; counter-reset: software-index; padding: 24px; }
 .skills .skill-cols > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+.skills .skill-cols b.software-skill::before {
+  counter-increment: software-index;
+  content: counter(software-index, decimal-leading-zero);
+  color: #aaa;
+  font: 400 12px/1.5 monospace;
+  align-self: center;
+}
+.skills .software-skill:has(.software-select[aria-pressed="true"])::before { color: var(--acid); }
 .skills .software-select {
   position: absolute;
   inset: 0;
@@ -1114,10 +1122,10 @@ footer a {
 .skills .software-detail {
   grid-column: 2;
   grid-row: 1;
-  align-self: stretch;
+  align-self: start;
   min-width: 0;
   border: 1px solid var(--education-line);
-  padding: clamp(22px, 3vw, 40px);
+  padding: 24px;
   color: var(--white);
   background: #000;
 }
@@ -1133,28 +1141,25 @@ footer a {
   line-height: 1.1;
   overflow-wrap: anywhere;
   margin: 0 0 24px;
-  min-height: 2.2em;
+  min-height: 1.1em;
 }
 .skills .software-detail-body {
   display: grid;
-  grid-template-columns: minmax(112px, .7fr) minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
+  align-items: center;
   gap: clamp(20px, 2vw, 32px);
 }
 .skills .software-detail-body > div { min-width: 0; }
 .skills .software-detail-chart {
-  width: min(100%, 190px);
-  aspect-ratio: 1;
-  border-radius: 50%;
+  width: 100%;
   display: grid;
-  place-items: center;
-  position: relative;
-  background: conic-gradient(var(--acid) var(--level-angle), var(--violet) 0);
+  gap: 24px;
 }
-.skills .software-detail-chart::before { content: ''; position: absolute; inset: 6px; background: #000; border-radius: 50%; }
-.skills .software-detail-chart strong { position: relative; font-size: clamp(32px, 4vw, 56px); line-height: 1; }
-.skills .software-detail-caption { font: 400 14px/1.5 sans-serif; color: #c9c9c9; margin: 14px 0 32px; }
-.skills .software-projects { display: grid; gap: 0; align-content: start; min-height: 264px; }
+.skills .software-detail-chart strong { color: var(--acid); font-size: clamp(56px, 6.4vw, 112px); letter-spacing: -.055em; line-height: .95; }
+.skills .software-detail-scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
+.skills .software-detail-scale i { height: 48px; background: linear-gradient(to top, var(--acid) var(--segment-fill), #252525 var(--segment-fill)); }
+.skills .software-detail-caption { font: 400 14px/1.5 sans-serif; color: #c9c9c9; margin: 16px 0 0; }
+.skills .software-projects { display: grid; gap: 0; align-content: start; }
 .skills .software-projects button {
   display: flex;
   align-items: center;
@@ -1183,6 +1188,6 @@ footer a {
   .skills .skill-cols > div:first-child,
   .skills .skill-cols > div:nth-child(2) { grid-column: 1; grid-row: auto; }
   .skills .software-detail { margin: 16px 0; padding: 20px 16px; }
-  .skills .software-detail-chart { width: 132px; }
-  .skills .software-detail-body { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .skills .software-detail-chart { max-width: 300px; }
+  .skills .software-detail-body { grid-template-columns: minmax(0, 1fr); gap: 28px; }
 }
