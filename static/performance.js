@@ -190,40 +190,31 @@
       waveContext?.clearRect(0, 0, waveWidth, waveHeight);
     };
 
-    // A single connected curve is repainted each frame. There are no separate
-    // rings, emission timers, or gaps between samples, even during fast moves.
+    // Each short segment keeps its own geometry and birth time. Reversing
+    // direction never relocates a shared gradient or restarts the old trail.
     const drawWaves = (time) => {
       if (!waveContext) return;
       waveContext.clearRect(0, 0, waveWidth, waveHeight);
-      trail = trail.filter((point) => time - point.time < 1900);
-      if (trail.length < 2 || reducedMotion.matches || !finePointer.matches) return;
-      const first = trail[0];
-      const last = trail[trail.length - 1];
-      const fade = Math.max(0, 1 - (time - last.time) / 1900);
-      waveContext.globalAlpha = fade * fade;
+      trail = trail.filter((segment) => time - segment.time < 1900);
+      if (!trail.length || reducedMotion.matches || !finePointer.matches) return;
       waveContext.lineCap = 'round';
       waveContext.lineJoin = 'round';
       const layers = [
-        { width: 110, color: 'rgba(89,15,232,0.28)' },
-        { width: 46, color: 'rgba(133,55,255,0.22)' },
-        { width: 10, color: 'rgba(194,255,115,0.07)' },
+        { width: 110, color: 'rgba(89,15,232,0.08)' },
+        { width: 46, color: 'rgba(133,55,255,0.06)' },
+        { width: 10, color: 'rgba(194,255,115,0.03)' },
       ];
       layers.forEach((layer) => {
-        const gradient = waveContext.createLinearGradient(first.x, first.y, last.x + .01, last.y + .01);
-        gradient.addColorStop(0, 'transparent');
-        gradient.addColorStop(.45, layer.color);
-        gradient.addColorStop(1, layer.color);
-        waveContext.strokeStyle = gradient;
+        waveContext.strokeStyle = layer.color;
         waveContext.lineWidth = layer.width;
-        waveContext.beginPath();
-        waveContext.moveTo(first.x, first.y);
-        for (let index = 1; index < trail.length - 1; index += 1) {
-          const point = trail[index];
-          const next = trail[index + 1];
-          waveContext.quadraticCurveTo(point.x, point.y, (point.x + next.x) / 2, (point.y + next.y) / 2);
-        }
-        waveContext.lineTo(last.x, last.y);
-        waveContext.stroke();
+        trail.forEach((segment) => {
+          const fade = Math.max(0, 1 - (time - segment.time) / 1900);
+          waveContext.globalAlpha = fade * fade;
+          waveContext.beginPath();
+          waveContext.moveTo(segment.from.x, segment.from.y);
+          waveContext.lineTo(segment.to.x, segment.to.y);
+          waveContext.stroke();
+        });
       });
       waveContext.globalAlpha = 1;
     };
@@ -441,11 +432,13 @@
         previousPointer = null;
       }
       if (!previousPointer || distance >= 1.5) {
-        // Seed a new gesture at its own position so re-entry never draws a
-        // diagonal connector from the previous cursor location.
-        if (!previousPointer) trail = [];
-        trail.push({ x: px, y: py, time: now });
-        if (trail.length > 160) trail.shift();
+        // A pause or re-entry starts a separate gesture, but existing segments
+        // remain visible until their own fade ends. No cross-screen connector.
+        if (previousPointer) {
+          trail.push({ from: previousPointer, to: { x: px, y: py }, time: now });
+        }
+        // At the 8ms sample interval, 256 covers the entire 1.9-second lifetime.
+        if (trail.length > 256) trail.shift();
         previousPointer = { x: px, y: py };
         lastPointerSample = now;
       }

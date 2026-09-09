@@ -122,11 +122,21 @@ if (!indexHtml.includes('/performance.js')) {
   );
 }
 
-const siteOrigin = process.env.SITE_ORIGIN?.replace(/\/$/, '');
+const siteOrigin = (process.env.SITE_ORIGIN || 'https://brenda-baltieri-portfolio.pages.dev').replace(/\/$/, '');
+const socialImagePath = 'brand/brenda-frontal-green.png';
+const socialImage = await sharp(path.join(outputRoot, socialImagePath)).metadata();
 indexHtml = indexHtml.replaceAll(
   'http://localhost:3000/og.png',
-  siteOrigin ? `${siteOrigin}/og.png` : '/og.png',
+  `${siteOrigin}/${socialImagePath}`,
 );
+indexHtml = indexHtml.replace('name="twitter:card" content="summary_large_image"', 'name="twitter:card" content="summary"');
+indexHtml = indexHtml.replace('</head>',
+  `<meta property="og:image:width" content="${socialImage.width}"/>`
+  + `<meta property="og:image:height" content="${socialImage.height}"/>`
+  + '<meta property="og:image:type" content="image/png"/>'
+  + '<meta property="og:image:alt" content="Ícone frontal de Brenda Baltieri com fones verdes sobre fundo roxo"/>'
+  + '<meta name="twitter:image:alt" content="Ícone frontal de Brenda Baltieri com fones verdes sobre fundo roxo"/>'
+  + '</head>');
 await writeFile(indexPath, indexHtml, 'utf8');
 
 const beforeBytes = await sumBytes(await walk(sourceRoot));
