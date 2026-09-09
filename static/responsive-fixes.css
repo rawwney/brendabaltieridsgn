@@ -941,18 +941,18 @@ footer a {
   line-height: 1.12;
 }
 .skills .courses article > span {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  background: var(--violet);
-  border: 1px solid var(--education-line);
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
   color: var(--white);
 }
 .skills .courses article > p { margin: auto 0 0; padding-top: 8px; }
 .skills .skill-cols {
   display: grid;
-  grid-template-columns: minmax(240px, .65fr) minmax(0, 1.35fr);
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 17vw, 240px);
   align-items: start;
   gap: 24px;
   padding-top: 40px;
@@ -1095,7 +1095,15 @@ footer a {
 }
 
 /* An editorial instrument panel: selection at left, evidence at right. */
-.skills .skill-cols > div:first-child { grid-column: 1; grid-row: 1; align-self: start; counter-reset: software-index; padding: 24px; }
+.skills .skill-cols > div:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  counter-reset: software-index;
+  padding: 24px;
+  display: block;
+}
+.skills .skill-cols > div:first-child > span:first-child { display: block; color: var(--white); font-weight: 700; }
 .skills .skill-cols > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
 .skills .skill-cols b.software-skill::before {
   counter-increment: software-index;
@@ -1122,10 +1130,10 @@ footer a {
 .skills .software-detail {
   grid-column: 2;
   grid-row: 1;
-  align-self: start;
+  align-self: stretch;
   min-width: 0;
   border: 1px solid var(--education-line);
-  padding: 24px;
+  padding: 20px;
   color: var(--white);
   background: #000;
 }
@@ -1137,15 +1145,16 @@ footer a {
   margin: 0 0 14px;
 }
 .skills .software-detail h3 {
-  font-size: clamp(26px, 2.7vw, 44px);
+  font-size: 18px;
   line-height: 1.1;
   overflow-wrap: anywhere;
-  margin: 0 0 24px;
-  min-height: 1.1em;
+  margin: 0 0 16px;
+  min-height: 2.2em;
 }
+.skills .software-detail > .software-detail-label { font-size: 12px; letter-spacing: 0; margin-bottom: 4px; }
 .skills .software-detail-body {
   display: grid;
-  grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: clamp(20px, 2vw, 32px);
 }
@@ -1153,41 +1162,20 @@ footer a {
 .skills .software-detail-chart {
   width: 100%;
   display: grid;
-  gap: 24px;
-}
-.skills .software-detail-chart strong { color: var(--acid); font-size: clamp(56px, 6.4vw, 112px); letter-spacing: -.055em; line-height: .95; }
-.skills .software-detail-scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
-.skills .software-detail-scale i { height: 48px; background: linear-gradient(to top, var(--acid) var(--segment-fill), #252525 var(--segment-fill)); }
-.skills .software-detail-caption { font: 400 14px/1.5 sans-serif; color: #c9c9c9; margin: 16px 0 0; }
-.skills .software-projects { display: grid; gap: 0; align-content: start; }
-.skills .software-projects button {
-  display: flex;
-  align-items: center;
+  justify-items: center;
   gap: 16px;
-  text-align: left;
-  padding: 14px 0;
-  background: transparent;
-  color: var(--white);
-  border: 0;
-  border-top: 1px solid var(--education-line);
-  cursor: pointer;
-  font: 700 16px/1.3 sans-serif;
-  min-height: 88px;
-  overflow-wrap: anywhere;
 }
-.skills .software-projects button:hover { color: var(--acid); }
-.skills .software-projects button span { margin: 0; font-size: inherit; }
-.skills .software-projects button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
-.skills .software-projects img { width: 76px; height: 58px; object-fit: cover; flex: 0 0 76px; }
-.skills .software-projects p { font: 400 16px/1.5 sans-serif; color: #c9c9c9; }
-@media (min-width: 761px) and (max-width: 1200px) {
-  .skills .software-projects img { width: 48px; height: 48px; flex-basis: 48px; }
-  .skills .software-projects button { gap: 10px; font-size: 14px; }
-}
+.skills .software-detail-chart strong { color: var(--white); font: 400 40px/1 sans-serif; letter-spacing: -.04em; }
+.skills .software-detail-scale { width: min(80px, 100%); height: 220px; position: relative; border: 1px solid var(--acid); }
+.skills .software-detail-scale i { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--acid); }
+.skills .software-detail-caption { font: 400 12px/1.5 sans-serif; color: #c9c9c9; margin: 12px 0 0; text-align: center; }
 @media (max-width: 760px) {
   .skills .skill-cols > div:first-child,
   .skills .skill-cols > div:nth-child(2) { grid-column: 1; grid-row: auto; }
+  .skills .skill-cols > div:first-child { display: block; }
   .skills .software-detail { margin: 16px 0; padding: 20px 16px; }
   .skills .software-detail-chart { max-width: 300px; }
+  .skills .software-detail-scale { height: 160px; width: 56px; }
+  .skills .software-detail-visual { justify-items: center; display: grid; }
   .skills .software-detail-body { grid-template-columns: minmax(0, 1fr); gap: 28px; }
 }

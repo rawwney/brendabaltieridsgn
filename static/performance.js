@@ -113,14 +113,14 @@
       state = { panel, selected: 0, signature: '', bound: new WeakSet() };
       softwarePanels.set(columns, state);
     }
-    const normalize = (value) => value.replace(/^#/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
-    const projects = Array.from(document.querySelectorAll('.project-grid > .project'));
-    const signature = language + rows.map((row) => row.querySelector('.software-name')?.textContent).join('|') + projects.length;
+    const signature = language + rows.map((row) => row.querySelector('.software-name')?.textContent).join('|');
     const placePanel = () => {
       if (window.matchMedia('(max-width: 760px)').matches) {
         const row = rows[state.selected];
         if (row.nextElementSibling !== state.panel) row.after(state.panel);
-      } else if (state.panel.parentElement !== columns) columns.append(state.panel);
+      } else {
+        if (state.panel.parentElement !== columns) columns.append(state.panel);
+      }
     };
     const render = () => {
       const en = language === 'en';
@@ -128,8 +128,6 @@
       const name = row.querySelector('.software-name').textContent.trim();
       const level = Math.max(0, Math.min(100, parseInt(row.querySelector('.software-level')?.textContent || '0', 10)));
       rows.forEach((item) => item.querySelector('.software-select')?.setAttribute('aria-pressed', String(item === row)));
-      const matches = projects.filter((project) => Array.from(project.querySelectorAll('[data-kind="software"]'))
-        .some((tag) => normalize(tag.textContent) === normalize(name)));
       const label = document.createElement('p');
       label.className = 'software-detail-label';
       label.textContent = en ? 'Tool in focus' : 'Ferramenta em foco';
@@ -142,51 +140,19 @@
       const scale = document.createElement('div');
       scale.className = 'software-detail-scale';
       scale.setAttribute('aria-hidden', 'true');
-      for (let index = 0; index < 10; index += 1) {
-        const segment = document.createElement('i');
-        segment.style.setProperty('--segment-fill', `${Math.max(0, Math.min(100, (level - index * 10) * 10))}%`);
-        scale.append(segment);
-      }
-      chart.append(value, scale);
+      const fill = document.createElement('i');
+      fill.style.height = `${level}%`;
+      scale.append(fill);
+      chart.append(scale, value);
       const caption = document.createElement('p');
       caption.className = 'software-detail-caption';
       caption.textContent = en ? 'Self-assessed proficiency' : 'Nível de domínio autoavaliado';
-      const projectLabel = document.createElement('p');
-      projectLabel.className = 'software-detail-label';
-      projectLabel.textContent = en ? 'In the portfolio' : 'No portfólio';
-      const list = document.createElement('div');
-      list.className = 'software-projects';
-      matches.slice(0, 3).forEach((project) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        const source = project.querySelector('.project-image img');
-        if (source) {
-          const thumbnail = document.createElement('img');
-          thumbnail.src = source.getAttribute('src');
-          thumbnail.alt = '';
-          thumbnail.loading = 'lazy';
-          button.append(thumbnail);
-        }
-        const text = document.createElement('span');
-        text.textContent = project.querySelector('.project-title')?.textContent || (en ? 'View project' : 'Ver projeto');
-        button.append(text);
-        button.addEventListener('click', () => project.querySelector('.project-open')?.click());
-        list.append(button);
-      });
-      if (!matches.length) {
-        const empty = document.createElement('p');
-        empty.textContent = en ? 'No projects tagged with this tool yet.' : 'Ainda não há projetos marcados com esta ferramenta.';
-        list.append(empty);
-      }
       const body = document.createElement('div');
       body.className = 'software-detail-body';
       const visual = document.createElement('div');
       visual.className = 'software-detail-visual';
       visual.append(chart, caption);
-      const work = document.createElement('div');
-      work.className = 'software-detail-work';
-      work.append(projectLabel, list);
-      body.append(visual, work);
+      body.append(visual);
       state.panel.replaceChildren(label, title, body);
       placePanel();
     };
