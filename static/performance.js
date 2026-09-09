@@ -99,6 +99,111 @@
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
   }
 
+  const softwarePanels = new WeakMap();
+
+  function enhanceSoftwarePanel(section, language) {
+    const columns = section.querySelector('.skill-cols');
+    const rows = Array.from(columns?.querySelectorAll('b.software-skill') || []);
+    if (!rows.length) return;
+    let state = softwarePanels.get(columns);
+    if (!state) {
+      const panel = document.createElement('aside');
+      panel.className = 'software-detail';
+      panel.setAttribute('aria-label', 'Software');
+      state = { panel, selected: 0, signature: '', bound: new WeakSet() };
+      softwarePanels.set(columns, state);
+    }
+    const normalize = (value) => value.replace(/^#/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    const projects = Array.from(document.querySelectorAll('.project-grid > .project'));
+    const signature = language + rows.map((row) => row.querySelector('.software-name')?.textContent).join('|') + projects.length;
+    const placePanel = () => {
+      if (window.matchMedia('(max-width: 760px)').matches) {
+        const row = rows[state.selected];
+        if (row.nextElementSibling !== state.panel) row.after(state.panel);
+      } else if (state.panel.parentElement !== columns) columns.append(state.panel);
+    };
+    const render = () => {
+      const en = language === 'en';
+      const row = rows[state.selected] || rows[0];
+      const name = row.querySelector('.software-name').textContent.trim();
+      const level = Math.max(0, Math.min(100, parseInt(row.querySelector('.software-level')?.textContent || '0', 10)));
+      rows.forEach((item) => item.querySelector('.software-select')?.setAttribute('aria-pressed', String(item === row)));
+      const matches = projects.filter((project) => Array.from(project.querySelectorAll('[data-kind="software"]'))
+        .some((tag) => normalize(tag.textContent) === normalize(name)));
+      const label = document.createElement('p');
+      label.className = 'software-detail-label';
+      label.textContent = en ? 'Tool in focus' : 'Ferramenta em foco';
+      const title = document.createElement('h3');
+      title.textContent = name;
+      const chart = document.createElement('div');
+      chart.className = 'software-detail-chart';
+      chart.style.setProperty('--level-angle', `${level * 3.6}deg`);
+      const value = document.createElement('strong');
+      value.textContent = `${level}%`;
+      chart.append(value);
+      const caption = document.createElement('p');
+      caption.className = 'software-detail-caption';
+      caption.textContent = en ? 'Self-assessed proficiency' : 'Nível de domínio autoavaliado';
+      const projectLabel = document.createElement('p');
+      projectLabel.className = 'software-detail-label';
+      projectLabel.textContent = en ? 'In the portfolio' : 'No portfólio';
+      const list = document.createElement('div');
+      list.className = 'software-projects';
+      matches.slice(0, 3).forEach((project) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        const source = project.querySelector('.project-image img');
+        if (source) {
+          const thumbnail = document.createElement('img');
+          thumbnail.src = source.getAttribute('src');
+          thumbnail.alt = '';
+          thumbnail.loading = 'lazy';
+          button.append(thumbnail);
+        }
+        const text = document.createElement('span');
+        text.textContent = project.querySelector('.project-title')?.textContent || (en ? 'View project' : 'Ver projeto');
+        button.append(text);
+        button.addEventListener('click', () => project.querySelector('.project-open')?.click());
+        list.append(button);
+      });
+      if (!matches.length) {
+        const empty = document.createElement('p');
+        empty.textContent = en ? 'No projects tagged with this tool yet.' : 'Ainda não há projetos marcados com esta ferramenta.';
+        list.append(empty);
+      }
+      state.panel.replaceChildren(label, title, chart, caption, projectLabel, list);
+      placePanel();
+    };
+    rows.forEach((row, index) => {
+      if (state.bound.has(row)) return;
+      state.bound.add(row);
+      row.removeAttribute('tabindex');
+      row.removeAttribute('aria-label');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'software-select';
+      button.addEventListener('click', () => {
+        state.selected = index;
+        state.render();
+      });
+      row.append(button);
+    });
+    state.render = render;
+    if (state.signature !== signature || !state.panel.isConnected) {
+      state.signature = signature;
+      rows.forEach((row) => {
+        row.querySelector('.software-select').setAttribute('aria-label', `${language === 'en' ? 'Explore' : 'Explorar'} ${row.querySelector('.software-name').textContent}`);
+      });
+      render();
+    }
+    if (!state.responsive) {
+      state.responsive = true;
+      window.matchMedia('(max-width: 760px)').addEventListener('change', () => {
+        if (columns.isConnected) state.render();
+      });
+    }
+  }
+
   function enhanceEducationSection(section) {
     const education = section.querySelector('.education');
     const label = section.querySelector('.section-label');
@@ -111,6 +216,29 @@
     }
     const title = label.textContent.includes('EDUCATION') ? 'EDUCATION' : 'FORMAÇÃO';
     if (heading.textContent !== title) heading.textContent = title;
+    const courseworkLanguage = title === 'EDUCATION' ? 'en' : 'pt';
+    enhanceSoftwarePanel(section, courseworkLanguage);
+    let coursework = education.querySelector('.education-coursework');
+    if (!coursework) {
+      coursework = document.createElement('div');
+      coursework.className = 'education-coursework';
+      education.append(coursework);
+    }
+    if (coursework.dataset.language !== courseworkLanguage) {
+      const courseworkTitle = document.createElement('h3');
+      courseworkTitle.textContent = courseworkLanguage === 'en' ? 'Selected studies' : 'Estudos em destaque';
+      const subjects = courseworkLanguage === 'en'
+        ? ['Image and visual identity', 'Visual languages and typography', 'Information and graphic design', 'Design methodology', 'Visual expression', 'Digital marketing']
+        : ['Imagem e identidade visual', 'Linguagens visuais e tipografia', 'Informação e projeto gráfico', 'Metodologia de projeto', 'Expressão visual', 'Marketing digital'];
+      const list = document.createElement('ul');
+      subjects.forEach((subject) => {
+        const item = document.createElement('li');
+        item.textContent = subject;
+        list.append(item);
+      });
+      coursework.dataset.language = courseworkLanguage;
+      coursework.replaceChildren(courseworkTitle, list);
+    }
     if (!education.querySelector('.education-emblem')) {
       const brandMark = label.querySelector('.note-mark');
       if (brandMark) {
@@ -176,6 +304,8 @@
     let height = 0;
     let lastFrame = 0;
     let elapsed = 0;
+    let spinAngle = 0.45;
+    let spinBoostRemaining = 0;
     let destroyed = false;
     let previousClientPointer = null;
     const listeners = new AbortController();
@@ -259,19 +389,27 @@
       }
       const delta = lastFrame ? Math.min(time - lastFrame, 60) : 16.67;
       lastFrame = time;
-      if (!reducedMotion.matches) elapsed += delta;
+      if (!reducedMotion.matches) {
+        elapsed += delta;
+        // Integrate speed into the current angle so clicks never reset the
+        // object's orientation. A new click renews, rather than stacks, boost.
+        const boostBefore = spinBoostRemaining / 1800;
+        spinBoostRemaining = Math.max(0, spinBoostRemaining - delta);
+        const boostAfter = spinBoostRemaining / 1800;
+        spinAngle += delta * .00026 + .022 * 1800 / 4 * (boostBefore ** 4 - boostAfter ** 4);
+        spinAngle %= Math.PI * 2;
+      }
 
       const pointerEase = 1 - Math.exp(-delta / 240);
       state.x += (target.x - state.x) * pointerEase;
       state.y += (target.y - state.y) * pointerEase;
       state.active += (target.active - state.active) * 0.06;
-      registration.style.setProperty('--registration-x', `${(-state.x * 8).toFixed(2)}px`);
-      registration.style.setProperty('--registration-y', `${(-state.y * 6).toFixed(2)}px`);
-      registration.style.opacity = String(.22 + state.active * .48);
+      registration.style.setProperty('--registration-x', `${Math.round(-state.x * 8)}px`);
+      registration.style.setProperty('--registration-y', `${Math.round(-state.y * 6)}px`);
 
       const still = reducedMotion.matches;
       const xAngle = -0.25 + state.y * 0.34;
-      const yAngle = (still ? 0.7 : 0.45 + elapsed * 0.00026) + state.x * 0.58;
+      const yAngle = (still ? 0.7 : spinAngle) + state.x * 0.58;
       const zAngle = still ? -0.12 : -0.1 + Math.sin(elapsed * 0.00022) * 0.12;
       const centerX = width * 0.5;
       const centerY = height * 0.5;
@@ -398,6 +536,13 @@
     };
 
     const eventOptions = { passive: true, signal: listeners.signal };
+    const spinButton = canvas.parentElement;
+    spinButton.disabled = reducedMotion.matches;
+    spinButton.addEventListener('click', () => {
+      if (reducedMotion.matches || document.hidden || !visible || destroyed) return;
+      spinBoostRemaining = 1800;
+      start();
+    }, { signal: listeners.signal });
     stage.addEventListener('pointermove', onPointerMove, eventOptions);
     stage.addEventListener('pointerleave', onPointerLeave, eventOptions);
     stage.addEventListener('pointercancel', onPointerLeave, eventOptions);
@@ -423,7 +568,7 @@
       const intersectionObserver = new IntersectionObserver(([entry]) => {
         visible = Boolean(entry?.isIntersecting);
         lastFrame = 0;
-        if (!visible) onPointerLeave();
+        if (!visible) { spinBoostRemaining = 0; onPointerLeave(); }
         if (visible) start();
         else if (frame) {
           window.cancelAnimationFrame(frame);
@@ -438,11 +583,14 @@
       state.x = state.y = target.x = target.y = 0;
       target.active = state.active = 0;
       previousClientPointer = null;
+      spinBoostRemaining = 0;
+      spinButton.disabled = reducedMotion.matches;
       start();
     }, eventOptions);
     document.addEventListener('visibilitychange', () => {
       lastFrame = 0;
       if (document.hidden) {
+        spinBoostRemaining = 0;
         window.cancelAnimationFrame(frame);
         frame = 0;
         target.x = target.y = target.active = 0;
@@ -478,12 +626,13 @@
     let spatialAsterisk = stage.querySelector(':scope > .hero-asterisk-3d');
     if (!spatialAsterisk) {
       heroRenderers.get(hero)?.destroy();
-      spatialAsterisk = document.createElement('div');
+      spatialAsterisk = document.createElement('button');
+      spatialAsterisk.type = 'button';
       spatialAsterisk.className = 'hero-asterisk-3d';
-      spatialAsterisk.setAttribute('aria-hidden', 'true');
 
       const canvas = document.createElement('canvas');
       canvas.className = 'hero-asterisk-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
       spatialAsterisk.append(canvas);
       stage.insertBefore(spatialAsterisk, mark);
       const renderer = createAsteriskRenderer(canvas, hero);
@@ -495,6 +644,9 @@
     } else if (spatialAsterisk.nextElementSibling !== mark) {
       stage.insertBefore(spatialAsterisk, mark);
     }
+
+    spatialAsterisk.setAttribute('aria-label', document.documentElement.lang.startsWith('en')
+      ? 'Spin the asterisk' : 'Girar o asterisco');
 
     hero.classList.add('has-spatial-asterisk');
     hero.dataset.spatialHero = 'true';
