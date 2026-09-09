@@ -106,6 +106,8 @@
     return points;
   }
 
+  const heroRenderers = new WeakMap();
+
   function createAsteriskRenderer(canvas, hero) {
     const context = canvas.getContext('2d', { alpha: true });
     if (!context) return null;
@@ -121,6 +123,18 @@
     let width = 0;
     let height = 0;
     let lastFrame = 0;
+    let elapsed = 0;
+    let destroyed = false;
+    let lastWave = 0;
+    let previousPointer = null;
+    const listeners = new AbortController();
+    const observers = [];
+    const waveTimers = new Set();
+    const stage = hero.querySelector('.hero-stage');
+    const waves = document.createElement('div');
+    waves.className = 'hero-pointer-waves';
+    waves.setAttribute('aria-hidden', 'true');
+    stage.prepend(waves);
 
     const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
@@ -159,7 +173,9 @@
     };
 
     const resize = () => {
-      const rect = canvas.getBoundingClientRect();
+      // Layout dimensions exclude the entrance transform, avoiding blurry or
+      // incorrectly sized backing buffers during the first animation.
+      const rect = { width: canvas.clientWidth, height: canvas.clientHeight };
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
@@ -173,7 +189,11 @@
     };
 
     const draw = (time = 0) => {
-      if (!visible || !canvas.isConnected) {
+      if (!canvas.isConnected) {
+        destroy();
+        return;
+      }
+      if (destroyed || !visible || document.hidden) {
         frame = 0;
         return;
       }
@@ -184,20 +204,20 @@
         frame = window.requestAnimationFrame(draw);
         return;
       }
+      const delta = lastFrame ? Math.min(time - lastFrame, 60) : 16.67;
       lastFrame = time;
+      if (!reducedMotion.matches) elapsed += delta;
 
       state.x += (target.x - state.x) * 0.055;
       state.y += (target.y - state.y) * 0.055;
       state.active += (target.active - state.active) * 0.06;
-      hero.style.setProperty('--hero-wave-x', `${(state.x * 24).toFixed(2)}px`);
-      hero.style.setProperty('--hero-wave-y', `${(state.y * 14).toFixed(2)}px`);
 
       const still = reducedMotion.matches;
       const xAngle = -0.25 + state.y * 0.34;
-      const yAngle = (still ? 0.7 : time * 0.00031) + state.x * 0.58;
-      const zAngle = still ? -0.12 : -0.1 + Math.sin(time * 0.00022) * 0.12;
-      const centerX = width * (0.5 + state.x * 0.025);
-      const centerY = height * (0.5 + state.y * 0.025);
+      const yAngle = (still ? 0.7 : 0.45 + elapsed * 0.00026) + state.x * 0.58;
+      const zAngle = still ? -0.12 : -0.1 + Math.sin(elapsed * 0.00022) * 0.12;
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
       const radius = Math.min(width, height) * (mobile ? 0.42 : 0.43);
       const camera = 4.3;
 
@@ -215,14 +235,10 @@
 
       const front = outline.map((point) => transformPoint({ ...point, z: depth / 2 }));
       const back = outline.map((point) => transformPoint({ ...point, z: -depth / 2 }));
-      const frontCenter = transformPoint({ x: 0, y: 0, z: depth / 2 });
-      const backCenter = transformPoint({ x: 0, y: 0, z: -depth / 2 });
       const polygons = [];
 
       for (let index = 0; index < outline.length; index += 1) {
         const next = (index + 1) % outline.length;
-        polygons.push({ kind: 'front', vertices: [frontCenter, front[index], front[next]] });
-        polygons.push({ kind: 'back', vertices: [backCenter, back[next], back[index]] });
         polygons.push({ kind: 'side', vertices: [front[index], back[index], back[next], front[next]] });
       }
 
@@ -232,19 +248,14 @@
       });
       polygons.sort((a, b) => a.depth - b.depth);
 
-      const projectedFront = front.map(project);
-      context.save();
-      context.beginPath();
-      projectedFront.forEach((point, index) => {
-        if (index === 0) context.moveTo(point.x + 14, point.y + 18);
-        else context.lineTo(point.x + 14, point.y + 18);
+      // Each cap is ONE concave path. Separately antialiased triangles leave
+      // hairline cracks even with strokes disabled. Draw visible caps last.
+      const frontNormal = transformPoint({ x: 0, y: 0, z: 1 });
+      polygons.push({ kind: 'front', vertices: front, normal: frontNormal });
+      polygons.push({
+        kind: 'back', vertices: [...back].reverse(),
+        normal: { x: -frontNormal.x, y: -frontNormal.y, z: -frontNormal.z },
       });
-      context.closePath();
-      context.fillStyle = 'rgba(0, 0, 0, .4)';
-      context.shadowColor = 'rgba(89, 15, 232, .72)';
-      context.shadowBlur = 38 + state.active * 16;
-      context.fill();
-      context.restore();
 
       const light = { x: -0.42, y: -0.58, z: 0.7 };
       const frontGradient = context.createLinearGradient(
@@ -259,7 +270,10 @@
       frontGradient.addColorStop(1, '#76a93c');
 
       polygons.forEach((polygon) => {
-        if (polygon.normal.z <= -0.035) return;
+        const origin = polygon.vertices[0];
+        const facingCamera = -polygon.normal.x * origin.x - polygon.normal.y * origin.y
+          + polygon.normal.z * (camera - origin.z);
+        if (facingCamera <= 0) return;
         const projected = polygon.vertices.map(project);
         const lightAmount = clamp(
           polygon.normal.x * light.x + polygon.normal.y * light.y + polygon.normal.z * light.z,
@@ -274,11 +288,8 @@
         });
         context.closePath();
 
-        if (polygon.kind === 'front') {
+        if (polygon.kind === 'front' || polygon.kind === 'back') {
           context.fillStyle = frontGradient;
-        } else if (polygon.kind === 'back') {
-          const luminosity = Math.round(40 + Math.max(0, lightAmount) * 45);
-          context.fillStyle = `rgb(${luminosity}, 16, ${Math.min(150, luminosity + 78)})`;
         } else {
           const illumination = Math.max(0, lightAmount);
           const red = Math.round(54 + illumination * 50);
@@ -287,25 +298,7 @@
           context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
         }
         context.fill();
-        if (polygon.kind === 'side') {
-          context.strokeStyle = 'rgba(194, 255, 115, .16)';
-          context.lineWidth = 0.7;
-          context.stroke();
-        }
       });
-
-      const frontNormal = polygonNormal([frontCenter, front[0], front[1]]);
-      if (frontNormal.z > 0) {
-        context.beginPath();
-        projectedFront.forEach((point, index) => {
-          if (index === 0) context.moveTo(point.x, point.y);
-          else context.lineTo(point.x, point.y);
-        });
-        context.closePath();
-        context.strokeStyle = 'rgba(241, 255, 217, .72)';
-        context.lineWidth = 1.1;
-        context.stroke();
-      }
 
       if (still) {
         frame = 0;
@@ -315,17 +308,37 @@
     };
 
     const start = () => {
-      if (!frame && visible) frame = window.requestAnimationFrame(draw);
+      if (!frame && visible && !document.hidden && !destroyed) frame = window.requestAnimationFrame(draw);
     };
 
     const onPointerMove = (event) => {
       if (!finePointer.matches || reducedMotion.matches) return;
       const stage = hero.querySelector('.hero-stage');
       const rect = stage?.getBoundingClientRect() ?? hero.getBoundingClientRect();
+      const px = event.clientX - rect.left;
+      const py = event.clientY - rect.top;
+      if (px < 0 || py < 0 || px > rect.width || py > rect.height) return;
       target.x = clamp(((event.clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 2, -1, 1);
       target.y = clamp(((event.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 2, -1, 1);
       target.active = 1;
       hero.classList.add('is-asterisk-active');
+      const now = performance.now();
+      const distance = previousPointer ? Math.hypot(px - previousPointer.x, py - previousPointer.y) : 0;
+      if (previousPointer && distance > 18 && now - lastWave > 100) {
+        const wave = document.createElement('span');
+        wave.className = 'hero-pointer-wave';
+        wave.style.left = `${px}px`;
+        wave.style.top = `${py}px`;
+        if (waves.children.length >= 8) waves.firstElementChild.remove();
+        waves.append(wave);
+        const timer = window.setTimeout(() => {
+          wave.remove();
+          waveTimers.delete(timer);
+        }, 1800);
+        waveTimers.add(timer);
+        lastWave = now;
+        previousPointer = { x: px, y: py };
+      } else if (!previousPointer) previousPointer = { x: px, y: py };
       start();
     };
 
@@ -333,14 +346,14 @@
       target.x = 0;
       target.y = 0;
       target.active = 0;
-      hero.style.setProperty('--hero-wave-x', '0px');
-      hero.style.setProperty('--hero-wave-y', '0px');
+      previousPointer = null;
       hero.classList.remove('is-asterisk-active');
       start();
     };
 
-    hero.addEventListener('pointermove', onPointerMove, { passive: true });
-    hero.addEventListener('pointerleave', onPointerLeave, { passive: true });
+    const eventOptions = { passive: true, signal: listeners.signal };
+    stage.addEventListener('pointermove', onPointerMove, eventOptions);
+    stage.addEventListener('pointerleave', onPointerLeave, eventOptions);
 
     if ('ResizeObserver' in window) {
       const resizeObserver = new ResizeObserver(() => {
@@ -348,16 +361,18 @@
         start();
       });
       resizeObserver.observe(canvas);
+      observers.push(resizeObserver);
     } else {
       window.addEventListener('resize', () => {
         resize();
         start();
-      }, { passive: true });
+      }, eventOptions);
     }
 
     if ('IntersectionObserver' in window) {
       const intersectionObserver = new IntersectionObserver(([entry]) => {
         visible = Boolean(entry?.isIntersecting);
+        lastFrame = 0;
         if (visible) start();
         else if (frame) {
           window.cancelAnimationFrame(frame);
@@ -365,13 +380,37 @@
         }
       }, { threshold: 0.02 });
       intersectionObserver.observe(hero);
+      observers.push(intersectionObserver);
     }
 
-    reducedMotion.addEventListener?.('change', start);
+    reducedMotion.addEventListener?.('change', () => {
+      state.x = state.y = target.x = target.y = 0;
+      waves.replaceChildren();
+      previousPointer = null;
+      start();
+    }, eventOptions);
+    document.addEventListener('visibilitychange', () => {
+      lastFrame = 0;
+      if (document.hidden) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+        waves.replaceChildren();
+      } else start();
+    }, eventOptions);
+
+    function destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      window.cancelAnimationFrame(frame);
+      listeners.abort();
+      observers.forEach((observer) => observer.disconnect());
+      waveTimers.forEach((timer) => window.clearTimeout(timer));
+      waves.remove();
+    }
     resize();
     start();
 
-    return { start };
+    return { start, destroy, canvas };
   }
 
   function enhanceSpatialHeroElement(hero) {
@@ -387,6 +426,7 @@
 
     let spatialAsterisk = stage.querySelector(':scope > .hero-asterisk-3d');
     if (!spatialAsterisk) {
+      heroRenderers.get(hero)?.destroy();
       spatialAsterisk = document.createElement('div');
       spatialAsterisk.className = 'hero-asterisk-3d';
       spatialAsterisk.setAttribute('aria-hidden', 'true');
@@ -395,10 +435,12 @@
       canvas.className = 'hero-asterisk-canvas';
       spatialAsterisk.append(canvas);
       stage.insertBefore(spatialAsterisk, mark);
-      if (!createAsteriskRenderer(canvas, hero)) {
+      const renderer = createAsteriskRenderer(canvas, hero);
+      if (!renderer) {
         spatialAsterisk.remove();
         return;
       }
+      heroRenderers.set(hero, renderer);
     } else if (spatialAsterisk.nextElementSibling !== mark) {
       stage.insertBefore(spatialAsterisk, mark);
     }
@@ -484,7 +526,12 @@
   window.setTimeout(enhanceSpatialHero, 1400);
 
   const observer = new MutationObserver((records) => {
+    const changedHeroes = new Set();
     for (const record of records) {
+      if (record.target instanceof Element) {
+        const hero = record.target.closest('.hero');
+        if (hero) changedHeroes.add(hero);
+      }
       for (const node of record.addedNodes) {
         if (!(node instanceof Element)) continue;
         if (node.matches('img[src^="/projects/"]')) enhanceImage(node);
@@ -495,6 +542,10 @@
         buildHorizontalArchive();
       }
     }
+    changedHeroes.forEach((hero) => {
+      if (hero.isConnected) enhanceSpatialHeroElement(hero);
+      else heroRenderers.get(hero)?.destroy();
+    });
   });
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
