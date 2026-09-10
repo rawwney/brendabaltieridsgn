@@ -1263,8 +1263,58 @@ footer a {
     will-change: transform;
   }
   .hero.hero-name-expanded .hero-stage > h1,
-  .hero .hero-stage > h1:hover {
+.hero .hero-stage > h1:hover {
     transform: translateY(.065em) scaleX(1.07) !important;
+  }
+}
+
+/* Project popups: a tighter editorial rhythm keeps the case title readable
+   without letting it overpower the project information below. */
+@media (min-width: 761px) {
+  .project-popup .popup-case > header {
+    padding: clamp(48px, 5vw, 88px) clamp(28px, 3vw, 56px) clamp(24px, 3vw, 48px);
+  }
+
+  .project-popup .popup-case > header h2 {
+    max-width: none;
+    margin: clamp(26px, 2.8vw, 48px) 0 clamp(32px, 4vw, 64px);
+    font-size: clamp(42px, 5.4vw, 86px);
+    line-height: .86;
+    letter-spacing: -.085em;
+    white-space: nowrap;
+    text-wrap: nowrap;
+  }
+
+  .project-popup .case-intro {
+    grid-template-columns: minmax(110px, 1fr) minmax(0, 3fr);
+    gap: clamp(24px, 4vw, 72px);
+    padding: clamp(72px, 8vw, 132px) clamp(28px, 3vw, 56px);
+  }
+
+  .project-popup .case-intro h3 {
+    max-width: 46rem;
+    font-size: clamp(24px, 2.35vw, 38px);
+    line-height: 1.08;
+    letter-spacing: -.025em;
+  }
+}
+
+@media (max-width: 760px) {
+  .project-popup .popup-case > header h2 {
+    font-size: clamp(36px, 13vw, 68px);
+    line-height: .88;
+    letter-spacing: -.075em;
+    text-wrap: balance;
+  }
+
+  .project-popup .case-intro {
+    padding: clamp(72px, 18vw, 128px) 14px;
+  }
+
+  .project-popup .case-intro h3 {
+    max-width: 34ch;
+    font-size: clamp(23px, 7vw, 36px);
+    line-height: 1.08;
   }
 }
 
