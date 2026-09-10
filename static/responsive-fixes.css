@@ -1242,31 +1242,19 @@ footer a {
   .skills .software-hover-grid > div:first-child { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Two genuine Roc faces, fitted together before the hover transition. */
-.hero-type-expanded { display: none !important; }
-@media (min-width: 761px) {
-  .hero.hero-type-ready .hero-stage > h1 { font-family: 'roc-grotesk', sans-serif; font-size: var(--hero-type-size); font-weight: 900 !important; font-synthesis: none; }
-  .hero.hero-type-ready h1 > .hero-name-line { transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.75,.2,1); }
-  .hero.hero-type-ready h1 .hero-letter { font-weight: 900 !important; }
-  .hero.hero-type-ready .hero-type-expanded {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    font-family: 'roc-grotesk-extrawide', sans-serif;
-    font-weight: 900 !important;
-    font-synthesis: none;
-    opacity: 0;
-    pointer-events: none;
-    transform: scaleX(.68);
-    transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.75,.2,1);
-  }
-  .hero-type-expanded > span { display: block; white-space: nowrap; }
-  .hero.hero-name-expanded h1 > .hero-name-line { opacity: 0; transform: scaleX(1.16); }
-  .hero.hero-name-expanded .hero-type-expanded { opacity: 1; transform: scaleX(1); }
-  /* CSS fallback keeps the type swap alive even if a pointer event is
-     intercepted by the layered asterisk canvas. */
-  .hero.hero-type-ready .hero-stage > h1:hover > .hero-name-line { opacity: 0; transform: scaleX(1.16); }
-  .hero.hero-type-ready .hero-stage > h1:hover .hero-type-expanded { opacity: 1; transform: scaleX(1); }
+/* The hero uses one real title: ExtraBold at rest, ExtraWide Black on hover. */
+.hero .hero-stage > h1,
+.hero .hero-stage > h1 .hero-letter {
+  font-family: 'roc-grotesk', sans-serif;
+  font-weight: 800 !important;
+  font-synthesis: none;
+}
+.hero.hero-name-expanded .hero-stage > h1,
+.hero.hero-name-expanded .hero-stage > h1 .hero-letter,
+.hero .hero-stage > h1:hover,
+.hero .hero-stage > h1:hover .hero-letter {
+  font-family: 'roc-grotesk-extrawide', sans-serif;
+  font-weight: 900 !important;
 }
 
 /* Mirrored by the paint layer: one future portrait and right-aligned copy. */
@@ -1347,6 +1335,4 @@ footer a {
 }
 @media (prefers-reduced-motion: reduce) {
   .software-popover { animation: none; }
-  .hero.hero-type-ready h1 > .hero-name-line,
-  .hero.hero-type-ready .hero-type-expanded { transition: none; }
 }

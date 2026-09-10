@@ -632,55 +632,27 @@
     return { start, destroy, canvas };
   }
 
-  const heroTypography = new WeakMap();
-  function enhanceHeroTypography(hero, title, stage) {
-    const existing = heroTypography.get(hero);
-    if (existing?.title === title && existing.layer.isConnected) return;
+  const heroHoverStates = new WeakMap();
+  function enhanceHeroHover(hero, title, stage) {
+    const existing = heroHoverStates.get(hero);
+    if (existing?.title === title) return;
     existing?.controller.abort();
-    existing?.layer.remove();
-    const lines = Array.from(title.querySelectorAll(':scope > .hero-name-line'));
-    if (!lines.length) return;
-    const layer = document.createElement('span');
-    layer.className = 'hero-type-expanded';
-    layer.setAttribute('aria-hidden', 'true');
-    lines.forEach((line) => {
-      const text = document.createElement('span');
-      text.textContent = line.textContent;
-      layer.append(text);
-    });
-    title.append(layer);
     const controller = new AbortController();
     const options = { signal: controller.signal, passive: true };
-    heroTypography.set(hero, { title, layer, controller });
-    const measure = document.createElement('canvas').getContext('2d');
-    const fit = () => {
-      if (!title.isConnected || !measure || controller.signal.aborted) return;
-      measure.font = '900 100px "roc-grotesk-extrawide"';
-      const widest = Math.max(...lines.map((line) => measure.measureText(line.textContent).width));
-      const available = Math.min(stage.clientWidth * .90, 1450);
-      const fontSize = Math.min(innerHeight * .27, 308, available / Math.max(1, widest) * 100);
-      title.style.setProperty('--hero-type-size', `${fontSize}px`);
-      hero.classList.add('hero-type-ready');
+    const update = (event) => {
+      if (event.pointerType === 'touch') return;
+      const rect = title.getBoundingClientRect();
+      const inside = event.clientY >= rect.top && event.clientY <= rect.bottom
+        && event.clientX >= rect.left && event.clientX <= rect.right;
+      hero.classList.toggle('hero-name-expanded', inside);
     };
-    fit();
-    Promise.all([
-      document.fonts.load('900 100px "roc-grotesk"'),
-      document.fonts.load('900 100px "roc-grotesk-extrawide"'),
-    ]).then(fit).catch(() => {});
-    window.addEventListener('resize', fit, options);
     title.addEventListener('pointerenter', (event) => {
-      if (event.pointerType !== 'touch' && hero.classList.contains('hero-type-ready')) {
-        hero.classList.add('hero-name-expanded');
-      }
+      if (event.pointerType !== 'touch') hero.classList.add('hero-name-expanded');
     }, options);
     title.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
-    stage.addEventListener('pointermove', (event) => {
-      if (event.pointerType === 'touch' || !hero.classList.contains('hero-type-ready')) return;
-      const rect = title.getBoundingClientRect();
-      hero.classList.toggle('hero-name-expanded', event.clientY >= rect.top && event.clientY <= rect.bottom
-        && event.clientX >= rect.left && event.clientX <= rect.right);
-    }, options);
+    stage.addEventListener('pointermove', update, options);
     stage.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
+    heroHoverStates.set(hero, { title, controller });
   }
 
   function enhanceSpatialHeroElement(hero) {
@@ -688,7 +660,7 @@
     const mark = hero.querySelector('.hero-stage > .hero-mark');
     const title = hero.querySelector('.hero-stage > h1:not(.hero-lens-title)');
     if (!stage || !mark || !title) return;
-    enhanceHeroTypography(hero, title, stage);
+    enhanceHeroHover(hero, title, stage);
 
     hero.classList.remove('hero-magnetic', 'is-magnetic-active');
     hero.classList.add('hero-spatial');
