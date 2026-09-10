@@ -120,7 +120,7 @@
         const margin = 12;
         const { x: px, y: py } = state.point;
         const left = px + 24 + width > innerWidth - margin ? px - width - 24 : px + 24;
-        const top = py + 20 + height > innerHeight - margin ? py - height - 20 : py + 20;
+        const top = py - height / 2;
         panel.style.left = `${Math.max(margin, Math.min(left, innerWidth - width - margin))}px`;
         panel.style.top = `${Math.max(margin, Math.min(top, innerHeight - height - margin))}px`;
       });
