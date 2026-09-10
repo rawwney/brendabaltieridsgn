@@ -1256,6 +1256,17 @@ footer a {
   font-family: 'roc-grotesk-extrawide', sans-serif;
   font-weight: 900 !important;
 }
+@media (min-width: 761px) {
+  .hero .hero-stage > h1 {
+    transform-origin: center;
+    transition: transform 420ms cubic-bezier(.2,.75,.2,1);
+    will-change: transform;
+  }
+  .hero.hero-name-expanded .hero-stage > h1,
+  .hero .hero-stage > h1:hover {
+    transform: translateY(.065em) scaleX(1.07) !important;
+  }
+}
 
 /* Mirrored by the paint layer: one future portrait and right-aligned copy. */
 .about .about-photo-layout {
