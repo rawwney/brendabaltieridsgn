@@ -124,7 +124,7 @@ if (!indexHtml.includes('/performance.js')) {
   );
 }
 
-const siteOrigin = (process.env.SITE_ORIGIN || 'https://brenda-baltieri-portfolio.pages.dev').replace(/\/$/, '');
+const siteOrigin = (process.env.SITE_ORIGIN || 'https://brendabaltieridsgn.pages.dev').replace(/\/$/, '');
 const socialImagePath = 'brand/brenda-frontal-green.png';
 const socialImage = await sharp(path.join(outputRoot, socialImagePath)).metadata();
 indexHtml = indexHtml.replaceAll(

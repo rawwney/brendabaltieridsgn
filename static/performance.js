@@ -633,25 +633,63 @@
   }
 
   const heroHoverStates = new WeakMap();
-  function enhanceHeroHover(hero, title, stage) {
+  function enhanceHeroHover(hero, title) {
     const existing = heroHoverStates.get(hero);
     if (existing?.title === title) return;
     existing?.controller.abort();
     const controller = new AbortController();
     const options = { signal: controller.signal, passive: true };
-    const update = (event) => {
-      if (event.pointerType === 'touch') return;
-      const rect = title.getBoundingClientRect();
-      const inside = event.clientY >= rect.top && event.clientY <= rect.bottom
-        && event.clientX >= rect.left && event.clientX <= rect.right;
-      hero.classList.toggle('hero-name-expanded', inside);
+    // The Adobe kit contains static faces, so font-family cannot interpolate.
+    // Match both glyphs to the same continuously expanding width and blend them.
+    const prepareInflation = async () => {
+      try {
+        const fonts = await Promise.all([
+          document.fonts.load('800 100px "roc-grotesk"', 'BRENDA BALTIERI'),
+          document.fonts.load('900 100px "roc-grotesk-extrawide"', 'BRENDA BALTIERI'),
+        ]);
+        if (controller.signal.aborted || !title.isConnected || fonts.some((face) => !face.length)) return;
+        const context = document.createElement('canvas').getContext('2d');
+        if (!context) return;
+        const measure = () => {
+          const style = getComputedStyle(title);
+          const size = parseFloat(style.fontSize);
+          const tracking = (parseFloat(style.letterSpacing) || 0) / size;
+          title.style.setProperty('--hero-tracking', `${tracking}em`);
+          title.querySelectorAll('.hero-name-line').forEach((line) => {
+            let expandedWidth = 0;
+            line.querySelectorAll('.hero-letter').forEach((letter) => {
+              const glyph = letter.textContent;
+              context.font = '800 1000px "roc-grotesk"';
+              const base = context.measureText(glyph).width / 1000;
+              context.font = '900 1000px "roc-grotesk-extrawide"';
+              const wide = context.measureText(glyph).width / 1000;
+              if (!base || !wide) return;
+              letter.dataset.glyph = glyph;
+              letter.style.setProperty('--glyph-base', base);
+              letter.style.setProperty('--glyph-growth', wide - base);
+              letter.style.setProperty('--glyph-stretch', wide / base - 1);
+              letter.style.setProperty('--glyph-compressed', base / wide);
+              letter.style.setProperty('--glyph-release', 1 - base / wide);
+              expandedWidth += (wide + tracking) * size;
+            });
+            line.style.setProperty('--hero-fit-change', Math.min(1, (title.clientWidth - 16) / expandedWidth) - 1);
+          });
+        };
+        measure();
+        title.classList.add('hero-inflate-ready');
+        window.addEventListener('resize', measure, options);
+      } catch {
+        // Retain readable ExtraBold text if the font service is unavailable.
+      }
     };
-    title.addEventListener('pointerenter', (event) => {
+    void prepareInflation();
+    const expand = (event) => {
       if (event.pointerType !== 'touch') hero.classList.add('hero-name-expanded');
-    }, options);
-    title.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
-    stage.addEventListener('pointermove', update, options);
-    stage.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
+    };
+    hero.addEventListener('pointerenter', expand, options);
+    hero.addEventListener('pointermove', expand, options);
+    hero.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
+    hero.addEventListener('pointercancel', () => hero.classList.remove('hero-name-expanded'), options);
     heroHoverStates.set(hero, { title, controller });
   }
 
@@ -660,7 +698,7 @@
     const mark = hero.querySelector('.hero-stage > .hero-mark');
     const title = hero.querySelector('.hero-stage > h1:not(.hero-lens-title)');
     if (!stage || !mark || !title) return;
-    enhanceHeroHover(hero, title, stage);
+    enhanceHeroHover(hero, title);
 
     hero.classList.remove('hero-magnetic', 'is-magnetic-active');
     hero.classList.add('hero-spatial');

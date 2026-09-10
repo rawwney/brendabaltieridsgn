@@ -1242,29 +1242,65 @@ footer a {
   .skills .software-hover-grid > div:first-child { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* The hero uses one real title: ExtraBold at rest, ExtraWide Black on hover. */
+/* One accessible title; matched glyph widths smoothly blend the static faces. */
+@property --hero-inflate {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
 .hero .hero-stage > h1,
 .hero .hero-stage > h1 .hero-letter {
   font-family: 'roc-grotesk', sans-serif;
   font-weight: 800 !important;
   font-synthesis: none;
 }
-.hero.hero-name-expanded .hero-stage > h1,
-.hero.hero-name-expanded .hero-stage > h1 .hero-letter,
-.hero .hero-stage > h1:hover,
-.hero .hero-stage > h1:hover .hero-letter {
-  font-family: 'roc-grotesk-extrawide', sans-serif;
-  font-weight: 900 !important;
-}
-@media (min-width: 761px) {
-  .hero .hero-stage > h1 {
-    transform-origin: center;
-    transition: transform 420ms cubic-bezier(.2,.75,.2,1);
-    will-change: transform;
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .hero .hero-stage > h1.hero-inflate-ready {
+    --hero-inflate: 0;
+    transition: --hero-inflate 850ms cubic-bezier(.45, 0, .2, 1);
   }
-  .hero.hero-name-expanded .hero-stage > h1,
-.hero .hero-stage > h1:hover {
-    transform: translateY(.065em) scaleX(1.07) !important;
+  .hero.hero-name-expanded .hero-stage > h1.hero-inflate-ready {
+    --hero-inflate: 1;
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-name-line {
+    animation: none !important;
+    transform: scaleX(calc(1 + var(--hero-fit-change, 0) * var(--hero-inflate)));
+    transform-origin: center;
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter {
+    position: relative;
+    isolation: isolate;
+    width: calc((var(--glyph-base) + var(--glyph-growth) * var(--hero-inflate)) * 1em);
+    margin-right: var(--hero-tracking);
+    letter-spacing: 0;
+    color: transparent;
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before,
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
+    content: attr(data-glyph);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    color: var(--white);
+    line-height: inherit;
+    transform-origin: left center;
+    pointer-events: none;
+    font-synthesis: none;
+    mix-blend-mode: plus-lighter;
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before {
+    font-family: 'roc-grotesk', sans-serif;
+    font-weight: 800;
+    opacity: calc(1 - var(--hero-inflate));
+    transform: scaleX(calc(1 + var(--glyph-stretch) * var(--hero-inflate)));
+    -webkit-text-stroke: calc(var(--hero-inflate) * .006em) var(--white);
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
+    font-family: 'roc-grotesk-extrawide', sans-serif;
+    font-weight: 900;
+    opacity: var(--hero-inflate);
+    transform: scaleX(calc(var(--glyph-compressed) + var(--glyph-release) * var(--hero-inflate)));
   }
 }
 
