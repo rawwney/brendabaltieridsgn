@@ -656,23 +656,31 @@
           const tracking = (parseFloat(style.letterSpacing) || 0) / size;
           title.style.setProperty('--hero-tracking', `${tracking}em`);
           title.querySelectorAll('.hero-name-line').forEach((line) => {
-            let expandedWidth = 0;
-            line.querySelectorAll('.hero-letter').forEach((letter) => {
+            const letters = Array.from(line.querySelectorAll('.hero-letter'));
+            const metrics = letters.map((letter) => {
               const glyph = letter.textContent;
               context.font = '800 1000px "roc-grotesk"';
               const base = context.measureText(glyph).width / 1000;
               context.font = '900 1000px "roc-grotesk-extrawide"';
               const wide = context.measureText(glyph).width / 1000;
+              return { letter, glyph, base, wide };
+            });
+            const baseTotal = metrics.reduce((sum, glyph) => sum + glyph.base, 0);
+            const wideTotal = metrics.reduce((sum, glyph) => sum + glyph.wide, 0);
+            const frameWidth = hero.querySelector('.hero-registration')?.clientWidth || title.clientWidth;
+            const space = Math.max(1, (frameWidth - 96) / size - tracking * (letters.length - 1));
+            const baseFit = Math.min(1, space / baseTotal);
+            const wideFit = Math.min(1, space / wideTotal, baseTotal * baseFit * 1.12 / wideTotal);
+            metrics.forEach(({ letter, glyph, base, wide }) => {
               if (!base || !wide) return;
               letter.dataset.glyph = glyph;
-              letter.style.setProperty('--glyph-base', base);
-              letter.style.setProperty('--glyph-growth', wide - base);
-              letter.style.setProperty('--glyph-stretch', wide / base - 1);
-              letter.style.setProperty('--glyph-compressed', base / wide);
-              letter.style.setProperty('--glyph-release', 1 - base / wide);
-              expandedWidth += (wide + tracking) * size;
+              letter.style.setProperty('--glyph-base', base * baseFit);
+              letter.style.setProperty('--glyph-growth', wide * wideFit - base * baseFit);
+              letter.style.setProperty('--glyph-base-scale', baseFit);
+              letter.style.setProperty('--glyph-stretch', wide * wideFit / base - baseFit);
+              letter.style.setProperty('--glyph-compressed', base * baseFit / wide);
+              letter.style.setProperty('--glyph-release', wideFit - base * baseFit / wide);
             });
-            line.style.setProperty('--hero-fit-change', Math.min(1, (title.clientWidth - 16) / expandedWidth) - 1);
           });
         };
         measure();
@@ -684,7 +692,11 @@
     };
     void prepareInflation();
     const expand = (event) => {
-      if (event.pointerType !== 'touch') hero.classList.add('hero-name-expanded');
+      if (event.pointerType === 'touch') return;
+      const bounds = hero.querySelector('.hero-registration')?.getBoundingClientRect();
+      const inside = bounds && bounds.width > 0 && event.clientX >= bounds.left
+        && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+      hero.classList.toggle('hero-name-expanded', Boolean(inside));
     };
     hero.addEventListener('pointerenter', expand, options);
     hero.addEventListener('pointermove', expand, options);

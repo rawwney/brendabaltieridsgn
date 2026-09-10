@@ -1264,17 +1264,22 @@ footer a {
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-name-line {
     animation: none !important;
-    transform: scaleX(calc(1 + var(--hero-fit-change, 0) * var(--hero-inflate)));
-    transform-origin: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    transform: none;
+    text-align: center;
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter {
     position: relative;
     isolation: isolate;
+    flex-shrink: 0;
     width: calc((var(--glyph-base) + var(--glyph-growth) * var(--hero-inflate)) * 1em);
     margin-right: var(--hero-tracking);
     letter-spacing: 0;
     color: transparent;
   }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter:last-child { margin-right: 0; }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before,
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
     content: attr(data-glyph);
@@ -1293,7 +1298,7 @@ footer a {
     font-family: 'roc-grotesk', sans-serif;
     font-weight: 800;
     opacity: calc(1 - var(--hero-inflate));
-    transform: scaleX(calc(1 + var(--glyph-stretch) * var(--hero-inflate)));
+    transform: scaleX(calc(var(--glyph-base-scale) + var(--glyph-stretch) * var(--hero-inflate)));
     -webkit-text-stroke: calc(var(--hero-inflate) * .006em) var(--white);
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
