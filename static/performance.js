@@ -662,13 +662,20 @@
       title.style.setProperty('--hero-type-size', `${fontSize}px`);
       hero.classList.add('hero-type-ready');
     };
+    fit();
     Promise.all([
       document.fonts.load('900 100px "roc-grotesk"'),
       document.fonts.load('900 100px "roc-grotesk-extrawide"'),
     ]).then(fit).catch(() => {});
     window.addEventListener('resize', fit, options);
+    title.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'touch' && hero.classList.contains('hero-type-ready')) {
+        hero.classList.add('hero-name-expanded');
+      }
+    }, options);
+    title.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
     stage.addEventListener('pointermove', (event) => {
-      if (event.pointerType !== 'mouse' || !hero.classList.contains('hero-type-ready')) return;
+      if (event.pointerType === 'touch' || !hero.classList.contains('hero-type-ready')) return;
       const rect = title.getBoundingClientRect();
       hero.classList.toggle('hero-name-expanded', event.clientY >= rect.top && event.clientY <= rect.bottom
         && event.clientX >= rect.left && event.clientX <= rect.right);

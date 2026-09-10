@@ -1244,7 +1244,7 @@ footer a {
 
 /* Two genuine Roc faces, fitted together before the hover transition. */
 .hero-type-expanded { display: none !important; }
-@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+@media (min-width: 761px) {
   .hero.hero-type-ready .hero-stage > h1 { font-family: 'roc-grotesk', sans-serif; font-size: var(--hero-type-size); font-weight: 900 !important; font-synthesis: none; }
   .hero.hero-type-ready h1 > .hero-name-line { transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.75,.2,1); }
   .hero.hero-type-ready h1 .hero-letter { font-weight: 900 !important; }
