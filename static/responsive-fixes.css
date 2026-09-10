@@ -1242,7 +1242,7 @@ footer a {
   .skills .software-hover-grid > div:first-child { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* One accessible title; matched glyph widths smoothly blend the static faces. */
+/* One visible glyph per letter: continuous expansion without crossfade ghosts. */
 @property --hero-inflate {
   syntax: '<number>';
   inherits: true;
@@ -1280,8 +1280,7 @@ footer a {
     color: transparent;
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter:last-child { margin-right: 0; }
-  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before,
-  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
+  .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before {
     content: attr(data-glyph);
     position: absolute;
     top: 0;
@@ -1292,20 +1291,16 @@ footer a {
     transform-origin: left center;
     pointer-events: none;
     font-synthesis: none;
-    mix-blend-mode: plus-lighter;
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter::before {
     font-family: 'roc-grotesk', sans-serif;
     font-weight: 800;
-    opacity: calc(1 - var(--hero-inflate));
+    opacity: 1;
     transform: scaleX(calc(var(--glyph-base-scale) + var(--glyph-stretch) * var(--hero-inflate)));
-    -webkit-text-stroke: calc(var(--hero-inflate) * .006em) var(--white);
+    -webkit-text-stroke: calc(var(--hero-inflate) * .008em) var(--white);
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter::after {
-    font-family: 'roc-grotesk-extrawide', sans-serif;
-    font-weight: 900;
-    opacity: var(--hero-inflate);
-    transform: scaleX(calc(var(--glyph-compressed) + var(--glyph-release) * var(--hero-inflate)));
+    content: none;
   }
 }
 

@@ -640,7 +640,8 @@
     const controller = new AbortController();
     const options = { signal: controller.signal, passive: true };
     // The Adobe kit contains static faces, so font-family cannot interpolate.
-    // Match both glyphs to the same continuously expanding width and blend them.
+    // Use ExtraWide metrics as width targets, but animate only one visible glyph.
+    // This approximates inflation without overlapping different static outlines.
     const prepareInflation = async () => {
       try {
         const fonts = await Promise.all([
@@ -678,8 +679,6 @@
               letter.style.setProperty('--glyph-growth', wide * wideFit - base * baseFit);
               letter.style.setProperty('--glyph-base-scale', baseFit);
               letter.style.setProperty('--glyph-stretch', wide * wideFit / base - baseFit);
-              letter.style.setProperty('--glyph-compressed', base * baseFit / wide);
-              letter.style.setProperty('--glyph-release', wideFit - base * baseFit / wide);
             });
           });
         };
