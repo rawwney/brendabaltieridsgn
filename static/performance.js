@@ -48,50 +48,18 @@
     root.querySelectorAll?.('.project-grid > .project').forEach(enhanceProject);
   }
 
-  function ensureAboutHeadphoneFilter() {
-    if (document.getElementById('about-headphone-colors')) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'about-headphone-colors';
-    svg.setAttribute('aria-hidden', 'true');
-    svg.setAttribute('width', '0');
-    svg.setAttribute('height', '0');
-    svg.style.position = 'absolute';
-    // Key only green-dominant pixels. Skin (red-dominant), black hair and
-    // transparency stay unchanged; both layers share the same animated GIF.
-    svg.innerHTML = `<defs>
-      <filter id="about-purple-headphones" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -8 8 0 0 0" result="greenKey"/>
-        <feComposite in="greenKey" in2="SourceAlpha" operator="in" result="headphoneMask"/>
-        <feFlood flood-color="#590fe8" result="purple"/>
-        <feComposite in="purple" in2="headphoneMask" operator="in" result="purpleHeadphones"/>
-        <feComposite in="purpleHeadphones" in2="SourceGraphic" operator="over"/>
-      </filter>
-    </defs>`;
-    document.body.append(svg);
-  }
-
   function enhanceAboutGrid(grid) {
-    if (grid.dataset.aboutGif === 'true') return;
-
     const copy = grid.querySelector('.about-copy');
     if (!copy) return;
-    ensureAboutHeadphoneFilter();
-
-    grid.querySelectorAll('.portrait-placeholder').forEach((portrait) => portrait.remove());
-
-    const figure = document.createElement('figure');
-    figure.className = 'about-gif';
-
-    const image = document.createElement('img');
-    image.src = '/brand/brenda-about.gif';
-    image.alt = 'Ilustração animada de Brenda Baltieri com fones';
-    image.loading = 'lazy';
-    image.decoding = 'async';
-
-    figure.append(image);
-    copy.before(figure);
-    grid.classList.add('about-gif-layout');
-    grid.dataset.aboutGif = 'true';
+    grid.querySelectorAll('.portrait-placeholder, .about-gif').forEach((portrait) => portrait.remove());
+    if (!grid.querySelector('.about-photo-space')) {
+      const space = document.createElement('div');
+      space.className = 'about-photo-space';
+      space.setAttribute('aria-hidden', 'true');
+      grid.prepend(space);
+    }
+    grid.classList.remove('about-gif-layout');
+    grid.classList.add('about-photo-layout');
   }
 
   function enhanceAbout(root = document) {
@@ -99,7 +67,79 @@
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
   }
 
+  function enhanceContact(root = document) {
+    const sections = root.matches?.('.contact') ? [root] : Array.from(root.querySelectorAll?.('.contact') || []);
+    sections.forEach((section) => {
+      const heading = section.querySelector(':scope > .mega');
+      if (!heading || section.querySelector('.contact-gif')) return;
+      const figure = document.createElement('figure');
+      figure.className = 'contact-gif';
+      figure.setAttribute('aria-hidden', 'true');
+      const image = document.createElement('img');
+      image.src = '/brand/brenda-about.gif';
+      image.alt = '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      figure.append(image);
+      heading.after(figure);
+      section.classList.add('contact-with-gif');
+    });
+  }
+
   const softwarePanels = new WeakMap();
+  let softwarePopover;
+
+  function getSoftwarePopover() {
+    if (softwarePopover) return softwarePopover;
+    const panel = document.createElement('div');
+    panel.className = 'software-popover';
+    panel.id = 'software-proficiency';
+    panel.setAttribute('role', 'tooltip');
+    panel.hidden = true;
+    document.body.append(panel);
+    const state = { panel, button: null, timer: 0, frame: 0, point: null, pinned: false };
+    state.hide = () => {
+      clearTimeout(state.timer);
+      cancelAnimationFrame(state.frame);
+      state.frame = 0;
+      state.button?.removeAttribute('aria-describedby');
+      state.button?.setAttribute('aria-expanded', 'false');
+      state.button = null;
+      state.panel.hidden = true;
+      state.pinned = false;
+    };
+    state.move = (x, y) => {
+      state.point = { x, y };
+      if (state.frame) return;
+      state.frame = requestAnimationFrame(() => {
+        state.frame = 0;
+        if (panel.hidden) return;
+        if (!state.button?.isConnected) { state.hide(); return; }
+        const width = panel.offsetWidth;
+        const height = panel.offsetHeight;
+        const margin = 12;
+        const { x: px, y: py } = state.point;
+        const left = px + 24 + width > innerWidth - margin ? px - width - 24 : px + 24;
+        const top = py + 20 + height > innerHeight - margin ? py - height - 20 : py + 20;
+        panel.style.left = `${Math.max(margin, Math.min(left, innerWidth - width - margin))}px`;
+        panel.style.top = `${Math.max(margin, Math.min(top, innerHeight - height - margin))}px`;
+      });
+    };
+    state.leave = () => {
+      if (!state.pinned) state.timer = setTimeout(() => state.hide(), 160);
+    };
+    panel.addEventListener('pointerenter', () => clearTimeout(state.timer));
+    panel.addEventListener('pointerleave', state.leave);
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') state.hide(); });
+    document.addEventListener('pointerdown', (event) => {
+      if (state.button && !state.button.contains(event.target) && !panel.contains(event.target)) state.hide();
+    }, { passive: true });
+    window.addEventListener('scroll', state.hide, { passive: true });
+    window.addEventListener('resize', state.hide, { passive: true });
+    window.addEventListener('blur', state.hide);
+    softwarePopover = state;
+    return state;
+  }
 
   function enhanceSoftwarePanel(section, language) {
     const columns = section.querySelector('.skill-cols');
@@ -107,83 +147,81 @@
     if (!rows.length) return;
     let state = softwarePanels.get(columns);
     if (!state) {
-      const panel = document.createElement('aside');
-      panel.className = 'software-detail';
-      panel.setAttribute('aria-label', 'Software');
-      state = { panel, selected: 0, signature: '', bound: new WeakSet() };
+      state = { language, bound: new WeakSet() };
       softwarePanels.set(columns, state);
     }
-    const signature = language + rows.map((row) => row.querySelector('.software-name')?.textContent).join('|');
-    const placePanel = () => {
-      if (window.matchMedia('(max-width: 760px)').matches) {
-        const row = rows[state.selected];
-        if (row.nextElementSibling !== state.panel) row.after(state.panel);
-      } else {
-        if (state.panel.parentElement !== columns) columns.append(state.panel);
-      }
-    };
-    const render = () => {
-      const en = language === 'en';
-      const row = rows[state.selected] || rows[0];
+    if (state.language !== language) softwarePopover?.hide();
+    state.language = language;
+    columns.classList.add('software-hover-grid');
+    const show = (row, index, button, event, pinned = false) => {
+      const popup = getSoftwarePopover();
+      clearTimeout(popup.timer);
+      const en = state.language === 'en';
       const name = row.querySelector('.software-name').textContent.trim();
       const level = Math.max(0, Math.min(100, parseInt(row.querySelector('.software-level')?.textContent || '0', 10)));
-      rows.forEach((item) => item.querySelector('.software-select')?.setAttribute('aria-pressed', String(item === row)));
+      popup.button?.removeAttribute('aria-describedby');
+      popup.button?.setAttribute('aria-expanded', 'false');
+      popup.button = button;
+      popup.pinned = pinned;
+      button.setAttribute('aria-describedby', popup.panel.id);
+      button.setAttribute('aria-expanded', 'true');
       const label = document.createElement('p');
-      label.className = 'software-detail-label';
-      label.textContent = en ? 'Tool in focus' : 'Ferramenta em foco';
-      const title = document.createElement('h3');
+      label.className = 'software-popover-index';
+      label.textContent = `${String(index + 1).padStart(2, '0')} / SOFTWARE`;
+      const title = document.createElement('h4');
       title.textContent = name;
-      const chart = document.createElement('div');
-      chart.className = 'software-detail-chart';
       const value = document.createElement('strong');
+      value.className = 'software-popover-value';
       value.textContent = `${level}%`;
       const scale = document.createElement('div');
-      scale.className = 'software-detail-scale';
+      scale.className = 'software-popover-scale';
       scale.setAttribute('aria-hidden', 'true');
-      const fill = document.createElement('i');
-      fill.style.height = `${level}%`;
-      scale.append(fill);
-      chart.append(scale, value);
+      for (let step = 0; step < 20; step += 1) {
+        const bar = document.createElement('i');
+        bar.style.setProperty('--bar-height', `${20 + step * 2}px`);
+        bar.style.setProperty('--bar-fill', `${Math.max(0, Math.min(100, (level - step * 5) * 20))}%`);
+        scale.append(bar);
+      }
       const caption = document.createElement('p');
-      caption.className = 'software-detail-caption';
+      caption.className = 'software-popover-caption';
       caption.textContent = en ? 'Self-assessed proficiency' : 'Nível de domínio autoavaliado';
-      const body = document.createElement('div');
-      body.className = 'software-detail-body';
-      const visual = document.createElement('div');
-      visual.className = 'software-detail-visual';
-      visual.append(chart, caption);
-      body.append(visual);
-      state.panel.replaceChildren(label, title, body);
-      placePanel();
+      popup.panel.replaceChildren(label, title, value, scale, caption);
+      popup.panel.hidden = false;
+      const rect = button.getBoundingClientRect();
+      popup.move(event?.clientX ?? rect.left + rect.width / 2, event?.clientY ?? rect.bottom);
     };
     rows.forEach((row, index) => {
-      if (state.bound.has(row)) return;
+      if (state.bound.has(row)) {
+        row.querySelector('.software-select').setAttribute('aria-label', `${language === 'en' ? 'View proficiency:' : 'Ver nível de domínio:'} ${row.querySelector('.software-name').textContent}`);
+        return;
+      }
       state.bound.add(row);
       row.removeAttribute('tabindex');
       row.removeAttribute('aria-label');
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'software-select';
-      button.addEventListener('click', () => {
-        state.selected = index;
-        state.render();
+      button.setAttribute('aria-label', `${language === 'en' ? 'View proficiency:' : 'Ver nível de domínio:'} ${row.querySelector('.software-name').textContent}`);
+      button.setAttribute('aria-expanded', 'false');
+      let pointerType = '';
+      button.addEventListener('pointerdown', (event) => { pointerType = event.pointerType; });
+      button.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') show(row, index, button, event);
+      });
+      button.addEventListener('pointermove', (event) => {
+        if (event.pointerType === 'mouse' && softwarePopover?.button === button && !softwarePopover.pinned) softwarePopover.move(event.clientX, event.clientY);
+      });
+      button.addEventListener('pointerleave', () => softwarePopover?.leave());
+      button.addEventListener('focus', () => { if (button.matches(':focus-visible')) show(row, index, button, null, true); });
+      button.addEventListener('blur', () => softwarePopover?.hide());
+      button.addEventListener('click', (event) => {
+        if (pointerType === 'touch' || pointerType === 'pen') {
+          if (softwarePopover?.button === button && softwarePopover.pinned) softwarePopover.hide();
+          else show(row, index, button, null, true);
+        } else if (event.detail === 0) show(row, index, button, null, true);
       });
       row.append(button);
     });
-    state.render = render;
-    if (state.signature !== signature || !state.panel.isConnected) {
-      state.signature = signature;
-      rows.forEach((row) => {
-        row.querySelector('.software-select').setAttribute('aria-label', `${language === 'en' ? 'Explore' : 'Explorar'} ${row.querySelector('.software-name').textContent}`);
-      });
-      render();
-    }
-    if (!state.responsive) {
-      state.responsive = true;
-      window.matchMedia('(max-width: 760px)').addEventListener('change', () => {
-        if (columns.isConnected) state.render();
-      });
-    }
   }
 
   function enhanceEducationSection(section) {
@@ -594,11 +632,56 @@
     return { start, destroy, canvas };
   }
 
+  const heroTypography = new WeakMap();
+  function enhanceHeroTypography(hero, title, stage) {
+    const existing = heroTypography.get(hero);
+    if (existing?.title === title && existing.layer.isConnected) return;
+    existing?.controller.abort();
+    existing?.layer.remove();
+    const lines = Array.from(title.querySelectorAll(':scope > .hero-name-line'));
+    if (!lines.length) return;
+    const layer = document.createElement('span');
+    layer.className = 'hero-type-expanded';
+    layer.setAttribute('aria-hidden', 'true');
+    lines.forEach((line) => {
+      const text = document.createElement('span');
+      text.textContent = line.textContent;
+      layer.append(text);
+    });
+    title.append(layer);
+    const controller = new AbortController();
+    const options = { signal: controller.signal, passive: true };
+    heroTypography.set(hero, { title, layer, controller });
+    const measure = document.createElement('canvas').getContext('2d');
+    const fit = () => {
+      if (!title.isConnected || !measure || controller.signal.aborted) return;
+      measure.font = '900 100px "roc-grotesk-extrawide"';
+      const widest = Math.max(...lines.map((line) => measure.measureText(line.textContent).width));
+      const available = Math.min(stage.clientWidth * .90, 1450);
+      const fontSize = Math.min(innerHeight * .27, 308, available / Math.max(1, widest) * 100);
+      title.style.setProperty('--hero-type-size', `${fontSize}px`);
+      hero.classList.add('hero-type-ready');
+    };
+    Promise.all([
+      document.fonts.load('900 100px "roc-grotesk"'),
+      document.fonts.load('900 100px "roc-grotesk-extrawide"'),
+    ]).then(fit).catch(() => {});
+    window.addEventListener('resize', fit, options);
+    stage.addEventListener('pointermove', (event) => {
+      if (event.pointerType !== 'mouse' || !hero.classList.contains('hero-type-ready')) return;
+      const rect = title.getBoundingClientRect();
+      hero.classList.toggle('hero-name-expanded', event.clientY >= rect.top && event.clientY <= rect.bottom
+        && event.clientX >= rect.left && event.clientX <= rect.right);
+    }, options);
+    stage.addEventListener('pointerleave', () => hero.classList.remove('hero-name-expanded'), options);
+  }
+
   function enhanceSpatialHeroElement(hero) {
     const stage = hero.querySelector('.hero-stage');
     const mark = hero.querySelector('.hero-stage > .hero-mark');
     const title = hero.querySelector('.hero-stage > h1:not(.hero-lens-title)');
     if (!stage || !mark || !title) return;
+    enhanceHeroTypography(hero, title, stage);
 
     hero.classList.remove('hero-magnetic', 'is-magnetic-active');
     hero.classList.add('hero-spatial');
@@ -642,6 +725,7 @@
   enhanceImages();
   enhanceProjects();
   enhanceAbout();
+  enhanceContact();
   enhanceEducation();
   enhanceSpatialHero();
 
@@ -709,6 +793,7 @@
   buildHorizontalArchive();
   window.setTimeout(buildHorizontalArchive, 1400);
   window.setTimeout(enhanceAbout, 1400);
+  window.setTimeout(enhanceContact, 1400);
   window.setTimeout(enhanceEducation, 1400);
   window.setTimeout(enhanceSpatialHero, 1400);
 
@@ -728,6 +813,7 @@
         enhanceImages(node);
         enhanceProjects(node);
         enhanceAbout(node);
+        enhanceContact(node);
         enhanceEducation(node);
         enhanceSpatialHero(node);
         buildHorizontalArchive();
