@@ -1243,13 +1243,13 @@ footer a {
 }
 
 /* Two genuine Roc faces, fitted together before the hover transition. */
-.hero-type-expanded { display: none; }
+.hero-type-expanded { display: none !important; }
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
   .hero.hero-type-ready .hero-stage > h1 { font-family: 'roc-grotesk', sans-serif; font-size: var(--hero-type-size); font-weight: 900 !important; font-synthesis: none; }
   .hero.hero-type-ready h1 > .hero-name-line { transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.75,.2,1); }
   .hero.hero-type-ready h1 .hero-letter { font-weight: 900 !important; }
   .hero.hero-type-ready .hero-type-expanded {
-    display: block;
+    display: block !important;
     position: absolute;
     inset: 0;
     font-family: 'roc-grotesk-extrawide', sans-serif;
@@ -1278,7 +1278,7 @@ footer a {
   grid-row: 1;
   margin: 0;
   font-size: clamp(64px, 8vw, 146px);
-  text-align: right;
+  text-align: left;
   line-height: .9;
   white-space: normal;
 }
@@ -1297,12 +1297,12 @@ footer a {
   grid-row: 2;
   margin: 0;
   padding: 0;
-  text-align: right;
+  text-align: left;
   font-size: clamp(24px, 2.6vw, 44px);
   line-height: 1.15;
   max-width: none;
 }
-.about .about-photo-layout .about-copy small { width: 100%; max-width: 780px; margin: 24px 0 0 auto; font-size: 16px; line-height: 1.5; }
+.about .about-photo-layout .about-copy small { width: 100%; max-width: 780px; margin: 24px auto 0 0; font-size: 16px; line-height: 1.5; }
 .about .about-photo-layout .about-mark { display: none; }
 .contact.contact-with-gif { display: grid; grid-template-columns: minmax(0, 1fr) clamp(160px, 20vw, 320px); gap: 0 32px; min-height: auto; }
 .contact.contact-with-gif > :not(.mega):not(.contact-gif) { grid-column: 1 / -1; }
