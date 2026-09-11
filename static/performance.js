@@ -56,8 +56,8 @@
       ? 'I am a graphic designer, graduated from Universidade São Judas Tadeu, and currently part of the Sadhu Group team. My path spans branding, visual communication, packaging and social media — fields where I turn strategy into clear, consistent visual systems with personality.'
       : 'Sou designer gráfica, formada pela Universidade São Judas Tadeu, e atualmente faço parte do time da Sadhu Group. Minha trajetória passa por branding, comunicação visual, embalagens e social media — áreas em que transformo estratégia em sistemas visuais claros, consistentes e cheios de personalidade.';
     const detail = english
-      ? 'From concept to rollout, I enjoy building brands that work across identities, logos, advertising, digital pieces and print. I speak advanced English and am open to freelance projects in São Paulo or remotely.'
-      : 'Do conceito ao desdobramento, gosto de construir marcas que funcionam em identidades, logotipos, peças publicitárias, materiais digitais e impressos. Tenho inglês avançado e estou aberta a projetos freelance, em São Paulo ou remotamente.';
+      ? 'From concept to rollout, I enjoy building brands that work across identities, logos, advertising, digital pieces and print. I speak advanced English and am open to new work opportunities in São Paulo or remotely.'
+      : 'Do conceito ao desdobramento, gosto de construir marcas que funcionam em identidades, logotipos, peças publicitárias, materiais digitais e impressos. Tenho inglês avançado e estou aberta a novas oportunidades de trabalho, em São Paulo ou remotamente.';
     const paragraph = copy.querySelector(':scope > p');
     const small = copy.querySelector(':scope > small');
     if (paragraph) paragraph.textContent = lead;
