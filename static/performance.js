@@ -51,6 +51,17 @@
   function enhanceAboutGrid(grid) {
     const copy = grid.querySelector('.about-copy');
     if (!copy) return;
+    const english = document.documentElement.lang.startsWith('en');
+    const lead = english
+      ? 'I am a graphic designer, graduated from Universidade São Judas Tadeu, and currently part of the Sadhu Group team. My path spans branding, visual communication, packaging and social media — fields where I turn strategy into clear, consistent visual systems with personality.'
+      : 'Sou designer gráfica, formada pela Universidade São Judas Tadeu, e atualmente faço parte do time da Sadhu Group. Minha trajetória passa por branding, comunicação visual, embalagens e social media — áreas em que transformo estratégia em sistemas visuais claros, consistentes e cheios de personalidade.';
+    const detail = english
+      ? 'From concept to rollout, I enjoy building brands that work across identities, logos, advertising, digital pieces and print. I speak advanced English and am open to freelance projects in São Paulo or remotely.'
+      : 'Do conceito ao desdobramento, gosto de construir marcas que funcionam em identidades, logotipos, peças publicitárias, materiais digitais e impressos. Tenho inglês avançado e estou aberta a projetos freelance, em São Paulo ou remotamente.';
+    const paragraph = copy.querySelector(':scope > p');
+    const small = copy.querySelector(':scope > small');
+    if (paragraph) paragraph.textContent = lead;
+    if (small) small.textContent = detail;
     grid.querySelectorAll('.portrait-placeholder, .about-gif').forEach((portrait) => portrait.remove());
     if (!grid.querySelector('.about-photo-space')) {
       const space = document.createElement('div');
@@ -65,6 +76,36 @@
   function enhanceAbout(root = document) {
     if (root.matches?.('.about-grid')) enhanceAboutGrid(root);
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
+  }
+
+  function enhanceExperience(root = document) {
+    const timelines = root.matches?.('.timeline') ? [root] : Array.from(root.querySelectorAll?.('.timeline') || []);
+    const english = document.documentElement.lang.startsWith('en');
+    const details = {
+      'Sadhu Group': english
+        ? 'At Sadhu Group, I develop print and digital materials for the group’s brands, including packaging, visual identities and brand extensions. I also contribute to copywriting, marketing campaigns, product launches and visual communication for industry events.'
+        : 'Na Sadhu Group, desenvolvo materiais impressos e digitais para as marcas do grupo, incluindo embalagens, identidades visuais e desdobramentos de branding. Também participo de copywriting, campanhas de marketing, lançamentos de produtos e comunicação visual para eventos do setor.',
+      'Agência Trêes': english
+        ? 'At Agência Trêes, I created visual identities, key visuals, digital pieces and social campaigns for clients across different industries, translating brand strategy into consistent graphic systems from concept through rollout.'
+        : 'Na Agência Trêes, criei identidades visuais, key visuals, peças digitais e campanhas para redes sociais de clientes de diferentes segmentos, traduzindo estratégia de marca em sistemas gráficos consistentes, do conceito aos desdobramentos.',
+      'Meyer Publicidade': english
+        ? 'At Meyer Publicidade, I created and adapted print and digital assets for advertising campaigns, promotional pieces and environmental design, using artificial intelligence as support for visual research, image generation and composition.'
+        : 'Na Meyer Publicidade, criei e adaptei materiais impressos e digitais para campanhas, peças promocionais e projetos de ambientação, usando inteligência artificial como apoio à pesquisa visual, geração de imagens e composição.',
+      Freelance: english
+        ? 'As an independent designer, I work directly with clients on brands, visual identities and institutional, promotional and social media materials, leading each project from briefing and concept to applications and final delivery.'
+        : 'Como designer independente, atendo clientes diretamente na criação de marcas, identidades visuais e materiais institucionais, promocionais e para redes sociais, conduzindo cada projeto do briefing e conceito às aplicações e arquivos finais.',
+    };
+    timelines.forEach((timeline) => {
+      timeline.querySelectorAll(':scope > article').forEach((article) => {
+        const role = article.querySelector('h3');
+        const company = article.querySelector('b');
+        const description = article.querySelector(':scope > p');
+        if (!company || !description) return;
+        const updated = details[company.textContent.trim()];
+        if (updated && description.textContent !== updated) description.textContent = updated;
+        if (!english && role?.textContent === 'DESIGNER GRÁFICO') role.textContent = 'DESIGNER GRÁFICA';
+      });
+    });
   }
 
   function enhanceContact(root = document) {
@@ -328,6 +369,16 @@
       coursework.dataset.language = courseworkLanguage;
       coursework.replaceChildren(courseworkTitle, list);
     }
+    let profile = education.querySelector('.education-profile');
+    if (!profile) {
+      profile = document.createElement('p');
+      profile.className = 'education-profile';
+      education.append(profile);
+    }
+    const profileText = courseworkLanguage === 'en'
+      ? 'This degree strengthened my approach to visual identity, typography and design methodology — knowledge I now apply to brands, packaging, campaigns and communication systems.'
+      : 'A graduação fortaleceu meu olhar para identidade visual, tipografia e metodologia de projeto — repertório que hoje aplico na construção de marcas, embalagens, campanhas e sistemas de comunicação.';
+    if (profile.textContent !== profileText) profile.textContent = profileText;
     if (!education.querySelector('.education-emblem')) {
       const brandMark = label.querySelector('.note-mark');
       if (brandMark) {
@@ -822,6 +873,7 @@
   enhanceImages();
   enhanceProjects();
   enhanceAbout();
+  enhanceExperience();
   enhanceContact();
   enhanceFooterSignature();
   enhanceEducation();
@@ -891,6 +943,7 @@
   buildHorizontalArchive();
   window.setTimeout(buildHorizontalArchive, 1400);
   window.setTimeout(enhanceAbout, 1400);
+  window.setTimeout(enhanceExperience, 1400);
   window.setTimeout(enhanceContact, 1400);
   window.setTimeout(enhanceFooterSignature, 1400);
   window.setTimeout(enhanceEducation, 1400);
@@ -912,6 +965,7 @@
         enhanceImages(node);
         enhanceProjects(node);
         enhanceAbout(node);
+        enhanceExperience(node);
         enhanceContact(node);
         enhanceFooterSignature();
         enhanceEducation(node);
