@@ -1478,8 +1478,10 @@ footer a {
 }
 .footer-signature { display: none; }
 @media (min-width: 761px) {
+  .contact.contact-with-gif { padding-bottom: 0; }
   footer:has(> .footer-signature) {
-    padding-bottom: 0;
+    row-gap: 0;
+    padding: 0 24px 20px;
   }
   .footer-signature {
     display: flex;

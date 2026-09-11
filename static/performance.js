@@ -60,8 +60,8 @@
       : 'Do conceito ao desdobramento, gosto de construir marcas que funcionam em identidades, logotipos, peças publicitárias, materiais digitais e impressos. Tenho inglês avançado e estou aberta a novas oportunidades de trabalho, em São Paulo ou remotamente.';
     const paragraph = copy.querySelector(':scope > p');
     const small = copy.querySelector(':scope > small');
-    if (paragraph) paragraph.textContent = lead;
-    if (small) small.textContent = detail;
+    if (paragraph && paragraph.textContent !== lead) paragraph.textContent = lead;
+    if (small && small.textContent !== detail) small.textContent = detail;
     grid.querySelectorAll('.portrait-placeholder, .about-gif').forEach((portrait) => portrait.remove());
     if (!grid.querySelector('.about-photo-space')) {
       const space = document.createElement('div');
@@ -133,7 +133,7 @@
 
     const existing = document.querySelector('.footer-signature');
     if (existing) {
-      if (existing.parentElement !== footer || existing !== footer.lastElementChild) footer.append(existing);
+      if (existing.parentElement !== footer || existing !== footer.firstElementChild) footer.prepend(existing);
       return;
     }
 
@@ -144,7 +144,7 @@
     const title = document.createElement('h2');
     title.textContent = 'BRENDA BALTIERI';
     signature.append(title);
-    footer.append(signature);
+    footer.prepend(signature);
 
     const measureExpansion = async () => {
       try {
@@ -949,11 +949,17 @@
 
   const observer = new MutationObserver((records) => {
     const changedHeroes = new Set();
+    const changedAbout = new Set();
+    const changedExperience = new Set();
     const changedEducation = new Set();
     for (const record of records) {
       if (record.target instanceof Element) {
         const hero = record.target.closest('.hero');
         if (hero) changedHeroes.add(hero);
+        const about = record.target.closest('.about-grid');
+        if (about) changedAbout.add(about);
+        const experience = record.target.closest('.experience');
+        if (experience) changedExperience.add(experience);
         const education = record.target.closest('.skills');
         if (education) changedEducation.add(education);
       }
@@ -974,6 +980,12 @@
     changedHeroes.forEach((hero) => {
       if (hero.isConnected) enhanceSpatialHeroElement(hero);
       else heroRenderers.get(hero)?.destroy();
+    });
+    changedAbout.forEach((grid) => {
+      if (grid.isConnected) enhanceAboutGrid(grid);
+    });
+    changedExperience.forEach((section) => {
+      if (section.isConnected) enhanceExperience(section);
     });
     changedEducation.forEach((section) => {
       if (section.isConnected) enhanceEducationSection(section);
