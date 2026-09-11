@@ -1433,15 +1433,14 @@ footer a {
     gap: 14px;
     padding: 16px 0;
     border-bottom: 1px solid #ffffff35;
-    font-family: 'roc-grotesk-condensed', 'roc-grotesk', sans-serif;
-    font-weight: 900;
-    font-size: clamp(30px, 10vw, 52px);
-    line-height: 1.05;
-    letter-spacing: -.015em;
+    font-family: 'roc-grotesk', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 9vw, 46px);
+    line-height: 1;
+    letter-spacing: -.025em;
     overflow-wrap: anywhere;
   }
   .mobile-menu > a::before { counter-increment: mobile-link; content: counter(mobile-link, decimal-leading-zero); color: var(--acid); font: 400 12px/1 monospace; flex: 0 0 20px; }
-  .mobile-menu > a:nth-child(even) { font-family: 'roc-grotesk', sans-serif; font-weight: 700; font-size: clamp(28px, 8.8vw, 46px); }
   .mobile-menu > a:is(:hover, :focus-visible) { color: var(--acid); }
   .header .menu-button { min-height: 44px; min-width: 76px; padding: 10px 8px; font: 700 12px/1.2 'roc-grotesk', sans-serif; color: var(--white); border: 1px solid #ffffff40; }
   .mobile-menu .language-switch { padding-top: 24px; border-top: 0; }
@@ -1462,10 +1461,10 @@ footer a {
 .skills .courses-label { color: #000; }
 .skills.section .section-label { border-color: #000; }
 
-/* Keep the degree as the sole dark card; the remaining content lives on green. */
+/* The featured degree becomes the violet anchor instead of another black block. */
 .skills .education {
   --education-line: var(--acid);
-  background: #000;
+  background: var(--violet);
   color: var(--white);
 }
 .skills .courses article,
@@ -1483,12 +1482,75 @@ footer a {
 .skills .software-skill:has(.software-select:hover) .software-name { color: var(--violet); }
 .skills .software-select:focus-visible { outline-color: var(--violet); }
 
-/* The requested green SOFTWARES title remains legible on a compact black plate. */
+/* Modular editorial grid: titles anchor the panels and every item has a place. */
+.skills .skill-cols { gap: 16px; }
+.skills .software-hover-grid > div:first-child {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto repeat(3, minmax(104px, 1fr));
+  gap: 0;
+  padding: 0;
+  border: 2px solid #000;
+}
 .skills .skill-cols > div:first-child > span:first-child {
-  justify-self: start;
-  width: fit-content;
-  padding: .12em .2em .08em;
-  background: #000;
+  justify-self: stretch;
+  width: auto;
+  margin: 0;
+  padding: clamp(20px, 2vw, 30px);
+  background: var(--violet);
   color: var(--acid);
 }
-.skills .skill-cols > div:nth-child(2) > span:first-child { color: #000; }
+.skills .software-hover-grid b.software-skill {
+  min-height: 104px;
+  padding: clamp(20px, 2vw, 30px) !important;
+  border-top: 1px solid #000;
+  align-content: center;
+  font-size: clamp(25px, 2.15vw, 40px);
+}
+.skills .software-hover-grid b.software-skill:not(:nth-of-type(3n)) { border-right: 1px solid #000; }
+
+.skills .skill-cols > div:nth-child(2) {
+  --education-line: #000;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 24px 24px;
+  border: 2px solid #000;
+}
+.skills .skill-cols > div:nth-child(2) > span:first-child {
+  grid-column: 1 / -1;
+  margin: 0 -24px 8px;
+  padding: 20px 24px;
+  background: var(--violet);
+  color: var(--acid);
+  font-size: clamp(28px, 2.6vw, 44px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+.skills .skill-cols > div:nth-child(2) > b {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 14px 16px;
+  border: 1px solid #000;
+  font-size: clamp(15px, 1.25vw, 19px);
+}
+.skills .skill-cols > div:nth-child(2) > b:nth-of-type(2),
+.skills .skill-cols > div:nth-child(2) > b:nth-of-type(7),
+.skills .skill-cols > div:nth-child(2) > b:nth-of-type(9) { grid-column: span 2; }
+.skills .skill-cols > div:nth-child(2) > b:nth-of-type(10),
+.skills .skill-cols > div:nth-child(2) > b:nth-of-type(11) { grid-column: span 3; }
+
+@media (max-width: 1000px) {
+  .skills .software-hover-grid > div:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .skills .software-hover-grid b.software-skill { border-right: 0; }
+  .skills .software-hover-grid b.software-skill:nth-of-type(odd) { border-right: 1px solid #000; }
+  .skills .skill-cols > div:nth-child(2) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .skills .skill-cols > div:nth-child(2) > b { grid-column: auto !important; }
+}
+@media (max-width: 560px) {
+  .skills .software-hover-grid > div:first-child { grid-template-columns: minmax(0, 1fr); }
+  .skills .software-hover-grid b.software-skill { min-height: 76px; border-right: 0 !important; }
+  .skills .skill-cols > div:nth-child(2) { grid-template-columns: minmax(0, 1fr); padding-inline: 14px; }
+  .skills .skill-cols > div:nth-child(2) > span:first-child { margin-inline: -14px; padding-inline: 14px; }
+}
