@@ -247,6 +247,17 @@
     if (heading.textContent !== title) heading.textContent = title;
     const courseworkLanguage = title === 'EDUCATION' ? 'en' : 'pt';
     enhanceSoftwarePanel(section, courseworkLanguage);
+    const practicePanel = section.querySelector('.skill-cols > div:nth-child(2)');
+    if (practicePanel) {
+      let identityPractice = practicePanel.querySelector('[data-practice-added="identity"]');
+      if (!identityPractice) {
+        identityPractice = document.createElement('b');
+        identityPractice.dataset.practiceAdded = 'identity';
+        practicePanel.append(identityPractice);
+      }
+      const identityLabel = courseworkLanguage === 'en' ? 'VISUAL IDENTITY' : 'IDENTIDADE VISUAL';
+      if (identityPractice.textContent !== identityLabel) identityPractice.textContent = identityLabel;
+    }
     let coursework = education.querySelector('.education-coursework');
     if (!coursework) {
       coursework = document.createElement('div');

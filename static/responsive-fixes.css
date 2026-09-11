@@ -1413,7 +1413,17 @@ footer a {
 .contact.contact-with-gif > :not(.mega):not(.contact-gif) { grid-column: 1 / -1; }
 .contact.contact-with-gif > .mega { grid-column: 1; grid-row: 2; font-size: clamp(48px, 8.2vw, 156px); line-height: .9; white-space: normal; margin: 64px 0 48px; align-self: center; }
 .contact-gif { grid-column: 2; grid-row: 2; width: 100%; aspect-ratio: 1; margin: 48px 0; align-self: center; pointer-events: none; }
-.contact-gif img { width: 100%; height: 100%; display: block; object-fit: contain; filter: none; }
+.contact-gif img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter:
+    drop-shadow(1.5px 0 0 var(--white))
+    drop-shadow(-1.5px 0 0 var(--white))
+    drop-shadow(0 1.5px 0 var(--white))
+    drop-shadow(0 -1.5px 0 var(--white));
+}
 @media (max-width: 760px) {
   .about .about-photo-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .about .about-photo-layout > .about-photo-space { grid-column: 1; grid-row: 1; max-width: 300px; justify-self: end; }
@@ -1422,6 +1432,13 @@ footer a {
   .contact.contact-with-gif { grid-template-columns: minmax(0, 1fr) 88px; column-gap: 12px; }
   .contact.contact-with-gif > .mega { font-size: clamp(36px, 9vw, 64px); margin: 44px 0 32px; }
   .contact-gif { margin: 32px 0; }
+  .contact-gif img {
+    filter:
+      drop-shadow(1px 0 0 var(--white))
+      drop-shadow(-1px 0 0 var(--white))
+      drop-shadow(0 1px 0 var(--white))
+      drop-shadow(0 -1px 0 var(--white));
+  }
 }
 
 /* A mobile menu in the same typographic family, without oversized thin links. */
@@ -1516,7 +1533,7 @@ footer a {
 .skills .skill-cols > div:nth-child(2) {
   --education-line: #000;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 0 24px 24px;
   border: 2px solid #000;
@@ -1540,12 +1557,6 @@ footer a {
   border: 1px solid #000;
   font-size: clamp(15px, 1.25vw, 19px);
 }
-.skills .skill-cols > div:nth-child(2) > b:nth-of-type(2),
-.skills .skill-cols > div:nth-child(2) > b:nth-of-type(7),
-.skills .skill-cols > div:nth-child(2) > b:nth-of-type(9) { grid-column: span 2; }
-.skills .skill-cols > div:nth-child(2) > b:nth-of-type(10),
-.skills .skill-cols > div:nth-child(2) > b:nth-of-type(11) { grid-column: span 3; }
-
 @media (max-width: 1000px) {
   .skills .software-hover-grid > div:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .skills .software-hover-grid b.software-skill { border-right: 0; }
