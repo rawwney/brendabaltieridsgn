@@ -1249,6 +1249,18 @@ footer a {
   inherits: true;
   initial-value: 0;
 }
+@keyframes hero-name-enter {
+  from {
+    opacity: 0;
+    clip-path: inset(100% 0 0);
+    transform: translateY(.24em) scaleY(.9);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translateY(0) scaleY(1);
+  }
+}
 .hero .hero-stage > h1,
 .hero .hero-stage > h1 .hero-letter {
   font-family: 'roc-grotesk', sans-serif;
@@ -1264,12 +1276,15 @@ footer a {
     --hero-inflate: 1;
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-name-line {
-    animation: none !important;
+    animation: hero-name-enter 900ms cubic-bezier(.16, 1, .3, 1) both !important;
     display: flex;
     justify-content: center;
     width: 100%;
     transform: none;
     text-align: center;
+  }
+  .hero .hero-stage > h1.hero-inflate-ready .hero-name-line:nth-child(2) {
+    animation-delay: 110ms !important;
   }
   .hero .hero-stage > h1.hero-inflate-ready .hero-letter {
     position: relative;
@@ -1434,3 +1449,46 @@ footer a {
 @media (prefers-reduced-motion: reduce) {
   .software-popover { animation: none; }
 }
+
+/* Formation becomes the bright editorial interval between the darker sections. */
+.skills.section {
+  --education-line: #000;
+  background: var(--acid);
+  color: #000;
+}
+.skills.section .section-label,
+.skills.section .note-mark,
+.skills .education-title,
+.skills .courses-label { color: #000; }
+.skills.section .section-label { border-color: #000; }
+
+/* Keep the degree as the sole dark card; the remaining content lives on green. */
+.skills .education {
+  --education-line: var(--acid);
+  background: #000;
+  color: var(--white);
+}
+.skills .courses article,
+.skills .courses article > span,
+.skills .courses article > p,
+.skills .skill-cols > div,
+.skills .skill-cols b.software-skill { color: #000; }
+.skills .courses article,
+.skills .skill-cols > div { border-color: #000; }
+.skills .skill-cols b.software-skill::before { color: #0009; }
+.skills .software-skill:has(.software-select[aria-expanded="true"])::before,
+.skills .software-skill:has(.software-select[aria-pressed="true"])::before { color: var(--violet); }
+.skills .software-skill:has(.software-select[aria-expanded="true"]) .software-name,
+.skills .software-skill:has(.software-select[aria-pressed="true"]) .software-name,
+.skills .software-skill:has(.software-select:hover) .software-name { color: var(--violet); }
+.skills .software-select:focus-visible { outline-color: var(--violet); }
+
+/* The requested green SOFTWARES title remains legible on a compact black plate. */
+.skills .skill-cols > div:first-child > span:first-child {
+  justify-self: start;
+  width: fit-content;
+  padding: .12em .2em .08em;
+  background: #000;
+  color: var(--acid);
+}
+.skills .skill-cols > div:nth-child(2) > span:first-child { color: #000; }
