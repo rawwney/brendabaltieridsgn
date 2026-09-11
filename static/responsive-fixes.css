@@ -1459,8 +1459,7 @@ footer a {
   }
 }
 
-/* A final editorial signature, set on one line and inflated from a single
-   visible layer so the hover stays fluid instead of creating doubled glyphs. */
+/* A compact closing signature inside the existing contact section. */
 @property --footer-inflate {
   syntax: '<number>';
   inherits: true;
@@ -1471,20 +1470,21 @@ footer a {
   .footer-signature {
     display: flex;
     align-items: center;
-    min-height: clamp(240px, 34vw, 560px);
-    padding: clamp(54px, 7vw, 120px) 3vw;
+    justify-content: center;
+    min-height: clamp(180px, 23vw, 360px);
+    padding: clamp(42px, 5vw, 82px) 3vw;
     overflow: hidden;
-    border-top: 1px solid var(--acid);
     background: var(--ink);
   }
   .footer-signature h2 {
     --footer-inflate: 0;
     --footer-wide-scale: 1.075;
-    width: 100%;
-    margin: 0;
+    width: max-content;
+    max-width: 100%;
+    margin: auto;
     color: var(--white);
     font-family: 'roc-grotesk', sans-serif;
-    font-size: min(10.6vw, 204px);
+    font-size: min(7.2vw, 138px);
     font-weight: 800;
     font-synthesis: none;
     line-height: .82;
@@ -1493,10 +1493,14 @@ footer a {
     white-space: nowrap;
     transform: scaleX(calc(1 + var(--footer-inflate) * (var(--footer-wide-scale) - 1))) scaleY(calc(1 + var(--footer-inflate) * .025));
     transform-origin: center;
-    -webkit-text-stroke: calc(var(--footer-inflate) * .008em) var(--white);
-    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), transform 850ms cubic-bezier(.45, 0, .2, 1);
+    -webkit-text-stroke-color: currentColor;
+    -webkit-text-stroke-width: calc(var(--footer-inflate) * .008em);
+    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), transform 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
   }
-  .footer-signature:hover h2 { --footer-inflate: 1; }
+  .footer-signature h2:hover {
+    --footer-inflate: 1;
+    color: var(--acid);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .footer-signature h2 { transition: none; }

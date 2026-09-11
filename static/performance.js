@@ -88,16 +88,24 @@
 
   function enhanceFooterSignature() {
     const footer = document.querySelector('footer');
-    if (!footer || document.querySelector('.footer-signature')) return;
+    const contact = document.querySelector('.contact');
+    const socials = contact?.querySelector(':scope > .socials');
+    if (!footer || !contact || !socials) return;
 
-    const signature = document.createElement('section');
+    const existing = document.querySelector('.footer-signature');
+    if (existing) {
+      if (existing.previousElementSibling !== socials) socials.after(existing);
+      return;
+    }
+
+    const signature = document.createElement('div');
     signature.className = 'footer-signature';
     signature.setAttribute('aria-label', 'Brenda Baltieri');
 
     const title = document.createElement('h2');
     title.textContent = 'BRENDA BALTIERI';
     signature.append(title);
-    footer.before(signature);
+    socials.after(signature);
 
     const measureExpansion = async () => {
       try {
