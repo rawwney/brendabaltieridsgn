@@ -86,6 +86,47 @@
     });
   }
 
+  function enhanceFooterSignature() {
+    const footer = document.querySelector('footer');
+    if (!footer || document.querySelector('.footer-signature')) return;
+
+    const signature = document.createElement('section');
+    signature.className = 'footer-signature';
+    signature.setAttribute('aria-label', 'Brenda Baltieri');
+
+    const title = document.createElement('h2');
+    title.textContent = 'BRENDA BALTIERI';
+    signature.append(title);
+    footer.before(signature);
+
+    const measureExpansion = async () => {
+      try {
+        const faces = await Promise.all([
+          document.fonts.load('800 100px "roc-grotesk"', title.textContent),
+          document.fonts.load('900 100px "roc-grotesk-extrawide"', title.textContent),
+        ]);
+        if (!signature.isConnected || faces.some((face) => !face.length)) return;
+        const context = document.createElement('canvas').getContext('2d');
+        if (!context) return;
+        const measure = () => {
+          const size = parseFloat(getComputedStyle(title).fontSize);
+          context.font = '800 1000px "roc-grotesk"';
+          const base = context.measureText(title.textContent).width;
+          context.font = '900 1000px "roc-grotesk-extrawide"';
+          const wide = context.measureText(title.textContent).width;
+          const renderedBase = base / 1000 * size;
+          const available = Math.max(1, signature.clientWidth - 64);
+          title.style.setProperty('--footer-wide-scale', Math.min(wide / base, available / renderedBase).toFixed(4));
+        };
+        measure();
+        window.addEventListener('resize', measure, { passive: true });
+      } catch {
+        // Keep the restrained CSS expansion if the hosted font is unavailable.
+      }
+    };
+    void measureExpansion();
+  }
+
   const softwarePanels = new WeakMap();
   let softwarePopover;
 
@@ -774,6 +815,7 @@
   enhanceProjects();
   enhanceAbout();
   enhanceContact();
+  enhanceFooterSignature();
   enhanceEducation();
   enhanceSpatialHero();
 
@@ -842,6 +884,7 @@
   window.setTimeout(buildHorizontalArchive, 1400);
   window.setTimeout(enhanceAbout, 1400);
   window.setTimeout(enhanceContact, 1400);
+  window.setTimeout(enhanceFooterSignature, 1400);
   window.setTimeout(enhanceEducation, 1400);
   window.setTimeout(enhanceSpatialHero, 1400);
 
@@ -862,6 +905,7 @@
         enhanceProjects(node);
         enhanceAbout(node);
         enhanceContact(node);
+        enhanceFooterSignature();
         enhanceEducation(node);
         enhanceSpatialHero(node);
         buildHorizontalArchive();

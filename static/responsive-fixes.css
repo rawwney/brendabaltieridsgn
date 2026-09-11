@@ -1429,9 +1429,27 @@ footer a {
   .about .about-photo-layout > .about-photo-space { grid-column: 1; grid-row: 1; max-width: 300px; justify-self: end; }
   .about .about-photo-layout > .mega { grid-column: 1; grid-row: 2; font-size: clamp(56px, 15vw, 100px); }
   .about .about-photo-layout .about-copy { grid-column: 1; grid-row: 3; font-size: clamp(24px, 6.8vw, 36px); }
-  .contact.contact-with-gif { grid-template-columns: minmax(0, 1fr) 88px; column-gap: 12px; }
-  .contact.contact-with-gif > .mega { font-size: clamp(36px, 9vw, 64px); margin: 44px 0 32px; }
-  .contact-gif { margin: 32px 0; }
+  .project-grid .project,
+  .project-grid .project:nth-child(n) { --project-info-height: 154px; }
+  .project-grid .project-info,
+  .project-grid .project:hover .project-info {
+    align-content: start;
+    padding-top: 14px;
+  }
+  .contact.contact-with-gif { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
+  .contact.contact-with-gif > .mega {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: clamp(36px, 9vw, 64px);
+    margin: 44px 0 16px;
+  }
+  .contact-gif {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: end;
+    width: min(180px, 48vw);
+    margin: 0 0 32px;
+  }
   .contact-gif img {
     filter:
       drop-shadow(1px 0 0 var(--white))
@@ -1439,6 +1457,49 @@ footer a {
       drop-shadow(0 1px 0 var(--white))
       drop-shadow(0 -1px 0 var(--white));
   }
+}
+
+/* A final editorial signature, set on one line and inflated from a single
+   visible layer so the hover stays fluid instead of creating doubled glyphs. */
+@property --footer-inflate {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+.footer-signature { display: none; }
+@media (min-width: 761px) {
+  .footer-signature {
+    display: flex;
+    align-items: center;
+    min-height: clamp(240px, 34vw, 560px);
+    padding: clamp(54px, 7vw, 120px) 3vw;
+    overflow: hidden;
+    border-top: 1px solid var(--acid);
+    background: var(--ink);
+  }
+  .footer-signature h2 {
+    --footer-inflate: 0;
+    --footer-wide-scale: 1.075;
+    width: 100%;
+    margin: 0;
+    color: var(--white);
+    font-family: 'roc-grotesk', sans-serif;
+    font-size: min(10.6vw, 204px);
+    font-weight: 800;
+    font-synthesis: none;
+    line-height: .82;
+    letter-spacing: -.065em;
+    text-align: center;
+    white-space: nowrap;
+    transform: scaleX(calc(1 + var(--footer-inflate) * (var(--footer-wide-scale) - 1))) scaleY(calc(1 + var(--footer-inflate) * .025));
+    transform-origin: center;
+    -webkit-text-stroke: calc(var(--footer-inflate) * .008em) var(--white);
+    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), transform 850ms cubic-bezier(.45, 0, .2, 1);
+  }
+  .footer-signature:hover h2 { --footer-inflate: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-signature h2 { transition: none; }
 }
 
 /* A mobile menu in the same typographic family, without oversized thin links. */
