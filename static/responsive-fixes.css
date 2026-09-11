@@ -1461,12 +1461,17 @@ footer a {
 .skills .courses-label { color: #000; }
 .skills.section .section-label { border-color: #000; }
 
-/* The featured degree becomes the violet anchor instead of another black block. */
+/* The featured degree stays open: violet rules, no solid color block. */
 .skills .education {
-  --education-line: var(--acid);
-  background: var(--violet);
-  color: var(--white);
+  --education-line: var(--violet);
+  background: transparent;
+  color: #000;
 }
+.skills .education > p span,
+.skills .education > h2,
+.skills .education-emblem,
+.skills .education-coursework h3 { color: var(--violet); }
+.skills .education-coursework li { color: #000; }
 .skills .courses article,
 .skills .courses article > span,
 .skills .courses article > p,
@@ -1496,7 +1501,7 @@ footer a {
   width: auto;
   margin: 0;
   padding: clamp(20px, 2vw, 30px);
-  background: var(--violet);
+  background: #000;
   color: var(--acid);
 }
 .skills .software-hover-grid b.software-skill {
@@ -1520,7 +1525,7 @@ footer a {
   grid-column: 1 / -1;
   margin: 0 -24px 8px;
   padding: 20px 24px;
-  background: var(--violet);
+  background: #000;
   color: var(--acid);
   font-size: clamp(28px, 2.6vw, 44px);
   font-weight: 700;
