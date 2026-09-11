@@ -129,13 +129,11 @@
 
   function enhanceFooterSignature() {
     const footer = document.querySelector('footer');
-    const contact = document.querySelector('.contact');
-    const socials = contact?.querySelector(':scope > .socials');
-    if (!footer || !contact || !socials) return;
+    if (!footer) return;
 
     const existing = document.querySelector('.footer-signature');
     if (existing) {
-      if (existing.previousElementSibling !== socials) socials.after(existing);
+      if (existing.parentElement !== footer || existing !== footer.lastElementChild) footer.append(existing);
       return;
     }
 
@@ -146,7 +144,7 @@
     const title = document.createElement('h2');
     title.textContent = 'BRENDA BALTIERI';
     signature.append(title);
-    socials.after(signature);
+    footer.append(signature);
 
     const measureExpansion = async () => {
       try {

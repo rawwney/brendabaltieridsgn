@@ -1478,12 +1478,17 @@ footer a {
 }
 .footer-signature { display: none; }
 @media (min-width: 761px) {
+  footer:has(> .footer-signature) {
+    padding-bottom: 0;
+  }
   .footer-signature {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: clamp(180px, 23vw, 360px);
-    padding: clamp(42px, 5vw, 82px) 3vw;
+    grid-column: 1 / -1;
+    min-height: 0;
+    margin: 0 -24px;
+    padding: clamp(18px, 2.2vw, 38px) 3vw 0;
     overflow: hidden;
     background: var(--ink);
   }
@@ -1498,12 +1503,13 @@ footer a {
     font-size: min(7.2vw, 138px);
     font-weight: 800;
     font-synthesis: none;
-    line-height: .82;
+    line-height: .76;
     letter-spacing: -.065em;
     text-align: center;
     white-space: nowrap;
+    margin-bottom: -.055em;
     transform: scaleX(calc(1 + var(--footer-inflate) * (var(--footer-wide-scale) - 1))) scaleY(calc(1 + var(--footer-inflate) * .025));
-    transform-origin: center;
+    transform-origin: center bottom;
     -webkit-text-stroke-color: currentColor;
     -webkit-text-stroke-width: calc(var(--footer-inflate) * .008em);
     transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), transform 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
