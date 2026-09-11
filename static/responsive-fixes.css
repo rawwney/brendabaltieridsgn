@@ -1109,7 +1109,7 @@ footer a {
 .skills .skill-cols > div:first-child > span:first-child {
   grid-column: 1 / -1;
   display: block;
-  color: var(--white);
+  color: var(--acid);
   font-size: clamp(34px, 3.4vw, 56px);
   font-weight: 700;
   letter-spacing: -.035em;
@@ -1226,6 +1226,7 @@ footer a {
   box-shadow: 5px 5px 0 #590fe8;
   font-family: var(--font-idv, sans-serif);
   animation: software-card-in 160ms ease-out both;
+  pointer-events: none;
 }
 .software-popover[hidden] { display: none !important; }
 .software-popover-index { margin: 0 0 12px; color: var(--acid); font: 500 12px/1.4 monospace; letter-spacing: .09em; }

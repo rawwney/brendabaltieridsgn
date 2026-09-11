@@ -97,8 +97,9 @@
     panel.setAttribute('role', 'tooltip');
     panel.hidden = true;
     document.body.append(panel);
-    const state = { panel, button: null, timer: 0, frame: 0, point: null, pinned: false };
+    const state = { panel, button: null, timer: 0, frame: 0, point: null, pinned: false, sequence: 0 };
     state.hide = () => {
+      state.sequence += 1;
       clearTimeout(state.timer);
       cancelAnimationFrame(state.frame);
       state.frame = 0;
@@ -119,17 +120,24 @@
         const height = panel.offsetHeight;
         const margin = 12;
         const { x: px, y: py } = state.point;
-        const left = px + 24 + width > innerWidth - margin ? px - width - 24 : px + 24;
+        const gap = 56;
+        const left = px + gap + width > innerWidth - margin ? px - width - gap : px + gap;
         const top = py - height / 2;
         panel.style.left = `${Math.max(margin, Math.min(left, innerWidth - width - margin))}px`;
         panel.style.top = `${Math.max(margin, Math.min(top, innerHeight - height - margin))}px`;
       });
     };
-    state.leave = () => {
-      if (!state.pinned) state.timer = setTimeout(() => state.hide(), 160);
+    state.leave = (button) => {
+      if (state.pinned) return;
+      const sequence = ++state.sequence;
+      clearTimeout(state.timer);
+      state.timer = setTimeout(() => {
+        if (sequence === state.sequence && state.button === button && !state.pinned) state.hide();
+      }, 120);
     };
-    panel.addEventListener('pointerenter', () => clearTimeout(state.timer));
-    panel.addEventListener('pointerleave', state.leave);
+    document.addEventListener('pointermove', (event) => {
+      if (!panel.hidden && event.pointerType === 'mouse' && !state.pinned) state.move(event.clientX, event.clientY);
+    }, { passive: true });
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape') state.hide(); });
     document.addEventListener('pointerdown', (event) => {
       if (state.button && !state.button.contains(event.target) && !panel.contains(event.target)) state.hide();
@@ -156,6 +164,7 @@
     const show = (row, index, button, event, pinned = false) => {
       const popup = getSoftwarePopover();
       clearTimeout(popup.timer);
+      popup.sequence += 1;
       const en = state.language === 'en';
       const name = row.querySelector('.software-name').textContent.trim();
       const level = Math.max(0, Math.min(100, parseInt(row.querySelector('.software-level')?.textContent || '0', 10)));
@@ -211,7 +220,7 @@
       button.addEventListener('pointermove', (event) => {
         if (event.pointerType === 'mouse' && softwarePopover?.button === button && !softwarePopover.pinned) softwarePopover.move(event.clientX, event.clientY);
       });
-      button.addEventListener('pointerleave', () => softwarePopover?.leave());
+      button.addEventListener('pointerleave', () => softwarePopover?.leave(button));
       button.addEventListener('focus', () => { if (button.matches(':focus-visible')) show(row, index, button, null, true); });
       button.addEventListener('blur', () => softwarePopover?.hide());
       button.addEventListener('click', (event) => {
