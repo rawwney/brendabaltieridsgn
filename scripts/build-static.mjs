@@ -105,6 +105,10 @@ clientBundle = clientBundle.replace(
   'd=o.slug===`guru-spirit-folder`?l:o.behanceUrl?l.slice(0,2):l',
 );
 clientBundle = clientBundle.replace(
+  'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
+  'p=[`malhafil`,`guru-spirit-folder`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
+);
+clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
   'loading:t===0?`eager`:`lazy`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
 );
