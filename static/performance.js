@@ -203,7 +203,7 @@
         const context = document.createElement('canvas').getContext('2d');
         if (!context) return;
         const letters = Array.from(morphLine.querySelectorAll('.footer-letter'));
-        const tracking = -.065;
+        const tracking = .03;
         const metrics = letters.map((letter) => {
           const glyph = letter.dataset.glyph || ' ';
           context.font = '800 1000px "roc-grotesk"';
@@ -215,7 +215,8 @@
         const baseTotal = metrics.reduce((sum, glyph) => sum + glyph.base, 0) + tracking * (letters.length - 1);
         const compressedTotal = metrics.reduce((sum, glyph) => sum + glyph.compressed, 0) + tracking * (letters.length - 1);
         const measure = () => {
-          const available = Math.max(1, signature.clientWidth - 40);
+          const sideInset = Math.min(76, Math.max(32, signature.clientWidth * .04));
+          const available = Math.max(1, signature.clientWidth - sideInset * 2);
           if (baseTotal <= 0 || compressedTotal <= 0) return;
 
           const baseSize = available / baseTotal;

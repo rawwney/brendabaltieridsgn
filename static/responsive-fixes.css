@@ -1533,9 +1533,9 @@ footer a {
   }
   .footer-signature h2 {
     --footer-inflate: 0;
-    --footer-base-size: 10vw;
-    --footer-compressed-size: 16vw;
-    --footer-face-height: 12.16vw;
+    --footer-base-size: 8vw;
+    --footer-compressed-size: 13vw;
+    --footer-face-height: 9.88vw;
     position: relative;
     width: 100%;
     height: var(--footer-face-height);
