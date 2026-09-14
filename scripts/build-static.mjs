@@ -93,6 +93,18 @@ const clientBundlePath = path.join(
 let clientBundle = await readFile(clientBundlePath, 'utf8');
 clientBundle = patchAboutBrush(clientBundle);
 clientBundle = clientBundle.replace(
+  'shortDescription:`Informação institucional transformada em uma narrativa visual de marca.`,description:`Folder institucional desenvolvido para distribuidores da Guru Spirit. A peça organiza portfólio, posicionamento e argumentos comerciais em um sistema editorial direto e visualmente consistente.`',
+  'shortDescription:`Carta de produtos criada para aproximar a Guru Spirit de seus distribuidores.`,description:`Folder desenvolvido para apresentar aos distribuidores a carta de produtos da Guru Spirit durante um evento do setor de conveniência.`',
+);
+clientBundle = clientBundle.replace(
+  'shortDescription:`Institutional information shaped into a visual brand narrative.`,description:`Institutional brochure developed for Guru Spirit distributors. The piece organizes the portfolio, positioning and sales arguments into a direct and visually consistent editorial system.`',
+  'shortDescription:`A product catalog created to connect Guru Spirit with its distributors.`,description:`Folder designed to present Guru Spirit’s product catalog to distributors during a convenience-industry event.`',
+);
+clientBundle = clientBundle.replace(
+  'd=o.behanceUrl?l.slice(0,2):l',
+  'd=o.slug===`guru-spirit-folder`?l:o.behanceUrl?l.slice(0,2):l',
+);
+clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
   'loading:t===0?`eager`:`lazy`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
 );
