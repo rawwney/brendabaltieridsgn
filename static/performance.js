@@ -131,9 +131,10 @@
     const footer = document.querySelector('footer');
     if (!footer) return;
 
+    const signatureText = 'BRENDA BALTIERI';
+
     let signature = document.querySelector('.footer-signature');
     let title = signature?.querySelector('h2');
-    const created = !signature;
 
     if (!signature) {
       signature = document.createElement('div');
@@ -141,8 +142,23 @@
       signature.setAttribute('aria-label', 'Brenda Baltieri');
 
       title = document.createElement('h2');
-      title.textContent = 'BRENDA BALTIERI';
       signature.append(title);
+    }
+
+    let morphLine = title?.querySelector('.footer-morph-line');
+    if (title && !morphLine) {
+      title.setAttribute('aria-label', signatureText);
+
+      morphLine = document.createElement('span');
+      morphLine.className = 'footer-morph-line';
+      morphLine.setAttribute('aria-hidden', 'true');
+      Array.from(signatureText).forEach((glyph) => {
+        const letter = document.createElement('span');
+        letter.className = 'footer-letter';
+        letter.dataset.glyph = glyph;
+        morphLine.append(letter);
+      });
+      title.replaceChildren(morphLine);
     }
     if (signature.parentElement !== footer || signature !== footer.firstElementChild) footer.prepend(signature);
 
@@ -174,18 +190,50 @@
       observer.observe(footer);
     }
 
-    if (!created || !title) return;
+    if (!title || !morphLine || title.dataset.morphReady) return;
+    title.dataset.morphReady = 'true';
 
     const fitSignature = async () => {
       try {
-        const faces = await document.fonts.load('800 100px "roc-grotesk"', title.textContent);
-        if (!signature.isConnected || !faces.length) return;
+        const faces = await Promise.all([
+          document.fonts.load('800 100px "roc-grotesk"', signatureText),
+          document.fonts.load('800 100px "roc-grotesk-compressed"', signatureText),
+        ]);
+        if (!signature.isConnected || faces.some((face) => !face.length)) return;
+        const context = document.createElement('canvas').getContext('2d');
+        if (!context) return;
+        const letters = Array.from(morphLine.querySelectorAll('.footer-letter'));
+        const tracking = -.065;
+        const metrics = letters.map((letter) => {
+          const glyph = letter.dataset.glyph || ' ';
+          context.font = '800 1000px "roc-grotesk"';
+          const base = context.measureText(glyph).width / 1000;
+          context.font = '800 1000px "roc-grotesk-compressed"';
+          const compressed = context.measureText(glyph).width / 1000;
+          return { letter, base, compressed };
+        });
+        const baseTotal = metrics.reduce((sum, glyph) => sum + glyph.base, 0) + tracking * (letters.length - 1);
+        const compressedTotal = metrics.reduce((sum, glyph) => sum + glyph.compressed, 0) + tracking * (letters.length - 1);
         const measure = () => {
-          title.style.removeProperty('font-size');
-          const naturalSize = parseFloat(getComputedStyle(title).fontSize);
-          const naturalWidth = title.getBoundingClientRect().width;
           const available = Math.max(1, signature.clientWidth - 40);
-          if (naturalWidth > 0) title.style.fontSize = `${naturalSize * available / naturalWidth}px`;
+          if (baseTotal <= 0 || compressedTotal <= 0) return;
+
+          const baseSize = available / baseTotal;
+          const compressedSize = available / compressedTotal;
+          const heightScale = compressedSize / baseSize;
+          title.style.setProperty('--footer-base-size', `${baseSize}px`);
+          title.style.setProperty('--footer-compressed-size', `${compressedSize}px`);
+          title.style.setProperty('--footer-face-height', `${Math.max(baseSize, compressedSize) * .76}px`);
+          title.style.setProperty('--footer-height-growth', `${heightScale - 1}`);
+          morphLine.style.width = `${available}px`;
+
+          metrics.forEach(({ letter, base, compressed }, index) => {
+            const baseAdvance = base + (index < metrics.length - 1 ? tracking : 0);
+            const compressedAdvance = (compressed + (index < metrics.length - 1 ? tracking : 0)) * heightScale;
+            letter.style.setProperty('--footer-letter-base', `${baseAdvance}`);
+            letter.style.setProperty('--footer-letter-growth', `${compressedAdvance - baseAdvance}`);
+            letter.style.setProperty('--footer-letter-stretch', `${compressed * heightScale / base - 1}`);
+          });
         };
         measure();
         window.addEventListener('resize', measure, { passive: true });

@@ -1533,22 +1533,51 @@ footer a {
   }
   .footer-signature h2 {
     --footer-inflate: 0;
-    width: max-content;
-    margin: auto;
+    --footer-base-size: 10vw;
+    --footer-compressed-size: 16vw;
+    --footer-face-height: 12.16vw;
+    position: relative;
+    width: 100%;
+    height: var(--footer-face-height);
+    margin: 0 0 calc(var(--footer-compressed-size) * -.055);
     color: var(--white);
-    font-family: 'roc-grotesk', sans-serif;
-    font-size: 10vw;
+    font-synthesis: none;
+    text-align: center;
+    white-space: nowrap;
+    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
+  }
+  .footer-signature .footer-morph-line {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    height: 100%;
+    margin: auto;
+    color: currentColor;
+    pointer-events: none;
+  }
+  .footer-signature .footer-letter {
+    position: relative;
+    flex: none;
+    width: calc((var(--footer-letter-base) + var(--footer-letter-growth) * var(--footer-inflate)) * 1em);
+    height: 100%;
+    font-family: 'roc-grotesk', sans-serif !important;
+    font-size: var(--footer-base-size);
     font-weight: 800;
     font-synthesis: none;
     line-height: .76;
-    letter-spacing: -.065em;
-    text-align: center;
-    white-space: nowrap;
-    margin-bottom: -.055em;
-    paint-order: stroke fill;
-    -webkit-text-stroke-color: currentColor;
-    -webkit-text-stroke-width: calc(var(--footer-inflate) * .024em);
-    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
+  }
+  .footer-signature .footer-letter::before {
+    content: attr(data-glyph);
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: max-content;
+    color: currentColor;
+    font: inherit;
+    line-height: inherit;
+    transform: scaleX(calc(1 + var(--footer-letter-stretch) * var(--footer-inflate))) scaleY(calc(1 + var(--footer-height-growth) * var(--footer-inflate)));
+    transform-origin: left bottom;
+    will-change: transform;
   }
   .footer-signature h2:hover {
     --footer-inflate: 1;
@@ -1621,16 +1650,16 @@ footer a {
 .skills .courses-label { color: #000; }
 .skills.section .section-label { border-color: #000; }
 
-/* The featured degree stays open: violet rules, no solid color block. */
+/* The featured degree stays open: black details, with violet reserved for the asterisk. */
 .skills .education {
-  --education-line: var(--violet);
+  --education-line: #000;
   background: transparent;
   color: #000;
 }
 .skills .education > p span,
 .skills .education > h2,
-.skills .education-emblem,
-.skills .education-coursework h3 { color: var(--violet); }
+.skills .education-coursework h3 { color: #000; }
+.skills .education-emblem { color: var(--violet); }
 .skills .education-coursework li { color: #000; }
 .skills .courses article,
 .skills .courses article > span,
