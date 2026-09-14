@@ -131,20 +131,37 @@
     const footer = document.querySelector('footer');
     if (!footer) return;
 
-    const existing = document.querySelector('.footer-signature');
-    if (existing) {
-      if (existing.parentElement !== footer || existing !== footer.firstElementChild) footer.prepend(existing);
-      return;
+    let signature = document.querySelector('.footer-signature');
+    let title = signature?.querySelector('h2');
+    const created = !signature;
+
+    if (!signature) {
+      signature = document.createElement('div');
+      signature.className = 'footer-signature';
+      signature.setAttribute('aria-label', 'Brenda Baltieri');
+
+      title = document.createElement('h2');
+      title.textContent = 'BRENDA BALTIERI';
+      signature.append(title);
+    }
+    if (signature.parentElement !== footer || signature !== footer.firstElementChild) footer.prepend(signature);
+
+    let details = footer.querySelector(':scope > .footer-details');
+    if (!details) {
+      details = document.createElement('div');
+      details.className = 'footer-details';
+      signature.after(details);
     }
 
-    const signature = document.createElement('div');
-    signature.className = 'footer-signature';
-    signature.setAttribute('aria-label', 'Brenda Baltieri');
+    const footerItems = Array.from(footer.children).filter((item) => item !== signature && item !== details);
+    const backToTop = footerItems.find((item) => item.matches('a[href="#top"]'));
+    footerItems.filter((item) => item !== backToTop).forEach((item) => details.append(item));
 
-    const title = document.createElement('h2');
-    title.textContent = 'BRENDA BALTIERI';
-    signature.append(title);
-    footer.prepend(signature);
+    const socials = document.querySelector('.contact .socials');
+    if (socials) details.append(socials);
+    if (backToTop) details.append(backToTop);
+
+    if (!created || !title) return;
 
     const measureExpansion = async () => {
       try {

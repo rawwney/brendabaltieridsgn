@@ -1470,7 +1470,7 @@ footer a {
   }
 }
 
-/* A compact closing signature inside the existing contact section. */
+/* One continuous editorial footer: signature first, useful information directly below. */
 @property --footer-inflate {
   syntax: '<number>';
   inherits: true;
@@ -1480,17 +1480,17 @@ footer a {
 @media (min-width: 761px) {
   .contact.contact-with-gif { padding-bottom: 0; }
   footer:has(> .footer-signature) {
-    row-gap: 0;
-    padding: 0 24px 20px;
+    display: block;
+    padding: 0;
+    border-top: 1px solid var(--line);
   }
   .footer-signature {
     display: flex;
     align-items: center;
     justify-content: center;
-    grid-column: 1 / -1;
     min-height: 0;
-    margin: 0 -24px;
-    padding: clamp(18px, 2.2vw, 38px) 3vw 0;
+    margin: 0;
+    padding: clamp(20px, 2.5vw, 40px) 2vw 0;
     overflow: hidden;
     background: var(--ink);
   }
@@ -1502,7 +1502,7 @@ footer a {
     margin: auto;
     color: var(--white);
     font-family: 'roc-grotesk', sans-serif;
-    font-size: min(7.2vw, 138px);
+    font-size: min(8.2vw, 156px);
     font-weight: 800;
     font-synthesis: none;
     line-height: .76;
@@ -1520,9 +1520,53 @@ footer a {
     --footer-inflate: 1;
     color: var(--acid);
   }
+  .footer-details {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1.25fr 1.35fr auto;
+    align-items: start;
+    column-gap: clamp(18px, 2.2vw, 42px);
+    padding: 18px 24px 20px;
+    border-top: 1px solid var(--line);
+  }
+  .footer-details > * { margin: 0; }
+  .footer-details > div:first-child,
+  .footer-details > p,
+  .footer-details > a { padding-top: 2px; }
+  .footer-details > a[href="#top"] { justify-self: end; white-space: nowrap; }
+  .footer-details .socials {
+    display: flex;
+    justify-content: flex-start;
+    gap: clamp(18px, 2vw, 38px);
+    border: 0;
+  }
+  .footer-details .socials a {
+    padding: 2px 0;
+    border: 0;
+    white-space: nowrap;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .footer-signature h2 { transition: none; }
+}
+
+@media (max-width: 760px) {
+  footer:has(> .footer-signature) { display: block; padding: 0; }
+  .footer-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    padding: 0;
+  }
+  .footer-details > :not(.socials) { margin: 0; padding: 18px 20px; border-top: 1px solid var(--line); }
+  .footer-details > :nth-child(odd):not(.socials) { border-right: 1px solid var(--line); }
+  .footer-details .socials {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+  }
+  .footer-details .socials a { padding: 18px 20px; border: 0; }
+  .footer-details .socials a:first-child { border-right: 1px solid var(--line); }
 }
 
 /* A mobile menu in the same typographic family, without oversized thin links. */
