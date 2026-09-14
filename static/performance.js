@@ -157,9 +157,22 @@
     const backToTop = footerItems.find((item) => item.matches('a[href="#top"]'));
     footerItems.filter((item) => item !== backToTop).forEach((item) => details.append(item));
 
-    const socials = document.querySelector('.contact .socials');
-    if (socials) details.append(socials);
+    const contact = document.querySelector('.contact');
+    const socials = document.querySelector('.socials');
+    if (contact && socials && socials.parentElement !== contact) {
+      const copyRow = contact.querySelector('.contact-copy-row');
+      if (copyRow) copyRow.after(socials);
+      else contact.append(socials);
+    }
     if (backToTop) details.append(backToTop);
+
+    if (!footer.dataset.isolationObserver) {
+      footer.dataset.isolationObserver = 'true';
+      const observer = new IntersectionObserver(([entry]) => {
+        document.body.classList.toggle('footer-isolated', entry.intersectionRatio >= .72);
+      }, { threshold: [.72] });
+      observer.observe(footer);
+    }
 
     if (!created || !title) return;
 
