@@ -1490,19 +1490,17 @@ footer a {
     justify-content: center;
     min-height: 0;
     margin: 0;
-    padding: clamp(20px, 2.5vw, 40px) 2vw 0;
+    padding: clamp(20px, 2.5vw, 40px) 0 0;
     overflow: hidden;
     background: var(--ink);
   }
   .footer-signature h2 {
     --footer-inflate: 0;
-    --footer-wide-scale: 1.075;
     width: max-content;
-    max-width: 100%;
     margin: auto;
     color: var(--white);
     font-family: 'roc-grotesk', sans-serif;
-    font-size: min(8.2vw, 156px);
+    font-size: 10vw;
     font-weight: 800;
     font-synthesis: none;
     line-height: .76;
@@ -1510,11 +1508,10 @@ footer a {
     text-align: center;
     white-space: nowrap;
     margin-bottom: -.055em;
-    transform: scaleX(calc(1 + var(--footer-inflate) * (var(--footer-wide-scale) - 1))) scaleY(calc(1 + var(--footer-inflate) * .025));
-    transform-origin: center bottom;
+    paint-order: stroke fill;
     -webkit-text-stroke-color: currentColor;
-    -webkit-text-stroke-width: calc(var(--footer-inflate) * .008em);
-    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), transform 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
+    -webkit-text-stroke-width: calc(var(--footer-inflate) * .024em);
+    transition: --footer-inflate 850ms cubic-bezier(.45, 0, .2, 1), color 500ms ease;
   }
   .footer-signature h2:hover {
     --footer-inflate: 1;

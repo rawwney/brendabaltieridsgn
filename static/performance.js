@@ -163,32 +163,24 @@
 
     if (!created || !title) return;
 
-    const measureExpansion = async () => {
+    const fitSignature = async () => {
       try {
-        const faces = await Promise.all([
-          document.fonts.load('800 100px "roc-grotesk"', title.textContent),
-          document.fonts.load('900 100px "roc-grotesk-extrawide"', title.textContent),
-        ]);
-        if (!signature.isConnected || faces.some((face) => !face.length)) return;
-        const context = document.createElement('canvas').getContext('2d');
-        if (!context) return;
+        const faces = await document.fonts.load('800 100px "roc-grotesk"', title.textContent);
+        if (!signature.isConnected || !faces.length) return;
         const measure = () => {
-          const size = parseFloat(getComputedStyle(title).fontSize);
-          context.font = '800 1000px "roc-grotesk"';
-          const base = context.measureText(title.textContent).width;
-          context.font = '900 1000px "roc-grotesk-extrawide"';
-          const wide = context.measureText(title.textContent).width;
-          const renderedBase = base / 1000 * size;
-          const available = Math.max(1, signature.clientWidth - 64);
-          title.style.setProperty('--footer-wide-scale', Math.min(wide / base, available / renderedBase).toFixed(4));
+          title.style.removeProperty('font-size');
+          const naturalSize = parseFloat(getComputedStyle(title).fontSize);
+          const naturalWidth = title.getBoundingClientRect().width;
+          const available = Math.max(1, signature.clientWidth - 40);
+          if (naturalWidth > 0) title.style.fontSize = `${naturalSize * available / naturalWidth}px`;
         };
         measure();
         window.addEventListener('resize', measure, { passive: true });
       } catch {
-        // Keep the restrained CSS expansion if the hosted font is unavailable.
+        // Keep the viewport-based CSS size if the hosted font is unavailable.
       }
     };
-    void measureExpansion();
+    void fitSignature();
   }
 
   const softwarePanels = new WeakMap();
