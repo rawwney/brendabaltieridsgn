@@ -203,7 +203,10 @@
         const context = document.createElement('canvas').getContext('2d');
         if (!context) return;
         const letters = Array.from(morphLine.querySelectorAll('.footer-letter'));
-        const tracking = .03;
+        const heroTitle = document.querySelector('.hero .hero-stage > h1');
+        const heroStyle = heroTitle ? getComputedStyle(heroTitle) : null;
+        const heroSize = heroStyle ? parseFloat(heroStyle.fontSize) : 0;
+        const tracking = heroSize > 0 ? (parseFloat(heroStyle.letterSpacing) || 0) / heroSize : -.08;
         const metrics = letters.map((letter) => {
           const glyph = letter.dataset.glyph || ' ';
           context.font = '800 1000px "roc-grotesk"';

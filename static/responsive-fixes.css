@@ -1742,3 +1742,14 @@ footer a {
   .skills .skill-cols > div:nth-child(2) { grid-template-columns: minmax(0, 1fr); padding-inline: 14px; }
   .skills .skill-cols > div:nth-child(2) > span:first-child { margin-inline: -14px; padding-inline: 14px; }
 }
+
+/* Casamar is presented as a full-width vertical sequence for legible details. */
+.popup-slides-stacked .popup-slide img[src*="/casamar-"] {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.popup-slides-stacked .popup-slide img[src*="guru-packaging-"] {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
