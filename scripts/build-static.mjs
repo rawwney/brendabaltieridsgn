@@ -105,12 +105,24 @@ clientBundle = clientBundle.replace(
   'gallery:[`/projects/behance/guru-folder-cover.webp`,`/projects/behance/guru-folder-01.webp`,`/projects/behance/guru-folder-02.webp`,`/projects/behance/guru-folder-03.webp`]',
 );
 clientBundle = clientBundle.replace(
+  'gallery:[`/projects/pdf/casamar-01.png`,`/projects/pdf/casamar-02.png`],featured:!0',
+  'gallery:[`/projects/pdf/casamar-01.png`,`/projects/pdf/casamar-02.png`,`/projects/pdf/casamar-03.png`,`/projects/pdf/casamar-04.png`,`/projects/pdf/casamar-05.png`],galleryCaptions:[``,`O símbolo da CasaMar une arquitetura e natureza em uma forma simples e orgânica. Seu contorno remete a um portal ou abrigo, enquanto o elemento central representa o movimento natural do mar e da vegetação costeira. A composição reforça a ideia de um refúgio integrado à paisagem.`,``,``,``],featured:!0',
+);
+clientBundle = clientBundle.replace(
+  'description:`Identity created for a beachfront guesthouse in Arraial do Cabo. The brand translates a calm, exclusive and nature-connected experience through a sensory, sophisticated and intimate language.`}',
+  'description:`Identity created for a beachfront guesthouse in Arraial do Cabo. The brand translates a calm, exclusive and nature-connected experience through a sensory, sophisticated and intimate language.`,galleryCaptions:[``,`The CasaMar symbol unites architecture and nature in a simple, organic form. Its outline evokes a portal or shelter, while the central element represents the natural movement of the sea and coastal vegetation. The composition reinforces the idea of a retreat integrated into the landscape.`,``,``,``]}',
+);
+clientBundle = clientBundle.replace(
   'd=o.behanceUrl?l.slice(0,2):l',
   'd=o.slug===`guru-spirit-folder`?l:o.behanceUrl?l.slice(0,2):l',
 );
 clientBundle = clientBundle.replace(
   'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
   'p=[`malhafil`,`guru-spirit-folder`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
+);
+clientBundle = clientBundle.replace(
+  'o.slug===`epj-corrida`?`popup-slides-featured-first`:``',
+  '[`epj-corrida`,`casamar`].includes(o.slug)?`popup-slides-featured-first`:``',
 );
 clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
