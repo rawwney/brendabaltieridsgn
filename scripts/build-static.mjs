@@ -101,6 +101,10 @@ clientBundle = clientBundle.replace(
   'shortDescription:`A product catalog created to connect Guru Spirit with its distributors.`,description:`Folder designed to present Guru Spirit’s product catalog to distributors during a convenience-industry event.`',
 );
 clientBundle = clientBundle.replace(
+  'gallery:[`/projects/behance/guru-folder-01.webp`,`/projects/behance/guru-folder-02.webp`,`/projects/behance/guru-folder-03.webp`]',
+  'gallery:[`/projects/behance/guru-folder-cover.webp`,`/projects/behance/guru-folder-01.webp`,`/projects/behance/guru-folder-02.webp`,`/projects/behance/guru-folder-03.webp`]',
+);
+clientBundle = clientBundle.replace(
   'd=o.behanceUrl?l.slice(0,2):l',
   'd=o.slug===`guru-spirit-folder`?l:o.behanceUrl?l.slice(0,2):l',
 );
