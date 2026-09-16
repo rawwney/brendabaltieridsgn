@@ -1753,3 +1753,8 @@ footer a {
   aspect-ratio: auto;
   object-fit: contain;
 }
+
+.popup-slides-stacked .popup-slide img[src*="/ryzon-"] {
+  aspect-ratio: auto;
+  object-fit: contain;
+}

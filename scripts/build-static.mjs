@@ -93,6 +93,10 @@ const clientBundlePath = path.join(
 let clientBundle = await readFile(clientBundlePath, 'utf8');
 clientBundle = patchAboutBrush(clientBundle);
 clientBundle = clientBundle.replace(
+  '];c.sort((e,t)=>e.id-t.id),Array.from',
+  '];c=c.filter(e=>e.slug!==`raizes`),c.sort((e,t)=>e.id-t.id),Array.from',
+);
+clientBundle = clientBundle.replace(
   'shortDescription:`Informação institucional transformada em uma narrativa visual de marca.`,description:`Folder institucional desenvolvido para distribuidores da Guru Spirit. A peça organiza portfólio, posicionamento e argumentos comerciais em um sistema editorial direto e visualmente consistente.`',
   'shortDescription:`Carta de produtos criada para aproximar a Guru Spirit de seus distribuidores.`,description:`Folder desenvolvido para apresentar aos distribuidores a carta de produtos da Guru Spirit durante um evento do setor de conveniência.`',
 );
@@ -122,7 +126,11 @@ clientBundle = clientBundle.replace(
 );
 clientBundle = clientBundle.replace(
   'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
-  'p=[`malhafil`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
+  'p=[`malhafil`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`ryzon`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
+);
+clientBundle = clientBundle.replace(
+  'o.behanceUrl&&(0,u.jsx)(`a`,{className:`behance-case-link`',
+  'o.behanceUrl&&![`ryzon`,`guru-spirit-packaging`].includes(o.slug)&&(0,u.jsx)(`a`,{className:`behance-case-link`',
 );
 clientBundle = clientBundle.replace(
   'o.slug===`epj-corrida`?`popup-slides-featured-first`:``',
