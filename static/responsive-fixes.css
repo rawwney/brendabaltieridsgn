@@ -1758,3 +1758,9 @@ footer a {
   aspect-ratio: auto;
   object-fit: contain;
 }
+
+/* Preserve every VIÉS composition at its original Behance proportions. */
+.popup-slides-stacked .popup-slide img[src*="/vies-"] {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
