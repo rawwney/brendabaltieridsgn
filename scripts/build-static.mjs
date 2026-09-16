@@ -94,7 +94,7 @@ let clientBundle = await readFile(clientBundlePath, 'utf8');
 clientBundle = patchAboutBrush(clientBundle);
 clientBundle = clientBundle.replace(
   '];c.sort((e,t)=>e.id-t.id),Array.from',
-  '];c=c.filter(e=>e.slug!==`raizes`),c.sort((e,t)=>e.id-t.id),Array.from',
+  '];c=c.filter(e=>e.slug!==`raizes`);var bbOrder=[`sadhu-morning-evening-night`,`guru-spirit-folder`,`guru-spirit-packaging`,`malhafil`,`epj-corrida`,`deposito-23`,`casamar`,`grupo-pirasa`,`fluis`,`vies`,`labirinto-noir`,`ryzon`];c.sort((e,t)=>{let n=bbOrder.indexOf(e.slug),r=bbOrder.indexOf(t.slug);return(n<0?bbOrder.length:n)-(r<0?bbOrder.length:r)||e.id-t.id}),c.forEach((e,t)=>e.id=t+1),Array.from',
 );
 clientBundle = clientBundle.replace(
   'shortDescription:`Informação institucional transformada em uma narrativa visual de marca.`,description:`Folder institucional desenvolvido para distribuidores da Guru Spirit. A peça organiza portfólio, posicionamento e argumentos comerciais em um sistema editorial direto e visualmente consistente.`',
