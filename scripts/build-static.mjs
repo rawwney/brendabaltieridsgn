@@ -117,6 +117,10 @@ clientBundle = clientBundle.replace(
   'gallery:[`/projects/behance/vies-01.webp`,`/projects/popup/behance/vies-02-popup.gif`,`/projects/behance/vies-03.webp`,`/projects/behance/vies-04.webp`,`/projects/behance/vies-05.webp`,`/projects/behance/vies-06.webp`,`/projects/behance/vies-07.webp`,`/projects/behance/vies-08.webp`,`/projects/behance/vies-09.webp`,`/projects/behance/vies-10.webp`]',
 );
 clientBundle = clientBundle.replace(
+  'gallery:[`/projects/pdf/labirinto-01.png`,`/projects/pdf/labirinto-02.png`]',
+  'gallery:[`/projects/behance/labirinto-01.webp`,`/projects/behance/labirinto-02.webp`,`/projects/behance/labirinto-03.webp`,`/projects/behance/labirinto-04.webp`,`/projects/behance/labirinto-05.webp`,`/projects/behance/labirinto-06.webp`]',
+);
+clientBundle = clientBundle.replace(
   'gallery:[`/projects/pdf/casamar-01.png`,`/projects/pdf/casamar-02.png`],featured:!0',
   'gallery:[`/projects/pdf/casamar-01.png`,`/projects/pdf/casamar-02.png`,`/projects/pdf/casamar-03.png`,`/projects/pdf/casamar-04.png`,`/projects/pdf/casamar-05.png`],galleryCaptions:[``,`O símbolo da CasaMar une arquitetura e natureza em uma forma simples e orgânica. Seu contorno remete a um portal ou abrigo, enquanto o elemento central representa o movimento natural do mar e da vegetação costeira. A composição reforça a ideia de um refúgio integrado à paisagem.`,``,``,``],featured:!0',
 );
@@ -126,11 +130,11 @@ clientBundle = clientBundle.replace(
 );
 clientBundle = clientBundle.replace(
   'd=o.behanceUrl?l.slice(0,2):l',
-  'd=[`guru-spirit-folder`,`guru-spirit-packaging`,`vies`].includes(o.slug)?l:o.behanceUrl?l.slice(0,2):l',
+  'd=[`guru-spirit-folder`,`guru-spirit-packaging`,`vies`,`labirinto-noir`].includes(o.slug)?l:o.behanceUrl?l.slice(0,2):l',
 );
 clientBundle = clientBundle.replace(
   'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
-  'p=[`malhafil`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`ryzon`,`sadhu-morning-evening-night`,`deposito-23`,`vies`].includes(o.slug)',
+  'p=[`malhafil`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`ryzon`,`sadhu-morning-evening-night`,`deposito-23`,`vies`,`labirinto-noir`].includes(o.slug)',
 );
 clientBundle = clientBundle.replace(
   'o.behanceUrl&&(0,u.jsx)(`a`,{className:`behance-case-link`',

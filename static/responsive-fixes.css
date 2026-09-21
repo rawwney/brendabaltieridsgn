@@ -1764,3 +1764,9 @@ footer a {
   aspect-ratio: auto;
   object-fit: contain;
 }
+
+/* Keep every Labirinto Noir board fully visible in its vertical sequence. */
+.popup-slides-stacked .popup-slide img[src*="/labirinto-"] {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
