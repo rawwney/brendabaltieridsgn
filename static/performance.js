@@ -1,5 +1,31 @@
 (() => {
+  // The build also installs this class inline in <head>, before first paint.
+  // Keeping the assignment here makes direct/static previews fail safe too.
+  document.documentElement.classList.add('portfolio-booting');
   const projectImagePattern = /^\/projects\/.*\.(?:webp|png)$/i;
+
+  async function revealEnhancedSite() {
+    try { await document.fonts.ready; } catch { /* the fallback still reveals */ }
+
+    const heroTitle = document.querySelector('.hero .hero-stage > h1');
+    const deadline = performance.now() + 900;
+    while (
+      heroTitle?.isConnected
+      && !heroTitle.classList.contains('hero-inflate-ready')
+      && performance.now() < deadline
+    ) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+
+    // Allow layout and canvas sizing to settle before the cover fades away.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    clearTimeout(window.__portfolioBootTimeout);
+    document.documentElement.dataset.portfolioEnhanced = 'true';
+    document.documentElement.classList.add('portfolio-revealing');
+    window.setTimeout(() => {
+      document.documentElement.classList.remove('portfolio-booting', 'portfolio-revealing');
+    }, 280);
+  }
 
   function enhanceImage(image) {
     const source = image.getAttribute('src');
@@ -21,26 +47,103 @@
   }
 
   function enhanceProject(project) {
-    if (project.dataset.interactiveImage === 'true') return;
-
     const image = project.querySelector('.project-image');
     const opener = project.querySelector('.project-open');
     if (!image || !opener) return;
 
-    image.setAttribute('role', 'button');
-    image.setAttribute('tabindex', '0');
-    image.setAttribute('aria-label', opener.getAttribute('aria-label') || 'Abrir projeto');
-    image.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      opener.click();
-    });
-    project.addEventListener('click', (event) => {
-      const separateAction = event.target.closest('button, a');
-      if (separateAction && separateAction !== opener) return;
-      if (event.target !== opener) opener.click();
-    });
-    project.dataset.interactiveImage = 'true';
+    const english = document.documentElement.lang.startsWith('en');
+    const projectTitle = project.querySelector('.project-title')?.textContent?.trim() || 'project';
+    const openLabel = `${english ? 'View project' : 'Ver projeto'} ${projectTitle}`;
+
+    if (project.dataset.interactiveImage !== 'true') {
+      image.setAttribute('role', 'button');
+      image.setAttribute('tabindex', '0');
+      image.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        opener.click();
+      });
+      image.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        opener.click();
+      });
+      project.addEventListener('click', (event) => {
+        const separateAction = event.target.closest('button, a');
+        if (separateAction && separateAction !== opener) return;
+        if (event.target !== opener) opener.click();
+      });
+      project.dataset.interactiveImage = 'true';
+    }
+
+    image.setAttribute('aria-label', openLabel);
+    opener.setAttribute('aria-label', openLabel);
+
+    let like = project.querySelector(':scope > .project-like');
+    const projectKey = projectTitle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const storageKey = `brenda-project-like:${projectKey}`;
+    const renderLike = (button, liked, count) => {
+      const isEnglish = document.documentElement.lang.startsWith('en');
+      button.setAttribute('aria-pressed', String(liked));
+      button.dataset.count = String(Math.max(0, Number(count) || 0));
+      const markup = `<span class="project-like-icon" aria-hidden="true">${liked ? '♥' : '♡'}</span><span class="project-like-label">${isEnglish ? (liked ? 'LIKED' : 'LIKE') : 'GOSTEI'}</span><span class="project-like-count" aria-hidden="true">${button.dataset.count}</span>`;
+      if (button.innerHTML !== markup) button.innerHTML = markup;
+      button.setAttribute('aria-label', isEnglish
+        ? `${liked ? 'Already liked' : 'Like'} ${projectTitle}. ${button.dataset.count} likes.`
+        : `${liked ? 'Você já gostou de' : 'Gostei de'} ${projectTitle}. ${button.dataset.count} curtidas.`);
+    };
+    if (!like) {
+      like = document.createElement('button');
+      like.type = 'button';
+      like.className = 'project-like';
+      like.dataset.storageKey = storageKey;
+      like.dataset.projectKey = projectKey;
+      project.append(like);
+      like.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (like.getAttribute('aria-pressed') === 'true' || like.dataset.pending === 'true') return;
+        like.dataset.pending = 'true';
+        const optimisticCount = Number(like.dataset.count || 0) + 1;
+        renderLike(like, true, optimisticCount);
+        try { localStorage.setItem(like.dataset.storageKey, '1'); } catch { /* storage is optional */ }
+        try {
+          const response = await fetch('/api/likes', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ project: like.dataset.projectKey }),
+          });
+          if (!response.ok) throw new Error('Like counter unavailable');
+          const payload = await response.json();
+          renderLike(like, true, payload.count);
+        } catch {
+          renderLike(like, true, optimisticCount);
+        } finally {
+          delete like.dataset.pending;
+        }
+      });
+    }
+    let liked = false;
+    try { liked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
+    renderLike(like, liked, like.dataset.count || 0);
+    if (like.dataset.countRequested !== 'true') {
+      like.dataset.countRequested = 'true';
+      fetch(`/api/likes?project=${encodeURIComponent(projectKey)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error('Like counter unavailable');
+          return response.json();
+        })
+        .then((payload) => {
+          let currentLiked = like.getAttribute('aria-pressed') === 'true';
+          try { currentLiked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
+          renderLike(like, currentLiked, payload.count);
+        })
+        .catch(() => {
+          let currentLiked = like.getAttribute('aria-pressed') === 'true';
+          try { currentLiked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
+          renderLike(like, currentLiked, like.dataset.count || 0);
+        });
+    }
   }
 
   function enhanceProjects(root = document) {
@@ -48,27 +151,230 @@
     root.querySelectorAll?.('.project-grid > .project').forEach(enhanceProject);
   }
 
+  const glyphMorphControllers = new WeakMap();
+
+  function destroyGlyphMorph(element) {
+    const controller = glyphMorphControllers.get(element);
+    if (!controller) return;
+    controller.destroy();
+    glyphMorphControllers.delete(element);
+  }
+
+  function prepareGlyphMorph(element) {
+    if (!element) return;
+    element.classList.add('morph-text');
+    const letters = Array.from(element.querySelectorAll('.morph-letter'))
+      .filter((letter) => (letter.dataset.glyph ?? letter.textContent ?? '').trim());
+    const signature = letters.map((letter) => letter.dataset.glyph ?? letter.textContent).join('');
+    const previous = glyphMorphControllers.get(element);
+    if (previous?.signature === signature && previous.letters.length === letters.length) return;
+    destroyGlyphMorph(element);
+    const precisePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!precisePointer.matches || reducedMotion.matches || !letters.length) return;
+
+    const interactionSurface = element.matches('.hero .hero-stage > h1, .hero .hero-bottom > .hero-value-headline')
+      ? element.closest('.hero')
+      : element.matches('.footer-signature h2')
+        ? element.closest('.footer-signature')
+        : element.closest('section') || element.parentElement || element;
+    const states = letters.map((letter) => ({ letter, current: 0, target: 0 }));
+    let frame = 0;
+    let inside = false;
+    const animate = () => {
+      frame = 0;
+      let moving = false;
+      states.forEach((state) => {
+        const delta = state.target - state.current;
+        state.current += delta * (inside ? 0.16 : 0.11);
+        if (Math.abs(delta) > 0.002 || state.current > 0.004) moving = true;
+        if (state.current > 0.004) {
+          state.letter.style.setProperty('--morph-weight', state.current.toFixed(4));
+        } else if (!inside) {
+          state.current = 0;
+          state.letter.style.removeProperty('--morph-weight');
+        }
+      });
+      if (moving) frame = window.requestAnimationFrame(animate);
+      else element.classList.remove('is-morphing');
+    };
+    const requestAnimation = () => {
+      element.classList.add('is-morphing');
+      if (!frame) frame = window.requestAnimationFrame(animate);
+    };
+    const handleMove = (event) => {
+      inside = true;
+      const fontSize = parseFloat(getComputedStyle(element).fontSize) || 80;
+      const elementRect = element.getBoundingClientRect();
+      const radius = Math.max(fontSize * 2.6, Math.min(elementRect.width * 0.42, 560));
+      states.forEach((state) => {
+        const rect = state.letter.getBoundingClientRect();
+        const distance = Math.hypot(
+          event.clientX - (rect.left + rect.width / 2),
+          event.clientY - (rect.top + rect.height / 2),
+        );
+        const proximity = Math.max(0, 1 - distance / radius);
+        const easedProximity = proximity * proximity * (3 - 2 * proximity);
+        state.target = easedProximity;
+      });
+      requestAnimation();
+    };
+    const handleLeave = () => {
+      inside = false;
+      states.forEach((state) => { state.target = 0; });
+      requestAnimation();
+    };
+    interactionSurface.addEventListener('pointermove', handleMove, { passive: true });
+    interactionSurface.addEventListener('pointerleave', handleLeave, { passive: true });
+    glyphMorphControllers.set(element, {
+      signature,
+      letters,
+      destroy() {
+        cancelAnimationFrame(frame);
+        interactionSurface.removeEventListener('pointermove', handleMove);
+        interactionSurface.removeEventListener('pointerleave', handleLeave);
+        element.classList.remove('is-morphing');
+        states.forEach((state) => {
+          state.letter.style.removeProperty('--morph-weight');
+        });
+      },
+    });
+  }
+
+  function appendMorphGlyphs(container, text) {
+    Array.from(text).forEach((glyph) => {
+      if (/\s/.test(glyph)) {
+        container.append(document.createTextNode(glyph));
+        return;
+      }
+      const letter = document.createElement('span');
+      letter.className = 'morph-letter';
+      letter.dataset.glyph = glyph;
+      letter.setAttribute('aria-hidden', 'true');
+      letter.textContent = glyph;
+      container.append(letter);
+    });
+  }
+
+  function renderMorphText(heading, text) {
+    const mark = heading.querySelector(':scope > .inline-mark');
+    destroyGlyphMorph(heading);
+    const fragment = document.createDocumentFragment();
+    appendMorphGlyphs(fragment, text);
+    heading.replaceChildren(fragment);
+    if (mark) heading.append(mark);
+    heading.setAttribute('aria-label', text);
+    heading.dataset.sectionDisplayTitle = text;
+  }
+
+  function wrapExistingMorphText(element) {
+    if (!element || element.querySelector('.morph-letter')) return;
+    const ignored = '.inline-mark, [aria-hidden="true"], script, style';
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.textContent?.trim() || node.parentElement?.closest(ignored)) continue;
+      nodes.push(node);
+    }
+    if (!nodes.length) return;
+    const accessibleText = element.textContent.replace(/\s+/g, ' ').trim();
+    nodes.forEach((node) => {
+      const fragment = document.createDocumentFragment();
+      appendMorphGlyphs(fragment, node.textContent);
+      node.replaceWith(fragment);
+    });
+    if (accessibleText) element.setAttribute('aria-label', accessibleText);
+  }
+
+  function prepareHeroNameMorph(element) {
+    if (!element) return;
+    element.querySelectorAll('.hero-letter').forEach((letter) => {
+      const nestedLetter = letter.querySelector(':scope > .morph-letter');
+      if (nestedLetter) letter.textContent = nestedLetter.textContent;
+      letter.classList.add('morph-letter');
+      letter.dataset.glyph ||= letter.textContent;
+    });
+  }
+
+  function setSectionDisplayTitle(heading, text) {
+    if (!heading) return;
+    if (heading.dataset.sectionDisplayTitle !== text || !heading.querySelector(':scope > .morph-letter')) {
+      renderMorphText(heading, text);
+    }
+    heading.classList.add('section-display-title', 'morph-text');
+    prepareGlyphMorph(heading);
+  }
+
+  function enhanceMorphText(root = document) {
+    const selector = '.section-display-title, .footer-signature h2';
+    const candidates = [];
+    if (root.matches?.(selector)) candidates.push(root);
+    root.querySelectorAll?.(selector).forEach((item) => candidates.push(item));
+    candidates.forEach((element) => {
+      prepareGlyphMorph(element);
+    });
+  }
+
   function enhanceAboutGrid(grid) {
     const copy = grid.querySelector('.about-copy');
     if (!copy) return;
     const english = document.documentElement.lang.startsWith('en');
+    setSectionDisplayTitle(
+      grid.querySelector(':scope > .mega'),
+      english ? 'ABOUT ME' : 'SOBRE MIM',
+    );
     const lead = english
-      ? 'I am a graphic designer, graduated from Universidade São Judas Tadeu, and currently part of the Sadhu Group team. My path spans branding, visual communication, packaging and social media — fields where I turn strategy into clear, consistent visual systems with personality.'
-      : 'Sou designer gráfica, formada pela Universidade São Judas Tadeu, e atualmente faço parte do time da Sadhu Group. Minha trajetória passa por branding, comunicação visual, embalagens e social media — áreas em que transformo estratégia em sistemas visuais claros, consistentes e cheios de personalidade.';
-    const detail = english
-      ? 'From concept to rollout, I enjoy building brands that work across identities, logos, advertising, digital pieces and print. I speak advanced English and am open to new work opportunities in São Paulo or remotely.'
-      : 'Do conceito ao desdobramento, gosto de construir marcas que funcionam em identidades, logotipos, peças publicitárias, materiais digitais e impressos. Tenho inglês avançado e estou aberta a novas oportunidades de trabalho, em São Paulo ou remotamente.';
+      ? 'I am a graphic designer focused on branding, visual identity and social media design. I start from a central concept and build visual systems that remain consistent across every format — from print to packaging, from feed to campaign. I enjoy projects where the brand is still defining itself or needs to reposition, because that is where visual structure makes the biggest difference. I work remotely with brands in Brazil and abroad.'
+      : 'Sou designer gráfica focada em branding, identidade visual e design para redes sociais. Trabalho a partir de um conceito central e construo sistemas visuais que se mantêm consistentes em qualquer formato — do impresso à embalagem, do feed à campanha. Gosto de projetos onde a marca ainda está se definindo ou precisa se reposicionar, porque é onde a estrutura visual faz mais diferença. Trabalho remoto, atendendo marcas no Brasil e fora.';
     const paragraph = copy.querySelector(':scope > p');
     const small = copy.querySelector(':scope > small');
     if (paragraph && paragraph.textContent !== lead) paragraph.textContent = lead;
-    if (small && small.textContent !== detail) small.textContent = detail;
+    if (small) small.remove();
     grid.querySelectorAll('.portrait-placeholder, .about-gif').forEach((portrait) => portrait.remove());
-    if (!grid.querySelector('.about-photo-space')) {
-      const space = document.createElement('div');
+    let photoStack = grid.querySelector(':scope > .about-photo-stack');
+    if (!photoStack) {
+      grid.querySelector(':scope > .about-photo-space')?.remove();
+      photoStack = document.createElement('div');
+      photoStack.className = 'about-photo-stack';
+      const space = document.createElement('figure');
       space.className = 'about-photo-space';
-      space.setAttribute('aria-hidden', 'true');
-      grid.prepend(space);
+      const image = document.createElement('img');
+      image.src = '/brand/brenda-about-portrait.webp';
+      image.alt = english ? 'Portrait of Brenda Baltieri' : 'Retrato de Brenda Baltieri';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.width = 1600;
+      image.height = 1687;
+      space.append(image);
+      const download = document.createElement('a');
+      download.className = 'about-cv-download';
+      download.href = '/cv/brenda-baltieri-curriculo.pdf';
+      download.download = 'Brenda-Baltieri-Curriculo.pdf';
+      const label = document.createElement('span');
+      label.className = 'about-cv-label';
+      const arrow = document.createElement('span');
+      arrow.className = 'about-cv-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      download.append(label, arrow);
+      photoStack.append(space, download);
+      grid.prepend(photoStack);
     }
+    const downloadLabel = photoStack.querySelector('.about-cv-label');
+    const downloadText = english ? 'DOWNLOAD RÉSUMÉ' : 'BAIXAR CURRÍCULO';
+    if (downloadLabel && downloadLabel.textContent !== downloadText) {
+      downloadLabel.textContent = downloadText;
+    }
+    const downloadLink = photoStack.querySelector('.about-cv-download');
+    if (downloadLink) {
+      downloadLink.setAttribute('aria-label', english
+        ? 'Download Brenda Baltieri résumé in PDF'
+        : 'Baixar currículo de Brenda Baltieri em PDF');
+    }
+    const portrait = photoStack.querySelector('.about-photo-space img');
+    if (portrait) portrait.alt = english ? 'Portrait of Brenda Baltieri' : 'Retrato de Brenda Baltieri';
+
+    copy.querySelector(':scope > .about-practice')?.remove();
     grid.classList.remove('about-gif-layout');
     grid.classList.add('about-photo-layout');
   }
@@ -76,6 +382,611 @@
   function enhanceAbout(root = document) {
     if (root.matches?.('.about-grid')) enhanceAboutGrid(root);
     root.querySelectorAll?.('.about-grid').forEach(enhanceAboutGrid);
+  }
+
+  function simplifyProfile() {
+    document.querySelectorAll('a[href="#experience"]').forEach((link) => link.remove());
+    document.querySelectorAll('section.experience, section.skills').forEach((section) => section.remove());
+
+    // The underlay is a visual-only clone used by the About brush reveal.
+    // Hide it from assistive technology so the profile content is announced once.
+    document.querySelectorAll('.about-underlay').forEach((underlay) => {
+      if (underlay.getAttribute('aria-hidden') !== 'true') {
+        underlay.setAttribute('aria-hidden', 'true');
+      }
+      underlay.inert = true;
+      underlay.setAttribute('inert', '');
+    });
+
+    document.querySelectorAll('section.about .section-label').forEach((label) => {
+      const english = document.documentElement.lang.startsWith('en');
+      const prefix = english ? '03 / ABOUT ' : '03 / SOBRE ';
+      const textNode = Array.from(label.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+      if (textNode && textNode.nodeValue !== prefix) textNode.nodeValue = prefix;
+    });
+
+    document.querySelectorAll('.marquee.marquee-slow').forEach((marquee) => {
+      if (marquee.nextElementSibling?.matches('.contact')) marquee.remove();
+    });
+
+    document.querySelectorAll('section.contact').forEach((contact) => {
+      const label = contact.querySelector(':scope > .section-label');
+      if (!label) return;
+      const english = document.documentElement.lang.startsWith('en');
+      const prefix = english ? '04 / CONTACT ' : '04 / CONTATO ';
+      const textNode = Array.from(label.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+      if (textNode && textNode.nodeValue !== prefix) textNode.nodeValue = prefix;
+    });
+  }
+
+  const projectOrder = [
+    'MORNING / EVENING / NIGHT',
+    'CASAMAR',
+    'RYZON',
+    'LABIRINTO NOIR',
+    'GURU SPIRIT / PACKAGING',
+    'GURU SPIRIT / FOLDER',
+    'GRUPO PIRASA',
+    'DEPÓSITO 23',
+    'EPJ CORRIDA',
+    'MALHAFIL',
+    'AGÊNCIA TRÊES / CARNAVAL',
+    'FLUIS',
+    'VIÉS / LIBERDADE SEM RÓTULOS',
+  ];
+
+  function enhanceNavigation() {
+    document.querySelectorAll('.header nav, .mobile-menu nav, .mobile-menu').forEach((nav) => {
+      if (!nav.querySelector('a[href="#work"]') || !nav.querySelector('a[href="#about"]')) return;
+      let servicesLink = nav.querySelector('a[href="#services"]');
+      if (!servicesLink) {
+        servicesLink = document.createElement('a');
+        servicesLink.href = '#services';
+        nav.querySelector('a[href="#about"]').before(servicesLink);
+      }
+      const label = document.documentElement.lang.startsWith('en') ? 'SERVICES' : 'SERVIÇOS';
+      if (servicesLink.textContent !== label) servicesLink.textContent = label;
+      if (nav.closest('.mobile-menu')) {
+        nav.querySelectorAll('a[href^="#"]').forEach((link) => {
+          if (link.dataset.mobileNavigationBound === 'true') return;
+          link.dataset.mobileNavigationBound = 'true';
+          link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetId = link.getAttribute('href')?.slice(1);
+            requestAnimationFrame(() => {
+              const menuButton = document.querySelector('.header .menu-button[aria-expanded="true"]');
+              menuButton?.click();
+              requestAnimationFrame(() => {
+                const target = targetId ? document.getElementById(targetId) : null;
+                if (!target) return;
+                window.history.pushState(null, '', `#${targetId}`);
+                target.scrollIntoView({
+                  behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+                  block: 'start',
+                });
+              });
+            });
+          });
+        });
+      }
+    });
+
+    const menuButton = document.querySelector('.header .menu-button');
+    if (menuButton) {
+      const english = document.documentElement.lang.startsWith('en');
+      const expanded = menuButton.getAttribute('aria-expanded') === 'true';
+      menuButton.setAttribute('aria-label', english
+        ? (expanded ? 'Close menu' : 'Open menu')
+        : (expanded ? 'Fechar menu' : 'Abrir menu'));
+    }
+  }
+
+  function syncPageIsolation() {
+    const customDialogOpen = Boolean(document.querySelector('.modal-backdrop'));
+    const mobileMenuOpen = Boolean(document.querySelector('.mobile-menu'));
+    const targets = [
+      document.querySelector('header.header'),
+      document.querySelector('main'),
+      document.querySelector('footer'),
+    ].filter(Boolean);
+
+    targets.forEach((target) => {
+      const shouldIsolate = customDialogOpen || (mobileMenuOpen && target.matches('main, footer'));
+      if (shouldIsolate) {
+        if (target.dataset.isolationAriaHidden === undefined) {
+          target.dataset.isolationAriaHidden = target.getAttribute('aria-hidden') ?? '';
+        }
+        target.inert = true;
+        target.setAttribute('aria-hidden', 'true');
+      } else if (target.dataset.isolationAriaHidden !== undefined) {
+        const previous = target.dataset.isolationAriaHidden;
+        target.inert = false;
+        if (previous) target.setAttribute('aria-hidden', previous);
+        else target.removeAttribute('aria-hidden');
+        delete target.dataset.isolationAriaHidden;
+      }
+    });
+  }
+
+  function openProjectContactModal() {
+    const english = document.documentElement.lang.startsWith('en');
+    let dialog = document.querySelector('.hero-contact-dialog');
+    if (!dialog) {
+      dialog = document.createElement('dialog');
+      dialog.className = 'hero-contact-dialog';
+      document.body.append(dialog);
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+    }
+    const copy = english
+      ? {
+        eyebrow: 'NEW PROJECT',
+        title: 'HOW WOULD YOU LIKE TO TALK?',
+        close: 'CLOSE',
+        whatsapp: 'WHATSAPP',
+        whatsappDetail: 'Start a direct conversation',
+        email: 'EMAIL',
+        emailDetail: 'Send a project brief',
+        site: 'CONTACT ON THE SITE',
+        siteDetail: 'Fill in your project details',
+        formTitle: 'TELL ME ABOUT YOUR PROJECT',
+        back: 'BACK',
+        name: 'NAME',
+        emailLabel: 'E-MAIL',
+        phone: 'WHATSAPP / PHONE',
+        service: 'WHAT DO YOU NEED?',
+        select: 'SELECT A SERVICE',
+        details: 'TELL ME A LITTLE ABOUT THE PROJECT',
+        detailsPlaceholder: 'Context, goals, deliverables and expected timing.',
+        submit: 'SEND BRIEF',
+        required: 'Required fields',
+        serviceOptions: ['Branding', 'Visual Identity', 'Social Media Design', 'UX / UI Design', 'Packaging / Editorial', 'Other'],
+      }
+      : {
+        eyebrow: 'NOVO PROJETO',
+        title: 'COMO PREFERE CONVERSAR?',
+        close: 'FECHAR',
+        whatsapp: 'WHATSAPP',
+        whatsappDetail: 'Comece uma conversa direta',
+        email: 'E-MAIL',
+        emailDetail: 'Envie um briefing do projeto',
+        site: 'CONTATO PELO SITE',
+        siteDetail: 'Preencha os dados do seu projeto',
+        formTitle: 'CONTE SOBRE O SEU PROJETO',
+        back: 'VOLTAR',
+        name: 'NOME',
+        emailLabel: 'E-MAIL',
+        phone: 'WHATSAPP / TELEFONE',
+        service: 'O QUE VOCÊ PRECISA?',
+        select: 'SELECIONE UM SERVIÇO',
+        details: 'CONTE UM POUCO SOBRE O PROJETO',
+        detailsPlaceholder: 'Contexto, objetivo, entregas e prazo esperado.',
+        submit: 'ENVIAR BRIEFING',
+        required: 'Campos obrigatórios',
+        serviceOptions: ['Branding', 'Identidade Visual', 'Design para Redes Sociais', 'UX / UI Design', 'Embalagens / Editorial', 'Outro'],
+      };
+    dialog.replaceChildren();
+    const shell = document.createElement('div');
+    shell.className = 'hero-contact-shell';
+    const top = document.createElement('div');
+    top.className = 'hero-contact-top';
+    const eyebrow = document.createElement('span');
+    eyebrow.textContent = copy.eyebrow;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = `${copy.close} ×`;
+    close.addEventListener('click', () => dialog.close());
+    top.append(eyebrow, close);
+    const title = document.createElement('h2');
+    title.textContent = copy.title;
+    const options = document.createElement('div');
+    options.className = 'hero-contact-options';
+    const makeOption = (element, labelText, detailText) => {
+      element.className = 'hero-contact-option';
+      const label = document.createElement('strong');
+      label.textContent = labelText;
+      const detail = document.createElement('small');
+      detail.textContent = detailText;
+      const arrow = document.createElement('span');
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '↗';
+      element.append(label, detail, arrow);
+      return element;
+    };
+    const whatsapp = makeOption(document.createElement('a'), copy.whatsapp, copy.whatsappDetail);
+    whatsapp.href = english
+      ? 'https://wa.me/5511984298730?text=Hi%20Brenda%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project.'
+      : 'https://wa.me/5511984298730?text=Ol%C3%A1%20Brenda%2C%20vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.';
+    whatsapp.target = '_blank';
+    whatsapp.rel = 'noreferrer';
+    const email = makeOption(document.createElement('a'), copy.email, copy.emailDetail);
+    email.href = 'mailto:brenda.baltieri01@gmail.com';
+    const site = makeOption(document.createElement('button'), copy.site, copy.siteDetail);
+    site.type = 'button';
+    site.addEventListener('click', () => {
+      title.textContent = copy.formTitle;
+      title.classList.add('is-form-title');
+      const form = document.createElement('form');
+      form.className = 'hero-contact-form';
+
+      const makeField = (labelText, control) => {
+        const label = document.createElement('label');
+        const caption = document.createElement('span');
+        caption.textContent = labelText;
+        label.append(caption, control);
+        return label;
+      };
+
+      const name = document.createElement('input');
+      name.name = 'name';
+      name.autocomplete = 'name';
+      name.required = true;
+      const emailInput = document.createElement('input');
+      emailInput.type = 'email';
+      emailInput.name = 'email';
+      emailInput.autocomplete = 'email';
+      emailInput.required = true;
+      const phone = document.createElement('input');
+      phone.type = 'tel';
+      phone.name = 'phone';
+      phone.autocomplete = 'tel';
+      const service = document.createElement('select');
+      service.name = 'service';
+      service.required = true;
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = copy.select;
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      service.append(placeholder);
+      copy.serviceOptions.forEach((optionText) => {
+        const option = document.createElement('option');
+        option.value = optionText;
+        option.textContent = optionText;
+        service.append(option);
+      });
+      const details = document.createElement('textarea');
+      details.name = 'details';
+      details.rows = 5;
+      details.required = true;
+      details.placeholder = copy.detailsPlaceholder;
+
+      const fields = document.createElement('div');
+      fields.className = 'hero-contact-fields';
+      fields.append(
+        makeField(`${copy.name} *`, name),
+        makeField(`${copy.emailLabel} *`, emailInput),
+        makeField(copy.phone, phone),
+        makeField(`${copy.service} *`, service),
+        makeField(`${copy.details} *`, details),
+      );
+
+      const actions = document.createElement('div');
+      actions.className = 'hero-contact-form-actions';
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'hero-contact-back';
+      back.textContent = `← ${copy.back}`;
+      back.addEventListener('click', openProjectContactModal);
+      const required = document.createElement('small');
+      required.textContent = `* ${copy.required}`;
+      const submit = document.createElement('button');
+      submit.type = 'submit';
+      submit.className = 'hero-contact-submit';
+      submit.textContent = `${copy.submit} ↗`;
+      actions.append(back, required, submit);
+      form.append(fields, actions);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const subject = english
+          ? `New project — ${service.value} — ${name.value.trim()}`
+          : `Novo projeto — ${service.value} — ${name.value.trim()}`;
+        const body = english
+          ? `Name: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / phone: ${phone.value.trim() || '-'}\nService: ${service.value}\n\nProject details:\n${details.value.trim()}`
+          : `Nome: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / telefone: ${phone.value.trim() || '-'}\nServiço: ${service.value}\n\nDetalhes do projeto:\n${details.value.trim()}`;
+        window.location.href = `mailto:brenda.baltieri01@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      });
+      options.replaceWith(form);
+      name.focus();
+    });
+    options.append(whatsapp, email, site);
+    shell.append(top, title, options);
+    dialog.append(shell);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function enhanceHeroCopy() {
+    const bottom = document.querySelector('.hero .hero-bottom');
+    if (!bottom) return;
+    const english = document.documentElement.lang.startsWith('en');
+    const copy = english
+      ? {
+        headline: 'BRAND SYSTEMS, FROM CONCEPT TO APPLICATION.',
+        headlineLines: ['BRAND SYSTEMS, FROM', 'CONCEPT TO APPLICATION.'],
+        subhead: 'Branding, visual identity and social media design for brands that want to stop reinventing their communication with every post.',
+        primary: 'I HAVE A PROJECT',
+        secondary: 'VIEW PROJECTS ↓',
+        tags: ['BRANDING', 'VISUAL IDENTITY', 'SOCIAL MEDIA DESIGN', 'PACKAGING', 'EDITORIAL'],
+      }
+      : {
+        headline: 'MARCA COM SISTEMA, DO CONCEITO À APLICAÇÃO.',
+        headlineLines: ['MARCA COM SISTEMA, DO', 'CONCEITO À APLICAÇÃO.'],
+        subhead: 'Branding, identidade visual e design para redes sociais para marcas que querem parar de reinventar a comunicação a cada post.',
+        primary: 'TENHO UM PROJETO',
+        secondary: 'VER PROJETOS ↓',
+        tags: ['BRANDING', 'IDENTIDADE VISUAL', 'DESIGN PARA REDES SOCIAIS', 'EMBALAGENS', 'EDITORIAL'],
+      };
+    const signature = `${document.documentElement.lang}|${copy.headline}`;
+    if (bottom.dataset.copySignature === signature && bottom.querySelector('.hero-value-headline')) return;
+
+    const headline = document.createElement('h2');
+    headline.className = 'hero-value-headline';
+    headline.setAttribute('aria-label', copy.headline);
+    headline.append(document.createTextNode(copy.headlineLines[0]));
+    const lineBreak = document.createElement('br');
+    lineBreak.className = 'hero-value-line-break';
+    headline.append(lineBreak, document.createTextNode(` ${copy.headlineLines[1]}`));
+    const subhead = document.createElement('p');
+    subhead.className = 'hero-value-subhead';
+    subhead.textContent = copy.subhead;
+    const actions = document.createElement('div');
+    actions.className = 'hero-value-actions';
+    const primary = document.createElement('a');
+    primary.className = 'hero-value-cta hero-value-cta-primary';
+    primary.href = '#contact';
+    primary.textContent = copy.primary;
+    primary.setAttribute('aria-haspopup', 'dialog');
+    primary.addEventListener('click', (event) => {
+      event.preventDefault();
+      openProjectContactModal();
+    });
+    const secondary = document.createElement('a');
+    secondary.className = 'hero-value-cta hero-value-cta-secondary';
+    secondary.href = '#work';
+    secondary.textContent = copy.secondary;
+    actions.append(primary, secondary);
+    const side = document.createElement('div');
+    side.className = 'hero-value-side';
+    side.append(subhead, actions);
+    const tags = document.createElement('p');
+    tags.className = 'hero-value-tags';
+    tags.textContent = copy.tags.join(' / ');
+    bottom.replaceChildren(headline, side, tags);
+    bottom.dataset.copySignature = signature;
+  }
+
+  function enhanceProjectGrid() {
+    const grid = document.querySelector('.project-grid');
+    if (!grid) return;
+    const projects = Array.from(grid.querySelectorAll(':scope > .project'));
+    const byTitle = new Map(projects.map((project) => [
+      project.querySelector('.project-title')?.textContent.trim().toUpperCase(),
+      project,
+    ]));
+    const orderedProjects = [
+      ...projectOrder.map((title) => byTitle.get(title)).filter(Boolean),
+      ...projects.filter((project) => !projectOrder.includes(
+        project.querySelector('.project-title')?.textContent.trim().toUpperCase(),
+      )),
+    ];
+    if (orderedProjects.some((project, index) => projects[index] !== project)) {
+      grid.append(...orderedProjects);
+    }
+    Array.from(grid.querySelectorAll(':scope > .project')).forEach((project, index) => {
+      const number = String(index + 1).padStart(2, '0');
+      project.id = `projeto-${number}`;
+      project.dataset.archiveIndex = String(index);
+      const projectNumber = project.querySelector('.project-number');
+      const posterIndex = project.querySelector('.poster-index');
+      if (projectNumber && projectNumber.textContent !== number) projectNumber.textContent = number;
+      if (posterIndex && posterIndex.textContent !== `BB—${number}`) posterIndex.textContent = `BB—${number}`;
+    });
+
+    const english = document.documentElement.lang.startsWith('en');
+    const authorial = english ? 'AUTHOR-LED PROJECT' : 'PROJETO AUTORAL';
+    const categoryTranslations = new Map([
+      ['BRANDING / IDENTIDADE VISUAL', 'BRANDING / VISUAL IDENTITY'],
+      ['MÍDIAS SOCIAIS / DIREÇÃO DE ARTE', 'SOCIAL MEDIA / ART DIRECTION'],
+      ['MÍDIAS SOCIAIS / CAMPANHA', 'SOCIAL MEDIA / CAMPAIGN'],
+      ['MÍDIAS SOCIAIS / ILUSTRAÇÃO', 'SOCIAL MEDIA / ILLUSTRATION'],
+      ['MÍDIAS SOCIAIS / CORPORATIVO', 'SOCIAL MEDIA / CORPORATE'],
+      ['MÍDIAS SOCIAIS / SAÚDE', 'SOCIAL MEDIA / HEALTH'],
+      ['REBRANDING / EMBALAGENS', 'REBRANDING / PACKAGING'],
+      ['REBRANDING / DESIGN IMPRESSO', 'REBRANDING / PRINT DESIGN'],
+      ['EMBALAGENS / 3D', 'PACKAGING / 3D'],
+      ['EDITORIAL / DESIGN IMPRESSO', 'EDITORIAL / PRINT DESIGN'],
+    ]);
+    const categoryTranslationsReverse = new Map(
+      Array.from(categoryTranslations, ([portuguese, translated]) => [translated, portuguese]),
+    );
+    grid.querySelectorAll(':scope > .project .project-meta').forEach((meta) => {
+      const parts = meta.innerHTML.split(/<br\s*\/?\s*>/i);
+      const rawCategory = parts[0].replace(/\s+—\s+(?:PROJETO AUTORAL|AUTHOR-LED PROJECT)$/i, '').trim();
+      const category = english
+        ? (categoryTranslations.get(rawCategory) || rawCategory)
+        : (categoryTranslationsReverse.get(rawCategory) || rawCategory);
+      const suffix = /\s+—\s+(?:PROJETO AUTORAL|AUTHOR-LED PROJECT)$/i.test(parts[0])
+        ? ` — ${authorial}` : '';
+      const desired = `${category}${suffix}<br>${(parts[1] || '').trim()}`;
+      if (meta.innerHTML !== desired) meta.innerHTML = desired;
+    });
+    ['CASAMAR', 'LABIRINTO NOIR', 'VIÉS / LIBERDADE SEM RÓTULOS'].forEach((title) => {
+      const project = byTitle.get(title);
+      const meta = project?.querySelector('.project-meta');
+      if (!meta) return;
+      const parts = meta.innerHTML.split(/<br\s*\/?\s*>/i);
+      const category = parts[0].replace(/\s+—\s+(?:PROJETO AUTORAL|AUTHOR-LED PROJECT)$/i, '').trim();
+      const year = (parts[1] || '').trim();
+      const desired = `${category} — ${authorial}<br>${year}`;
+      if (meta.innerHTML !== desired) meta.innerHTML = desired;
+    });
+
+    const work = document.querySelector('.work');
+    const count = work?.querySelector('.section-label span');
+    if (count) {
+      const desired = english ? 'ARCHIVE [ 13 ]' : 'ARQUIVO [ 13 ]';
+      if (count.textContent !== desired) count.textContent = desired;
+    }
+    const mega = work?.querySelector(':scope > .mega');
+    if (mega) {
+      setSectionDisplayTitle(mega, english ? 'SELECTED WORK' : 'PROJETOS SELECIONADOS');
+      let intro = work.querySelector(':scope > .work-intro');
+      if (!intro) {
+        intro = document.createElement('p');
+        intro.className = 'work-intro';
+        mega.after(intro);
+      }
+      const text = english
+        ? 'Projects where I built the visual system from scratch or carried it into new formats.'
+        : 'Projetos onde construí o sistema visual do zero ou o levei a novos formatos.';
+      if (intro.textContent !== text) intro.textContent = text;
+    }
+  }
+
+  function enhanceServices() {
+    const work = document.querySelector('.work');
+    if (!work) return;
+    const english = document.documentElement.lang.startsWith('en');
+    let section = document.querySelector('#services');
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'services';
+      section.className = 'services section';
+      work.after(section);
+    } else if (section.previousElementSibling !== work) {
+      work.after(section);
+    }
+    const copy = english
+      ? {
+        label: '02 / SERVICES',
+        title: 'WHAT I DO',
+        intro: 'Four core practices connected from concept through application.',
+        services: [
+          ['01', 'BRANDING'],
+          ['02', 'VISUAL IDENTITY'],
+          ['03', 'SOCIAL MEDIA DESIGN'],
+          ['04', 'UX / UI DESIGN'],
+        ],
+        extras: ['Art direction', 'Typography', 'Print design', 'Packaging', '3D mockups', 'Social media', 'Generative AI', 'Editorial design', 'Motion design', 'Image retouching'],
+      }
+      : {
+        label: '02 / SERVIÇOS',
+        title: 'O QUE EU FAÇO',
+        intro: 'Quatro frentes principais conectadas do conceito à aplicação.',
+        services: [
+          ['01', 'BRANDING'],
+          ['02', 'IDENTIDADE VISUAL'],
+          ['03', 'DESIGN PARA REDES SOCIAIS'],
+          ['04', 'UX / UI DESIGN'],
+        ],
+        extras: ['Direção de Arte', 'Tipografia', 'Impressos', 'Embalagens', 'Mockups 3D', 'Mídias Sociais', 'IA Generativa', 'Editorial', 'Motion Design', 'Tratamento de Imagem'],
+      };
+    const signature = `${document.documentElement.lang}|${copy.title}`;
+    if (section.dataset.copySignature === signature && section.querySelector('.services-title')) return;
+
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = copy.label;
+    const title = document.createElement('h2');
+    title.className = 'services-title section-display-title';
+    setSectionDisplayTitle(title, copy.title);
+    const decorativeMark = work.querySelector(':scope > .mega .inline-mark')?.cloneNode(true);
+    if (decorativeMark) title.append(decorativeMark);
+    const intro = document.createElement('p');
+    intro.className = 'services-intro';
+    intro.textContent = copy.intro;
+    const grid = document.createElement('div');
+    grid.className = 'services-grid';
+    copy.services.forEach(([number, name]) => {
+      const article = document.createElement('article');
+      const meta = document.createElement('span');
+      meta.className = 'service-number';
+      meta.textContent = `${english ? 'SERVICE' : 'SERVIÇO'} ${String(number)}`;
+      const heading = document.createElement('h3');
+      heading.textContent = name;
+      article.append(meta, heading);
+      grid.append(article);
+    });
+    const extras = document.createElement('div');
+    extras.className = 'services-extras';
+    const extrasList = document.createElement('ul');
+    copy.extras.forEach((item) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = item;
+      extrasList.append(listItem);
+    });
+    extras.append(extrasList);
+    section.replaceChildren(label, title, intro, grid, extras);
+    section.dataset.copySignature = signature;
+    prepareGlyphMorph(title);
+  }
+
+  function removeBehanceConnections() {
+    document.querySelectorAll('a[href*="behance.net"]').forEach((link) => {
+      if (link.closest('.socials')) {
+        link.href = 'https://instagram.com/brendabaltieridsgn';
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.textContent = 'INSTAGRAM ↗';
+        link.setAttribute('aria-label', 'Instagram — Brenda Baltieri');
+        return;
+      }
+      link.hidden = true;
+      link.tabIndex = -1;
+      link.removeAttribute('href');
+      link.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  function enhanceContactCopy() {
+    const contact = document.querySelector('.contact');
+    const heading = contact?.querySelector(':scope > .mega');
+    if (!contact || !heading) return;
+    const english = document.documentElement.lang.startsWith('en');
+    setSectionDisplayTitle(
+      heading,
+      english ? "LET'S CREATE SOMETHING" : 'VAMOS CRIAR ALGO',
+    );
+    let intro = contact.querySelector(':scope > .contact-intro');
+    if (!intro) {
+      intro = document.createElement('p');
+      intro.className = 'contact-intro';
+      const gif = contact.querySelector(':scope > .contact-gif');
+      (gif || heading).after(intro);
+    }
+    const text = english
+      ? 'Available for new branding, visual identity and social media design projects.'
+      : 'Disponível para novos projetos de branding, identidade visual e design para redes sociais.';
+    if (intro.textContent !== text) intro.textContent = text;
+  }
+
+  function enhanceFooterCredit() {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const parent = footer.querySelector(':scope > .footer-details') || footer;
+    let credit = parent.querySelector(':scope > .footer-credit');
+    if (!credit) {
+      credit = document.createElement('p');
+      credit.className = 'footer-credit';
+      parent.append(credit);
+    }
+    const text = document.documentElement.lang.startsWith('en')
+      ? 'Site design and UX: Brenda Baltieri, 2026.'
+      : 'Design e UX deste site: Brenda Baltieri, 2026.';
+    if (credit.textContent !== text) credit.textContent = text;
+  }
+
+  function enhanceSiteNarrative() {
+    enhanceNavigation();
+    enhanceHeroCopy();
+    enhanceProjectGrid();
+    enhanceServices();
+    enhanceContactCopy();
+    enhanceFooterCredit();
+    removeBehanceConnections();
+    enhanceMorphText();
   }
 
   function enhanceExperience(root = document) {
@@ -154,12 +1065,14 @@
       morphLine.setAttribute('aria-hidden', 'true');
       Array.from(signatureText).forEach((glyph) => {
         const letter = document.createElement('span');
-        letter.className = 'footer-letter';
+        letter.className = 'footer-letter morph-letter';
         letter.dataset.glyph = glyph;
         morphLine.append(letter);
       });
       title.replaceChildren(morphLine);
     }
+    title?.classList.add('morph-text');
+    title?.querySelectorAll('.footer-letter').forEach((letter) => letter.classList.add('morph-letter'));
     if (signature.parentElement !== footer || signature !== footer.firstElementChild) footer.prepend(signature);
 
     let details = footer.querySelector(':scope > .footer-details');
@@ -222,14 +1135,15 @@
           const available = Math.max(1, signature.clientWidth - sideInset * 2);
           if (baseTotal <= 0 || compressedTotal <= 0) return;
 
-          const baseSize = available / baseTotal;
-          const compressedSize = available / compressedTotal;
+          const signatureScale = .88;
+          const baseSize = available / baseTotal * signatureScale;
+          const compressedSize = available / compressedTotal * signatureScale;
           const heightScale = compressedSize / baseSize;
           title.style.setProperty('--footer-base-size', `${baseSize}px`);
           title.style.setProperty('--footer-compressed-size', `${compressedSize}px`);
           title.style.setProperty('--footer-face-height', `${Math.max(baseSize, compressedSize) * .76}px`);
           title.style.setProperty('--footer-height-growth', `${heightScale - 1}`);
-          morphLine.style.width = `${available}px`;
+          morphLine.style.width = `${available * signatureScale}px`;
 
           metrics.forEach(({ letter, base, compressed }, index) => {
             const baseAdvance = base + (index < metrics.length - 1 ? tracking : 0);
@@ -246,6 +1160,7 @@
       }
     };
     void fitSignature();
+    prepareGlyphMorph(title);
   }
 
   const softwarePanels = new WeakMap();
@@ -942,15 +1857,6 @@
     root.querySelectorAll?.('.hero').forEach(enhanceSpatialHeroElement);
   }
 
-  enhanceImages();
-  enhanceProjects();
-  enhanceAbout();
-  enhanceExperience();
-  enhanceContact();
-  enhanceFooterSignature();
-  enhanceEducation();
-  enhanceSpatialHero();
-
   function buildHorizontalArchive() {
     const work = document.querySelector('.work');
     const grid = work?.querySelector('.project-grid');
@@ -1009,32 +1915,23 @@
     window.setTimeout(updatePosition, 600);
   }
 
-  // The portfolio hydrates after the static HTML appears. Run once now for a
-  // quick first paint, then once more after hydration so the editorial shell
-  // remains present even when React replaces the initial project grid.
-  buildHorizontalArchive();
-  window.setTimeout(buildHorizontalArchive, 1400);
-  window.setTimeout(enhanceAbout, 1400);
-  window.setTimeout(enhanceExperience, 1400);
-  window.setTimeout(enhanceContact, 1400);
-  window.setTimeout(enhanceFooterSignature, 1400);
-  window.setTimeout(enhanceEducation, 1400);
-  window.setTimeout(enhanceSpatialHero, 1400);
-
   const observer = new MutationObserver((records) => {
     const changedHeroes = new Set();
     const changedAbout = new Set();
     const changedExperience = new Set();
     const changedEducation = new Set();
     for (const record of records) {
-      if (record.target instanceof Element) {
-        const hero = record.target.closest('.hero');
+      const mutationElement = record.target instanceof Element
+        ? record.target
+        : record.target.parentElement;
+      if (mutationElement) {
+        const hero = mutationElement.closest('.hero');
         if (hero) changedHeroes.add(hero);
-        const about = record.target.closest('.about-grid');
+        const about = mutationElement.closest('.about-grid');
         if (about) changedAbout.add(about);
-        const experience = record.target.closest('.experience');
+        const experience = mutationElement.closest('.experience');
         if (experience) changedExperience.add(experience);
-        const education = record.target.closest('.skills');
+        const education = mutationElement.closest('.skills');
         if (education) changedEducation.add(education);
       }
       for (const node of record.addedNodes) {
@@ -1051,6 +1948,10 @@
         buildHorizontalArchive();
       }
     }
+    simplifyProfile();
+    enhanceProjects();
+    enhanceSiteNarrative();
+    syncPageIsolation();
     changedHeroes.forEach((hero) => {
       if (hero.isConnected) enhanceSpatialHeroElement(hero);
       else heroRenderers.get(hero)?.destroy();
@@ -1066,5 +1967,27 @@
     });
   });
 
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  // Let React finish hydrating the static document before adding the
+  // progressive visual and interaction layers. Mutating the archive sooner
+  // forces React to recover from a mismatched tree and can drop event handlers.
+  window.setTimeout(() => {
+    simplifyProfile();
+    enhanceImages();
+    enhanceProjects();
+    enhanceAbout();
+    enhanceExperience();
+    enhanceContact();
+    enhanceFooterSignature();
+    enhanceEducation();
+    enhanceSpatialHero();
+    enhanceSiteNarrative();
+    buildHorizontalArchive();
+    syncPageIsolation();
+    observer.observe(document.documentElement, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+    void revealEnhancedSite();
+  }, 1400);
 })();

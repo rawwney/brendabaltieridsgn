@@ -94,7 +94,7 @@ let clientBundle = await readFile(clientBundlePath, 'utf8');
 clientBundle = patchAboutBrush(clientBundle);
 clientBundle = clientBundle.replace(
   '];c.sort((e,t)=>e.id-t.id),Array.from',
-  '];c=c.filter(e=>e.slug!==`raizes`);var bbOrder=[`sadhu-morning-evening-night`,`guru-spirit-folder`,`guru-spirit-packaging`,`malhafil`,`epj-corrida`,`deposito-23`,`casamar`,`grupo-pirasa`,`fluis`,`vies`,`labirinto-noir`,`ryzon`];c.sort((e,t)=>{let n=bbOrder.indexOf(e.slug),r=bbOrder.indexOf(t.slug);return(n<0?bbOrder.length:n)-(r<0?bbOrder.length:r)||e.id-t.id}),c.forEach((e,t)=>e.id=t+1),Array.from',
+  '];c=c.filter(e=>e.slug!==`raizes`);var bbOrder=[`sadhu-morning-evening-night`,`casamar`,`ryzon`,`labirinto-noir`,`guru-spirit-packaging`,`guru-spirit-folder`,`grupo-pirasa`,`deposito-23`,`epj-corrida`,`malhafil`,`agencia-trees`,`fluis`,`vies`];c.sort((e,t)=>{let n=bbOrder.indexOf(e.slug),r=bbOrder.indexOf(t.slug);return(n<0?bbOrder.length:n)-(r<0?bbOrder.length:r)||e.id-t.id}),c.forEach((e,t)=>e.id=t+1),Array.from',
 );
 clientBundle = clientBundle.replace(
   'shortDescription:`Informação institucional transformada em uma narrativa visual de marca.`,description:`Folder institucional desenvolvido para distribuidores da Guru Spirit. A peça organiza portfólio, posicionamento e argumentos comerciais em um sistema editorial direto e visualmente consistente.`',
@@ -107,6 +107,10 @@ clientBundle = clientBundle.replace(
 clientBundle = clientBundle.replace(
   'gallery:[`/projects/behance/guru-folder-01.webp`,`/projects/behance/guru-folder-02.webp`,`/projects/behance/guru-folder-03.webp`]',
   'gallery:[`/projects/behance/guru-folder-cover.webp`,`/projects/behance/guru-folder-01.webp`,`/projects/behance/guru-folder-02.webp`,`/projects/behance/guru-folder-03.webp`]',
+);
+clientBundle = clientBundle.replace(
+  'gallery:[`/projects/behance/sadhu-morning-slide-01.webp`,`/projects/behance/sadhu-morning-slide-02.webp`]',
+  'gallery:[`/projects/behance/sadhu-morning-01.webp`,`/projects/behance/sadhu-morning-02.webp`,`/projects/behance/sadhu-morning-03.webp`,`/projects/behance/sadhu-morning-04.webp`,`/projects/behance/sadhu-morning-05.gif`,`/projects/behance/sadhu-morning-06.webp`,`/projects/behance/sadhu-morning-07.gif`,`/projects/behance/sadhu-morning-08.webp`,`/projects/behance/sadhu-morning-09.gif`,`/projects/behance/sadhu-morning-10.webp`,`/projects/behance/sadhu-morning-11.gif`,`/projects/behance/sadhu-morning-12.webp`,`/projects/behance/sadhu-morning-13.webp`,`/projects/behance/sadhu-morning-14.webp`,`/projects/behance/sadhu-morning-15.webp`,`/projects/behance/sadhu-morning-16.webp`,`/projects/behance/sadhu-morning-17.webp`,`/projects/behance/sadhu-morning-18.webp`,`/projects/behance/sadhu-morning-19.webp`,`/projects/behance/sadhu-morning-20.webp`,`/projects/behance/sadhu-morning-21.webp`,`/projects/behance/sadhu-morning-22.webp`,`/projects/behance/sadhu-morning-23.webp`,`/projects/behance/sadhu-morning-24.webp`,`/projects/behance/sadhu-morning-25.webp`,`/projects/behance/sadhu-morning-26.webp`,`/projects/behance/sadhu-morning-27.webp`,`/projects/behance/sadhu-morning-28.webp`,`/projects/behance/sadhu-morning-29.webp`,`/projects/behance/sadhu-morning-30.webp`,`/projects/behance/sadhu-morning-31.webp`,`/projects/behance/sadhu-morning-32.webp`,`/projects/behance/sadhu-morning-33.webp`,`/projects/behance/sadhu-morning-34.webp`,`/projects/behance/sadhu-morning-35.webp`,`/projects/behance/sadhu-morning-36.webp`]',
 );
 clientBundle = clientBundle.replace(
   'gallery:[`/projects/behance/guru-packaging-01.webp`,`/projects/behance/guru-packaging-02.webp`]',
@@ -130,7 +134,7 @@ clientBundle = clientBundle.replace(
 );
 clientBundle = clientBundle.replace(
   'd=o.behanceUrl?l.slice(0,2):l',
-  'd=[`guru-spirit-folder`,`guru-spirit-packaging`,`vies`,`labirinto-noir`].includes(o.slug)?l:o.behanceUrl?l.slice(0,2):l',
+  'd=[`sadhu-morning-evening-night`,`guru-spirit-folder`,`guru-spirit-packaging`,`vies`,`labirinto-noir`].includes(o.slug)?l:o.behanceUrl?l.slice(0,2):l',
 );
 clientBundle = clientBundle.replace(
   'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
@@ -148,10 +152,68 @@ clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
   'loading:t===0?`eager`:`lazy`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
 );
+clientBundle = clientBundle.replace(
+  '[D,P]=(0,r.useState)(!0),[F,I]',
+  '[D,P]=(0,r.useState)(()=>{try{return![`pt`,`en`].includes(window.localStorage.getItem(`brenda-portfolio-language`))}catch{return!0}}),[F,I]',
+);
+clientBundle = clientBundle.replace(
+  'window.history.replaceState(null,``,`${e.pathname}${e.search}${e.hash}`)):P(!0)},[])',
+  'window.history.replaceState(null,``,`${e.pathname}${e.search}${e.hash}`)):P(!r)},[])',
+);
 await writeFile(clientBundlePath, clientBundle, 'utf8');
 
 const indexPath = path.join(outputRoot, 'index.html');
 let indexHtml = await readFile(indexPath, 'utf8');
+
+// Install the boot cover before styles or hydration can paint the base hero.
+// performance.js removes it only after the final hero structure, fonts and
+// measurements are ready; the timeout prevents a permanent cover if JS fails.
+indexHtml = indexHtml.replace(
+  '<head>',
+  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),5000);</script>',
+);
+
+// Keep the server-rendered project archive in the same order as the patched
+// client data. Otherwise React has to discard the archive during hydration,
+// which can interrupt the site's interaction layers while it recovers.
+const projectMarkupPattern = /<article class="project [^"]+">[\s\S]*?<\/article>/g;
+const projectMarkup = [...indexHtml.matchAll(projectMarkupPattern)].map((match) => match[0]);
+const projectMarkupByTitle = new Map(projectMarkup.map((article) => {
+  const title = article.match(/class="project-title">([^<]+)<\/span>/)?.[1];
+  return [title, article];
+}));
+const staticProjectOrder = [
+  'MORNING / EVENING / NIGHT',
+  'CASAMAR',
+  'RYZON',
+  'LABIRINTO NOIR',
+  'GURU SPIRIT / PACKAGING',
+  'GURU SPIRIT / FOLDER',
+  'GRUPO PIRASA',
+  'DEPÓSITO 23',
+  'EPJ CORRIDA',
+  'MALHAFIL',
+  'AGÊNCIA TRÊES / CARNAVAL',
+  'FLUIS',
+  'VIÉS / LIBERDADE SEM RÓTULOS',
+];
+const orderedProjectMarkup = staticProjectOrder.map((title, index) => {
+  const article = projectMarkupByTitle.get(title);
+  if (!article) throw new Error(`Missing server-rendered project: ${title}`);
+  const number = String(index + 1).padStart(2, '0');
+  return article
+    .replace(/class="project-number">\d{2}<\/span>/, `class="project-number">${number}</span>`)
+    .replace(/class="poster-index">BB—<!-- -->\d{2}<\/span>/, `class="poster-index">BB—<!-- -->${number}</span>`);
+});
+let projectMarkupIndex = 0;
+indexHtml = indexHtml.replace(projectMarkupPattern, () => {
+  projectMarkupIndex += 1;
+  return projectMarkupIndex === 1 ? orderedProjectMarkup.join('') : '';
+});
+indexHtml = indexHtml.replace(
+  'ARQUIVO<!-- --> [<!-- -->14<!-- -->]',
+  'ARQUIVO<!-- --> [<!-- -->13<!-- -->]',
+);
 
 const assetRevision = async (fileName) => createHash('sha256')
   .update(await readFile(path.join(outputRoot, fileName)))
