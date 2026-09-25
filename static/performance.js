@@ -3,28 +3,43 @@
   // Keeping the assignment here makes direct/static previews fail safe too.
   document.documentElement.classList.add('portfolio-booting');
   const projectImagePattern = /^\/projects\/.*\.(?:webp|png)$/i;
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+  const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
   async function revealEnhancedSite() {
-    try { await document.fonts.ready; } catch { /* the fallback still reveals */ }
-
     const heroTitle = document.querySelector('.hero .hero-stage > h1');
-    const deadline = performance.now() + 900;
-    while (
-      heroTitle?.isConnected
-      && !heroTitle.classList.contains('hero-inflate-ready')
-      && performance.now() < deadline
-    ) {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-    }
+    const fontReadiness = document.fonts?.load
+      ? Promise.race([
+        Promise.allSettled([
+          document.fonts.load('800 100px "roc-grotesk"', 'BRENDA BALTIERI'),
+          document.fonts.load('900 100px "roc-grotesk-extrawide"', 'BRENDA BALTIERI'),
+        ]),
+        wait(650),
+      ])
+      : Promise.resolve();
+    const heroReadiness = (async () => {
+      const deadline = performance.now() + 650;
+      while (
+        heroTitle?.isConnected
+        && !heroTitle.classList.contains('hero-inflate-ready')
+        && performance.now() < deadline
+      ) {
+        await nextFrame();
+      }
+    })();
+
+    // Prepare fonts and glyph measurements in parallel so neither can hold the
+    // first reveal indefinitely on a slow connection.
+    await Promise.all([fontReadiness, heroReadiness]);
 
     // Allow layout and canvas sizing to settle before the cover fades away.
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await nextFrame();
     clearTimeout(window.__portfolioBootTimeout);
     document.documentElement.dataset.portfolioEnhanced = 'true';
     document.documentElement.classList.add('portfolio-revealing');
     window.setTimeout(() => {
       document.documentElement.classList.remove('portfolio-booting', 'portfolio-revealing');
-    }, 280);
+    }, 180);
   }
 
   function enhanceImage(image) {
@@ -2042,5 +2057,5 @@
       subtree: true,
     });
     void revealEnhancedSite();
-  }, 1400);
+  }, 550);
 })();

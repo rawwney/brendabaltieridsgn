@@ -170,7 +170,7 @@ let indexHtml = await readFile(indexPath, 'utf8');
 // measurements are ready; the timeout prevents a permanent cover if JS fails.
 indexHtml = indexHtml.replace(
   '<head>',
-  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),5000);</script>',
+  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),2500);</script>',
 );
 
 // Keep the server-rendered project archive in the same order as the patched
