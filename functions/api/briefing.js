@@ -66,6 +66,8 @@ export async function onRequestPost({ request }) {
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
+      origin: 'https://brendabaltieridsgn.pages.dev',
+      referer: 'https://brendabaltieridsgn.pages.dev/',
     },
     body: JSON.stringify({
       Nome: name,
@@ -91,9 +93,12 @@ export async function onRequestPost({ request }) {
     // accepted. The HTTP status remains the authoritative signal.
   }
 
-  if (!upstream.ok || upstreamResult?.success === 'false') {
+  const activationPending = upstreamResult?.success === 'false'
+    && /activation/i.test(upstreamResult?.message || '');
+
+  if (!upstream.ok || (upstreamResult?.success === 'false' && !activationPending)) {
     return json(request, { ok: false, error: 'Delivery service unavailable.' }, 502);
   }
 
-  return json(request, { ok: true });
+  return json(request, { ok: true, activationPending });
 }
