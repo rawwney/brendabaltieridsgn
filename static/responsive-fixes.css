@@ -3164,6 +3164,13 @@ section.skills,
   pointer-events: none;
 }
 
+/* Wrapping each glyph removes the font's native V-A kerning pair. Restore the
+   optical spacing only for the Portuguese contact title. */
+:lang(pt) .contact.contact-with-gif > .mega.section-display-title
+  > .morph-letter:first-child[data-glyph="V"] {
+  margin-inline-end: -.065em;
+}
+
 .morph-text.is-morphing .morph-letter {
   will-change: -webkit-text-stroke-width;
 }
