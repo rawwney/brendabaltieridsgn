@@ -538,6 +538,10 @@
         details: 'TELL ME A LITTLE ABOUT THE PROJECT',
         detailsPlaceholder: 'Context, goals, deliverables and expected timing.',
         submit: 'SEND BRIEF',
+        sending: 'SENDING...',
+        sent: 'BRIEF SENT ✓',
+        sentDetail: 'Thank you! Your project details were sent successfully.',
+        sendError: 'Unable to send right now. Please try again or use WhatsApp.',
         required: 'Required fields',
         serviceOptions: ['Branding', 'Visual Identity', 'Social Media Design', 'UX / UI Design', 'Packaging / Editorial', 'Other'],
       }
@@ -555,6 +559,10 @@
         details: 'CONTE UM POUCO SOBRE O PROJETO',
         detailsPlaceholder: 'Contexto, objetivo, entregas e prazo esperado.',
         submit: 'ENVIAR BRIEFING',
+        sending: 'ENVIANDO...',
+        sent: 'BRIEFING ENVIADO ✓',
+        sentDetail: 'Obrigada! As informações do seu projeto foram enviadas com sucesso.',
+        sendError: 'Não foi possível enviar agora. Tente novamente ou use o WhatsApp.',
         required: 'Campos obrigatórios',
         serviceOptions: ['Branding', 'Identidade Visual', 'Design para Redes Sociais', 'UX / UI Design', 'Embalagens / Editorial', 'Outro'],
       };
@@ -597,6 +605,15 @@
 
     const form = document.createElement('form');
     form.className = 'hero-contact-form';
+    form.noValidate = false;
+
+    const honeypot = document.createElement('input');
+    honeypot.type = 'text';
+    honeypot.name = 'website';
+    honeypot.tabIndex = -1;
+    honeypot.autocomplete = 'off';
+    honeypot.setAttribute('aria-hidden', 'true');
+    honeypot.className = 'hero-contact-honeypot';
 
     const makeField = (labelText, control) => {
       const label = document.createElement('label');
@@ -658,18 +675,50 @@
     submit.type = 'submit';
     submit.className = 'hero-contact-submit';
     submit.textContent = `${copy.submit} ↗`;
-    actions.append(required, submit);
-    form.append(fields, actions);
-    form.addEventListener('submit', (event) => {
+    const feedback = document.createElement('p');
+    feedback.className = 'hero-contact-feedback';
+    feedback.setAttribute('aria-live', 'polite');
+    feedback.hidden = true;
+    actions.append(required, feedback, submit);
+    form.append(honeypot, fields, actions);
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!form.reportValidity()) return;
-      const subject = english
-        ? `New project — ${service.value} — ${name.value.trim()}`
-        : `Novo projeto — ${service.value} — ${name.value.trim()}`;
-      const body = english
-        ? `Name: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / phone: ${phone.value.trim() || '-'}\nService: ${service.value}\n\nProject details:\n${details.value.trim()}`
-        : `Nome: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / telefone: ${phone.value.trim() || '-'}\nServiço: ${service.value}\n\nDetalhes do projeto:\n${details.value.trim()}`;
-      window.location.href = `mailto:brenda.baltieri01@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      submit.disabled = true;
+      submit.textContent = copy.sending;
+      feedback.hidden = true;
+      feedback.className = 'hero-contact-feedback';
+
+      try {
+        const response = await fetch('https://brendabaltieridsgn.pages.dev/api/briefing', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            name: name.value.trim(),
+            email: emailInput.value.trim(),
+            phone: phone.value.trim(),
+            service: service.value,
+            details: details.value.trim(),
+            language: english ? 'en' : 'pt',
+            sourceUrl: window.location.href,
+            website: honeypot.value,
+          }),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error('Brief delivery failed.');
+
+        form.reset();
+        feedback.textContent = copy.sentDetail;
+        feedback.classList.add('is-success');
+        feedback.hidden = false;
+        submit.textContent = copy.sent;
+      } catch {
+        feedback.textContent = copy.sendError;
+        feedback.classList.add('is-error');
+        feedback.hidden = false;
+        submit.disabled = false;
+        submit.textContent = `${copy.submit} ↗`;
+      }
     });
     shell.append(top, title, whatsapp, form);
     dialog.append(shell);
