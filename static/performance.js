@@ -690,22 +690,38 @@
       feedback.className = 'hero-contact-feedback';
 
       try {
-        const response = await fetch('https://brendabaltieridsgn.pages.dev/api/briefing', {
+        if (honeypot.value) {
+          form.reset();
+          feedback.textContent = copy.sentDetail;
+          feedback.classList.add('is-success');
+          feedback.hidden = false;
+          submit.textContent = copy.sent;
+          return;
+        }
+
+        const response = await fetch('https://formsubmit.co/ajax/brenda.baltieri01@gmail.com', {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+          },
           body: JSON.stringify({
-            name: name.value.trim(),
-            email: emailInput.value.trim(),
-            phone: phone.value.trim(),
-            service: service.value,
-            details: details.value.trim(),
-            language: english ? 'en' : 'pt',
-            sourceUrl: window.location.href,
-            website: honeypot.value,
+            Nome: name.value.trim(),
+            Email: emailInput.value.trim(),
+            'WhatsApp / telefone': phone.value.trim() || 'Não informado',
+            Serviço: service.value,
+            'Sobre o projeto': details.value.trim(),
+            Idioma: english ? 'Inglês' : 'Português',
+            'Página de origem': window.location.href,
+            _replyto: emailInput.value.trim(),
+            _subject: `Novo briefing do portfólio — ${name.value.trim()}`,
+            _template: 'table',
+            _captcha: 'false',
+            _honey: '',
           }),
         });
         const result = await response.json().catch(() => null);
-        if (!response.ok || !result?.ok) throw new Error('Brief delivery failed.');
+        if (!response.ok || result?.success !== 'true') throw new Error('Brief delivery failed.');
 
         form.reset();
         feedback.textContent = copy.sentDetail;
