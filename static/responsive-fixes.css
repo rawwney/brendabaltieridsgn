@@ -1800,10 +1800,11 @@ section.skills,
   color: var(--white);
   overflow: auto;
 }
-html.brand-cursor-ready .hero-contact-dialog,
-html.brand-cursor-ready .hero-contact-dialog * { cursor: default !important; }
-html.brand-cursor-ready .hero-contact-dialog :is(a, button, select) { cursor: pointer !important; }
-html.brand-cursor-ready .hero-contact-dialog :is(input, textarea) { cursor: text !important; }
+@media (hover: hover) and (pointer: fine) {
+  html.brand-cursor-ready .hero-contact-dialog,
+  html.brand-cursor-ready .hero-contact-dialog * { cursor: none !important; }
+  .hero-contact-dialog > .brand-cursor { z-index: 4; }
+}
 .hero-contact-dialog::backdrop {
   background: #000000c7;
   backdrop-filter: blur(9px);
@@ -1879,6 +1880,14 @@ html.brand-cursor-ready .hero-contact-dialog :is(input, textarea) { cursor: text
   color: var(--ink);
   transform: translate(4px, -4px);
 }
+.hero-contact-whatsapp {
+  width: 100%;
+  min-height: 112px;
+  margin-bottom: clamp(24px, 3vw, 42px);
+  border: 1px solid var(--line);
+  padding: clamp(18px, 2vw, 28px);
+}
+.hero-contact-whatsapp strong { font-size: clamp(20px, 1.8vw, 30px); }
 .hero-contact-shell > h2.is-form-title { max-width: 15ch; margin-bottom: clamp(28px, 4vw, 54px); }
 .hero-contact-form { border-top: 1px solid var(--line); }
 .hero-contact-fields {
@@ -1923,7 +1932,7 @@ html.brand-cursor-ready .hero-contact-dialog :is(input, textarea) { cursor: text
 .hero-contact-fields textarea::placeholder { color: #ffffff80; }
 .hero-contact-form-actions {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 18px;
   padding-top: 22px;
@@ -2159,9 +2168,7 @@ html.brand-cursor-ready .hero-contact-dialog :is(input, textarea) { cursor: text
   .services-ux-note { grid-template-columns: minmax(0, 1fr); }
   .contact-intro { font-size: 18px; }
   .hero-contact-shell > h2 { font-size: clamp(42px, 12vw, 64px); }
-  .hero-contact-options { grid-template-columns: minmax(0, 1fr); }
-  .hero-contact-option { min-height: 130px; }
-  .hero-contact-option + .hero-contact-option { border-top: 1px solid var(--line); border-left: 0; }
+  .hero-contact-whatsapp { min-height: 110px; }
   .hero-contact-fields { grid-template-columns: minmax(0, 1fr); }
   .hero-contact-fields label,
   .hero-contact-fields label:nth-child(odd),
@@ -2172,8 +2179,6 @@ html.brand-cursor-ready .hero-contact-dialog :is(input, textarea) { cursor: text
     border-right: 0;
   }
   .hero-contact-form-actions { grid-template-columns: 1fr auto; }
-  .hero-contact-form-actions small { grid-column: 1 / -1; grid-row: 1; }
-  .hero-contact-back { grid-column: 1; }
   .hero-contact-submit { grid-column: 2; }
 }
 

@@ -518,20 +518,18 @@
       dialog.addEventListener('click', (event) => {
         if (event.target === dialog) dialog.close();
       });
+      dialog.addEventListener('close', () => {
+        const brandCursor = dialog.querySelector(':scope > .brand-cursor');
+        if (brandCursor) document.body.prepend(brandCursor);
+      });
     }
     const copy = english
       ? {
         eyebrow: 'NEW PROJECT',
-        title: 'HOW WOULD YOU LIKE TO TALK?',
         close: 'CLOSE',
         whatsapp: 'WHATSAPP',
-        whatsappDetail: 'Start a direct conversation',
-        email: 'EMAIL',
-        emailDetail: 'Send a project brief',
-        site: 'CONTACT ON THE SITE',
-        siteDetail: 'Fill in your project details',
+        whatsappDetail: 'Start a direct conversation before filling out the brief',
         formTitle: 'TELL ME ABOUT YOUR PROJECT',
-        back: 'BACK',
         name: 'NAME',
         emailLabel: 'E-MAIL',
         phone: 'WHATSAPP / PHONE',
@@ -545,16 +543,10 @@
       }
       : {
         eyebrow: 'NOVO PROJETO',
-        title: 'COMO PREFERE CONVERSAR?',
         close: 'FECHAR',
         whatsapp: 'WHATSAPP',
-        whatsappDetail: 'Comece uma conversa direta',
-        email: 'E-MAIL',
-        emailDetail: 'Envie um briefing do projeto',
-        site: 'CONTATO PELO SITE',
-        siteDetail: 'Preencha os dados do seu projeto',
+        whatsappDetail: 'Comece uma conversa direta antes de preencher o briefing',
         formTitle: 'CONTE SOBRE O SEU PROJETO',
-        back: 'VOLTAR',
         name: 'NOME',
         emailLabel: 'E-MAIL',
         phone: 'WHATSAPP / TELEFONE',
@@ -566,6 +558,8 @@
         required: 'Campos obrigatórios',
         serviceOptions: ['Branding', 'Identidade Visual', 'Design para Redes Sociais', 'UX / UI Design', 'Embalagens / Editorial', 'Outro'],
       };
+    const carriedCursor = dialog.querySelector(':scope > .brand-cursor');
+    if (carriedCursor) document.body.prepend(carriedCursor);
     dialog.replaceChildren();
     const shell = document.createElement('div');
     shell.className = 'hero-contact-shell';
@@ -579,9 +573,8 @@
     close.addEventListener('click', () => dialog.close());
     top.append(eyebrow, close);
     const title = document.createElement('h2');
-    title.textContent = copy.title;
-    const options = document.createElement('div');
-    options.className = 'hero-contact-options';
+    title.textContent = copy.formTitle;
+    title.classList.add('is-form-title');
     const makeOption = (element, labelText, detailText) => {
       element.className = 'hero-contact-option';
       const label = document.createElement('strong');
@@ -600,101 +593,96 @@
       : 'https://wa.me/5511984298730?text=Ol%C3%A1%20Brenda%2C%20vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto.';
     whatsapp.target = '_blank';
     whatsapp.rel = 'noreferrer';
-    const email = makeOption(document.createElement('a'), copy.email, copy.emailDetail);
-    email.href = 'mailto:brenda.baltieri01@gmail.com';
-    const site = makeOption(document.createElement('button'), copy.site, copy.siteDetail);
-    site.type = 'button';
-    site.addEventListener('click', () => {
-      title.textContent = copy.formTitle;
-      title.classList.add('is-form-title');
-      const form = document.createElement('form');
-      form.className = 'hero-contact-form';
+    whatsapp.classList.add('hero-contact-whatsapp');
 
-      const makeField = (labelText, control) => {
-        const label = document.createElement('label');
-        const caption = document.createElement('span');
-        caption.textContent = labelText;
-        label.append(caption, control);
-        return label;
-      };
+    const form = document.createElement('form');
+    form.className = 'hero-contact-form';
 
-      const name = document.createElement('input');
-      name.name = 'name';
-      name.autocomplete = 'name';
-      name.required = true;
-      const emailInput = document.createElement('input');
-      emailInput.type = 'email';
-      emailInput.name = 'email';
-      emailInput.autocomplete = 'email';
-      emailInput.required = true;
-      const phone = document.createElement('input');
-      phone.type = 'tel';
-      phone.name = 'phone';
-      phone.autocomplete = 'tel';
-      const service = document.createElement('select');
-      service.name = 'service';
-      service.required = true;
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = copy.select;
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      service.append(placeholder);
-      copy.serviceOptions.forEach((optionText) => {
-        const option = document.createElement('option');
-        option.value = optionText;
-        option.textContent = optionText;
-        service.append(option);
-      });
-      const details = document.createElement('textarea');
-      details.name = 'details';
-      details.rows = 5;
-      details.required = true;
-      details.placeholder = copy.detailsPlaceholder;
+    const makeField = (labelText, control) => {
+      const label = document.createElement('label');
+      const caption = document.createElement('span');
+      caption.textContent = labelText;
+      label.append(caption, control);
+      return label;
+    };
 
-      const fields = document.createElement('div');
-      fields.className = 'hero-contact-fields';
-      fields.append(
-        makeField(`${copy.name} *`, name),
-        makeField(`${copy.emailLabel} *`, emailInput),
-        makeField(copy.phone, phone),
-        makeField(`${copy.service} *`, service),
-        makeField(`${copy.details} *`, details),
-      );
-
-      const actions = document.createElement('div');
-      actions.className = 'hero-contact-form-actions';
-      const back = document.createElement('button');
-      back.type = 'button';
-      back.className = 'hero-contact-back';
-      back.textContent = `← ${copy.back}`;
-      back.addEventListener('click', openProjectContactModal);
-      const required = document.createElement('small');
-      required.textContent = `* ${copy.required}`;
-      const submit = document.createElement('button');
-      submit.type = 'submit';
-      submit.className = 'hero-contact-submit';
-      submit.textContent = `${copy.submit} ↗`;
-      actions.append(back, required, submit);
-      form.append(fields, actions);
-      form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (!form.reportValidity()) return;
-        const subject = english
-          ? `New project — ${service.value} — ${name.value.trim()}`
-          : `Novo projeto — ${service.value} — ${name.value.trim()}`;
-        const body = english
-          ? `Name: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / phone: ${phone.value.trim() || '-'}\nService: ${service.value}\n\nProject details:\n${details.value.trim()}`
-          : `Nome: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / telefone: ${phone.value.trim() || '-'}\nServiço: ${service.value}\n\nDetalhes do projeto:\n${details.value.trim()}`;
-        window.location.href = `mailto:brenda.baltieri01@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      });
-      options.replaceWith(form);
-      name.focus();
+    const name = document.createElement('input');
+    name.name = 'name';
+    name.autocomplete = 'name';
+    name.required = true;
+    const emailInput = document.createElement('input');
+    emailInput.type = 'email';
+    emailInput.name = 'email';
+    emailInput.autocomplete = 'email';
+    emailInput.required = true;
+    const phone = document.createElement('input');
+    phone.type = 'tel';
+    phone.name = 'phone';
+    phone.autocomplete = 'tel';
+    const service = document.createElement('select');
+    service.name = 'service';
+    service.required = true;
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = copy.select;
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    service.append(placeholder);
+    copy.serviceOptions.forEach((optionText) => {
+      const option = document.createElement('option');
+      option.value = optionText;
+      option.textContent = optionText;
+      service.append(option);
     });
-    options.append(whatsapp, email, site);
-    shell.append(top, title, options);
+    const details = document.createElement('textarea');
+    details.name = 'details';
+    details.rows = 5;
+    details.required = true;
+    details.placeholder = copy.detailsPlaceholder;
+
+    const fields = document.createElement('div');
+    fields.className = 'hero-contact-fields';
+    fields.append(
+      makeField(`${copy.name} *`, name),
+      makeField(`${copy.emailLabel} *`, emailInput),
+      makeField(copy.phone, phone),
+      makeField(`${copy.service} *`, service),
+      makeField(`${copy.details} *`, details),
+    );
+
+    const actions = document.createElement('div');
+    actions.className = 'hero-contact-form-actions';
+    const required = document.createElement('small');
+    required.textContent = `* ${copy.required}`;
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'hero-contact-submit';
+    submit.textContent = `${copy.submit} ↗`;
+    actions.append(required, submit);
+    form.append(fields, actions);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const subject = english
+        ? `New project — ${service.value} — ${name.value.trim()}`
+        : `Novo projeto — ${service.value} — ${name.value.trim()}`;
+      const body = english
+        ? `Name: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / phone: ${phone.value.trim() || '-'}\nService: ${service.value}\n\nProject details:\n${details.value.trim()}`
+        : `Nome: ${name.value.trim()}\nE-mail: ${emailInput.value.trim()}\nWhatsApp / telefone: ${phone.value.trim() || '-'}\nServiço: ${service.value}\n\nDetalhes do projeto:\n${details.value.trim()}`;
+      window.location.href = `mailto:brenda.baltieri01@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+    shell.append(top, title, whatsapp, form);
     dialog.append(shell);
+    const brandCursor = document.querySelector('body > .brand-cursor');
+    if (
+      brandCursor &&
+      window.matchMedia('(hover:hover) and (pointer:fine)').matches &&
+      !window.matchMedia('(prefers-reduced-motion:reduce)').matches
+    ) {
+      dialog.append(brandCursor);
+    }
     if (!dialog.open) dialog.showModal();
+    requestAnimationFrame(() => name.focus({ preventScroll: true }));
   }
 
   function enhanceHeroCopy() {
