@@ -61,6 +61,73 @@
     root.querySelectorAll('img[src^="/projects/"]').forEach(enhanceImage);
   }
 
+  const arrowGlyphPattern = /\s*([↗↘→↓↑←])\s*$/u;
+  const arrowDirectionClass = {
+    '↘': 'site-arrow--south-east',
+    '↗': 'site-arrow--north-east',
+    '→': 'site-arrow--east',
+    '↓': 'site-arrow--south',
+    '↑': 'site-arrow--north',
+    '←': 'site-arrow--west',
+  };
+
+  function trailingTextNode(element) {
+    const visit = (node) => {
+      for (let child = node.lastChild; child; child = child.previousSibling) {
+        if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) return child;
+        if (child.nodeType === Node.ELEMENT_NODE && !child.classList.contains('site-arrow')) {
+          const nested = visit(child);
+          if (nested) return nested;
+        }
+      }
+      return null;
+    };
+    return visit(element);
+  }
+
+  function enhanceLinkArrow(element) {
+    if (!(element instanceof Element)) return;
+    if (element.classList.contains('about-cv-arrow')) {
+      element.classList.add('site-arrow', 'site-arrow--south-east', 'site-arrow--large');
+      return;
+    }
+
+    const textNode = trailingTextNode(element);
+    const match = textNode?.textContent.match(arrowGlyphPattern);
+    if (!match) return;
+    textNode.textContent = textNode.textContent.replace(arrowGlyphPattern, '').replace(/\s+$/u, '');
+
+    let arrow = Array.from(element.children).find((child) => child.classList.contains('site-arrow'));
+    if (!arrow) {
+      arrow = document.createElement('span');
+      arrow.className = 'site-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      element.append(arrow);
+    }
+    Object.values(arrowDirectionClass).forEach((className) => arrow.classList.remove(className));
+    arrow.classList.add(arrowDirectionClass[match[1]] || 'site-arrow--south-east');
+    arrow.dataset.direction = match[1];
+  }
+
+  function enhanceLinkArrows(root = document) {
+    const selector = [
+      '.about-cv-arrow',
+      '.project-cta',
+      '.hero-value-cta',
+      '.hero-contact-option',
+      '.hero-contact-submit',
+      '.contact-option',
+      '.contact-copy-button',
+      '.socials a',
+      '.tag-project-actions a',
+      '.project-tag-link',
+      '.case-nav button',
+      'footer a',
+    ].join(',');
+    if (root.matches?.(selector)) enhanceLinkArrow(root);
+    root.querySelectorAll?.(selector).forEach(enhanceLinkArrow);
+  }
+
   function enhanceProject(project) {
     const image = project.querySelector('.project-image');
     const opener = project.querySelector('.project-open');
@@ -94,71 +161,7 @@
     image.setAttribute('aria-label', openLabel);
     opener.setAttribute('aria-label', openLabel);
 
-    let like = project.querySelector(':scope > .project-like');
-    const projectKey = projectTitle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const storageKey = `brenda-project-like:${projectKey}`;
-    const renderLike = (button, liked, count) => {
-      const isEnglish = document.documentElement.lang.startsWith('en');
-      button.setAttribute('aria-pressed', String(liked));
-      button.dataset.count = String(Math.max(0, Number(count) || 0));
-      const markup = `<span class="project-like-icon" aria-hidden="true">${liked ? '♥' : '♡'}</span><span class="project-like-label">${isEnglish ? (liked ? 'LIKED' : 'LIKE') : 'GOSTEI'}</span><span class="project-like-count" aria-hidden="true">${button.dataset.count}</span>`;
-      if (button.innerHTML !== markup) button.innerHTML = markup;
-      button.setAttribute('aria-label', isEnglish
-        ? `${liked ? 'Already liked' : 'Like'} ${projectTitle}. ${button.dataset.count} likes.`
-        : `${liked ? 'Você já gostou de' : 'Gostei de'} ${projectTitle}. ${button.dataset.count} curtidas.`);
-    };
-    if (!like) {
-      like = document.createElement('button');
-      like.type = 'button';
-      like.className = 'project-like';
-      like.dataset.storageKey = storageKey;
-      like.dataset.projectKey = projectKey;
-      project.append(like);
-      like.addEventListener('click', async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (like.getAttribute('aria-pressed') === 'true' || like.dataset.pending === 'true') return;
-        like.dataset.pending = 'true';
-        const optimisticCount = Number(like.dataset.count || 0) + 1;
-        renderLike(like, true, optimisticCount);
-        try { localStorage.setItem(like.dataset.storageKey, '1'); } catch { /* storage is optional */ }
-        try {
-          const response = await fetch('/api/likes', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ project: like.dataset.projectKey }),
-          });
-          if (!response.ok) throw new Error('Like counter unavailable');
-          const payload = await response.json();
-          renderLike(like, true, payload.count);
-        } catch {
-          renderLike(like, true, optimisticCount);
-        } finally {
-          delete like.dataset.pending;
-        }
-      });
-    }
-    let liked = false;
-    try { liked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
-    renderLike(like, liked, like.dataset.count || 0);
-    if (like.dataset.countRequested !== 'true') {
-      like.dataset.countRequested = 'true';
-      fetch(`/api/likes?project=${encodeURIComponent(projectKey)}`)
-        .then((response) => {
-          if (!response.ok) throw new Error('Like counter unavailable');
-          return response.json();
-        })
-        .then((payload) => {
-          let currentLiked = like.getAttribute('aria-pressed') === 'true';
-          try { currentLiked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
-          renderLike(like, currentLiked, payload.count);
-        })
-        .catch(() => {
-          let currentLiked = like.getAttribute('aria-pressed') === 'true';
-          try { currentLiked = localStorage.getItem(storageKey) === '1'; } catch { /* storage is optional */ }
-          renderLike(like, currentLiked, like.dataset.count || 0);
-        });
-    }
+    project.querySelectorAll(':scope > .project-like').forEach((button) => button.remove());
   }
 
   function enhanceProjects(root = document) {
@@ -364,8 +367,6 @@
       space.append(image);
       const download = document.createElement('a');
       download.className = 'about-cv-download';
-      download.href = '/cv/brenda-baltieri-curriculo.pdf';
-      download.download = 'Brenda-Baltieri-Curriculo.pdf';
       const label = document.createElement('span');
       label.className = 'about-cv-label';
       const arrow = document.createElement('span');
@@ -382,6 +383,13 @@
     }
     const downloadLink = photoStack.querySelector('.about-cv-download');
     if (downloadLink) {
+      downloadLink.href = english
+        ? '/cv/brenda-baltieri-resume-en.pdf'
+        : '/cv/brenda-baltieri-curriculo-pt.pdf';
+      downloadLink.download = english
+        ? 'Brenda-Baltieri-Resume-EN.pdf'
+        : 'Brenda-Baltieri-Curriculo-PT.pdf';
+      downloadLink.lang = english ? 'en' : 'pt-BR';
       downloadLink.setAttribute('aria-label', english
         ? 'Download Brenda Baltieri résumé in PDF'
         : 'Baixar currículo de Brenda Baltieri em PDF');
@@ -2013,12 +2021,14 @@
         enhanceFooterSignature();
         enhanceEducation(node);
         enhanceSpatialHero(node);
+        enhanceLinkArrows(node);
         buildHorizontalArchive();
       }
     }
     simplifyProfile();
     enhanceProjects();
     enhanceSiteNarrative();
+    enhanceLinkArrows();
     syncPageIsolation();
     changedHeroes.forEach((hero) => {
       if (hero.isConnected) enhanceSpatialHeroElement(hero);
@@ -2049,6 +2059,7 @@
     enhanceEducation();
     enhanceSpatialHero();
     enhanceSiteNarrative();
+    enhanceLinkArrows();
     buildHorizontalArchive();
     syncPageIsolation();
     observer.observe(document.documentElement, {

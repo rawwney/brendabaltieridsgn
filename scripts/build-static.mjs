@@ -170,7 +170,7 @@ let indexHtml = await readFile(indexPath, 'utf8');
 // measurements are ready; the timeout prevents a permanent cover if JS fails.
 indexHtml = indexHtml.replace(
   '<head>',
-  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),2500);</script>',
+  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),2500);</script><style>html.portfolio-booting,html.portfolio-booting body{background:#000}html.portfolio-booting::before{content:"";position:fixed;z-index:250;inset:0;background:#000;opacity:1;pointer-events:auto;transition:opacity 260ms cubic-bezier(.22,1,.36,1)}html.portfolio-booting.portfolio-revealing::before{opacity:0;pointer-events:none}</style>',
 );
 
 // Keep the server-rendered project archive in the same order as the patched

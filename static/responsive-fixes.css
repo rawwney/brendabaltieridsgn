@@ -79,13 +79,24 @@ footer a {
   border-color: var(--acid) !important;
 }
 
+.project-grid > .project .project-info {
+  background-color: var(--ink) !important;
+  background-image: linear-gradient(to top, var(--acid) 0 50%, var(--ink) 50% 100%) !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 200% !important;
+  transition: background-position var(--interaction-duration, 220ms) var(--interaction-ease, cubic-bezier(.22, 1, .36, 1)), color 90ms linear 110ms;
+}
+
 .project-grid > .project:is(:hover, :focus-within) .project-info {
-  background: var(--acid) !important;
+  background-color: var(--ink) !important;
+  background-position: center bottom !important;
   color: var(--ink) !important;
 }
 
 .project-grid > .project:is(:hover, :focus-within) .project-tags {
   color: var(--ink) !important;
+  transition-delay: 110ms;
 }
 
 .project-grid > .project:is(:hover, :focus-within) .project-image img {
@@ -104,6 +115,7 @@ footer a {
 
 .project-grid > .project { position: relative; }
 .project-like {
+  display: none !important;
   position: absolute;
   z-index: 5;
   top: 14px;
@@ -1549,32 +1561,9 @@ footer a {
   transition: transform .25s cubic-bezier(.2, .75, .18, 1);
 }
 .about-cv-arrow {
-  position: relative;
   flex: none;
   width: clamp(34px, 3.5vw, 52px);
   height: clamp(34px, 3.5vw, 52px);
-  color: currentColor;
-}
-.about-cv-arrow::before {
-  content: "";
-  position: absolute;
-  top: 8%;
-  left: 4%;
-  width: 118%;
-  height: 3px;
-  background: currentColor;
-  transform: rotate(45deg);
-  transform-origin: left center;
-}
-.about-cv-arrow::after {
-  content: "";
-  position: absolute;
-  right: 2%;
-  bottom: 2%;
-  width: 42%;
-  height: 42%;
-  border-right: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
 }
 .about-cv-download:is(:hover, :focus-visible) {
   background: var(--ink);
@@ -3316,6 +3305,68 @@ section.skills,
   --interaction-duration: 220ms;
   --interaction-ease: cubic-bezier(.22, 1, .36, 1);
   --interaction-shift: 4px;
+  --arrow-white: url('/icons/arrow-white.svg');
+  --arrow-acid: url('/icons/arrow-acid.svg');
+  --arrow-purple: url('/icons/arrow-purple.svg');
+  --arrow-black: url('/icons/arrow-black.svg');
+}
+
+.site-arrow {
+  --site-arrow-image: var(--arrow-acid);
+  --site-arrow-rotation: 0deg;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: .82em;
+  height: .82em;
+  margin-left: .42em;
+  background: var(--site-arrow-image) center / contain no-repeat;
+  transform: rotate(var(--site-arrow-rotation));
+  transform-origin: center;
+  transition: transform var(--interaction-duration) var(--interaction-ease),
+    background-image var(--interaction-duration) var(--interaction-ease);
+}
+
+.site-arrow--north-east { --site-arrow-rotation: -90deg; }
+.site-arrow--east { --site-arrow-rotation: -45deg; }
+.site-arrow--south { --site-arrow-rotation: 45deg; }
+.site-arrow--north { --site-arrow-rotation: -135deg; }
+.site-arrow--west { --site-arrow-rotation: 135deg; }
+
+.site-arrow--large {
+  width: clamp(32px, 2.8vw, 42px);
+  height: clamp(32px, 2.8vw, 42px);
+  margin-left: 0;
+}
+
+:is(.hero-value-cta-secondary, .about-cv-download, footer a) .site-arrow {
+  --site-arrow-image: var(--arrow-white);
+}
+
+:is(.hero-value-cta-primary, .hero-contact-submit, .hero-contact-option:is(:hover, :focus-visible)) .site-arrow,
+.project-grid > .project:is(:hover, :focus-within) .project-cta .site-arrow {
+  --site-arrow-image: var(--arrow-black);
+}
+
+:is(.hero-value-cta-primary, .hero-contact-submit):is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-purple);
+}
+
+:is(.hero-value-cta, .project-cta, .hero-contact-option, .hero-contact-submit, .contact-option, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, .case-nav button, footer a) {
+  align-items: center;
+}
+
+:is(.hero-value-cta, .hero-contact-submit, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, footer a) {
+  display: inline-flex !important;
+}
+
+:is(.hero-value-cta, .project-cta, .hero-contact-option, .hero-contact-submit, .contact-option, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, .case-nav button, footer a):is(:hover, :focus-visible) .site-arrow {
+  transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1)) rotate(var(--site-arrow-rotation));
+}
+
+.hero-contact-option > .site-arrow {
+  width: 26px;
+  height: 26px;
+  margin-left: 0;
 }
 
 html {
@@ -3346,10 +3397,19 @@ html {
 
 :is(.header nav a, .mobile-menu > a, .socials a, footer a) {
   display: inline-block;
-  transition-property: color, transform !important;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: left calc(100% - 1px);
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  text-decoration: none;
+  transition-property: color, background-size !important;
 }
 
-:is(.header nav a, .mobile-menu > a, .socials a, footer a):is(:hover, :focus-visible),
+:is(.header nav a, .mobile-menu > a, .socials a, footer a):is(:hover, :focus-visible) {
+  background-size: 100% 1px;
+  transform: none;
+}
+
 :is(.hero-value-cta, .project-like, .project-tag-link, .contact-copy-button, .hero-contact-back, .hero-contact-submit, .tag-project-actions > *, .modal-top button):is(:hover, :focus-visible) {
   transform: translateY(-2px);
 }
@@ -3390,7 +3450,7 @@ html {
 }
 
 .contact-option:is(:hover, :focus-visible) small,
-.hero-contact-option:is(:hover, :focus-visible) > span,
+.hero-contact-option:is(:hover, :focus-visible) > span:not(.site-arrow),
 .about-cv-download:is(:hover, :focus-visible) .about-cv-arrow {
   transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1));
 }
@@ -3406,5 +3466,211 @@ html {
 @media (prefers-reduced-motion: reduce) {
   :is(a, button, .project-title, .project-cta, .services-grid h3, .services-extras li, .contact-option strong, .contact-option small) {
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* One shared upward sweep for action links. Context variables preserve the
+   existing black, white, acid and violet relationships in each section. */
+:where(
+  .hero-value-cta,
+  .about-cv-download,
+  .hero-contact-option,
+  .hero-contact-submit,
+  .contact-option,
+  .contact-copy-button,
+  .hero-contact-back,
+  .menu-button,
+  .language-switch button,
+  .project-like,
+  .project-tag-link,
+  .modal-top button,
+  .copy-confirmation button,
+  .tag-project-actions > *,
+  .case-nav button
+) {
+  --sweep-base: transparent;
+  --sweep-fill: var(--acid);
+  --sweep-text: var(--ink);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+:where(
+  .hero-value-cta,
+  .about-cv-download,
+  .hero-contact-option,
+  .hero-contact-submit,
+  .contact-option,
+  .contact-copy-button,
+  .hero-contact-back,
+  .menu-button,
+  .language-switch button,
+  .project-like,
+  .project-tag-link,
+  .modal-top button,
+  .copy-confirmation button,
+  .tag-project-actions > *,
+  .case-nav button
+)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  background: var(--sweep-fill);
+  transform: translateY(101%);
+  transform-origin: center bottom;
+  transition: transform var(--interaction-duration) var(--interaction-ease);
+  pointer-events: none;
+}
+
+:where(
+  .hero-value-cta,
+  .about-cv-download,
+  .hero-contact-option,
+  .hero-contact-submit,
+  .contact-option,
+  .contact-copy-button,
+  .hero-contact-back,
+  .menu-button,
+  .language-switch button,
+  .project-like,
+  .project-tag-link,
+  .modal-top button,
+  .copy-confirmation button,
+  .tag-project-actions > *,
+  .case-nav button
+):is(:hover, :focus-visible) {
+  background: var(--sweep-base) !important;
+  color: var(--sweep-text) !important;
+}
+
+:where(
+  .hero-value-cta,
+  .about-cv-download,
+  .hero-contact-option,
+  .hero-contact-submit,
+  .contact-option,
+  .contact-copy-button,
+  .hero-contact-back,
+  .menu-button,
+  .language-switch button,
+  .project-like,
+  .project-tag-link,
+  .modal-top button,
+  .copy-confirmation button,
+  .tag-project-actions > *,
+  .case-nav button
+):is(:hover, :focus-visible)::before {
+  transform: translateY(0);
+}
+
+.hero-value-cta-primary,
+.hero-contact-submit {
+  --sweep-base: var(--acid);
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.hero-value-cta-secondary {
+  --sweep-base: transparent;
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.about-cv-download {
+  --sweep-base: var(--ink);
+  --sweep-fill: #171717;
+  --sweep-text: var(--white);
+}
+
+.about-cv-download:hover {
+  border-color: var(--ink) !important;
+  box-shadow: none !important;
+}
+
+.about-cv-download:focus-visible {
+  border-color: var(--ink) !important;
+  box-shadow: 0 0 0 3px var(--violet), 0 0 0 6px var(--white) !important;
+}
+
+.contact-whatsapp {
+  --sweep-base: var(--acid);
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.contact-email {
+  --sweep-base: var(--violet);
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.contact-options .contact-option {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.project-like {
+  position: absolute;
+  --sweep-base: #050505d9;
+  --sweep-fill: var(--acid);
+  --sweep-text: var(--ink);
+}
+
+.modal-top button {
+  --sweep-base: var(--acid);
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.hero-value-cta-secondary:is(:hover, :focus-visible) .site-arrow,
+:is(.hero-value-cta-primary, .hero-contact-submit):is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-purple);
+}
+
+:is(.hero-contact-option, .contact-option):is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-black);
+}
+
+.about-cv-download:is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-white);
+}
+
+.contact-whatsapp .site-arrow {
+  --site-arrow-image: var(--arrow-black);
+}
+
+.contact-email .site-arrow {
+  --site-arrow-image: var(--arrow-white);
+}
+
+.contact-email:is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-purple);
+}
+
+.contact-whatsapp:is(:hover, :focus-visible) .site-arrow {
+  --site-arrow-image: var(--arrow-purple);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .hero-value-cta,
+    .about-cv-download,
+    .hero-contact-option,
+    .hero-contact-submit,
+    .contact-option,
+    .contact-copy-button,
+    .hero-contact-back,
+    .menu-button,
+    .language-switch button,
+    .project-like,
+    .project-tag-link,
+    .modal-top button,
+    .copy-confirmation button,
+    .tag-project-actions > *,
+    .case-nav button
+  )::before {
+    transition-duration: 0.01ms;
   }
 }
