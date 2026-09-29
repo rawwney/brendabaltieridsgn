@@ -3606,6 +3606,22 @@ html {
   --sweep-text: var(--violet);
 }
 
+.contact-copy-button {
+  --sweep-base: var(--acid);
+  --sweep-fill: var(--white);
+  --sweep-text: var(--violet);
+}
+
+.hero-contact-whatsapp {
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
+.hero-contact-whatsapp :is(strong, small) {
+  margin-inline: 0 !important;
+  text-align: left !important;
+}
+
 .contact-options .contact-option {
   align-items: flex-start;
   text-align: left;

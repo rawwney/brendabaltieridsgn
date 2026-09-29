@@ -97,6 +97,11 @@
     if (!match) return;
     textNode.textContent = textNode.textContent.replace(arrowGlyphPattern, '').replace(/\s+$/u, '');
 
+    if (element.matches('.contact-option')) {
+      element.querySelectorAll(':scope > .site-arrow').forEach((arrow) => arrow.remove());
+      return;
+    }
+
     let arrow = Array.from(element.children).find((child) => child.classList.contains('site-arrow'));
     if (!arrow) {
       arrow = document.createElement('span');
@@ -1038,6 +1043,23 @@
     if (intro.textContent !== text) intro.textContent = text;
   }
 
+  function enhanceContactActions(root = document) {
+    const emailActions = root.matches?.('.contact-email')
+      ? [root]
+      : Array.from(root.querySelectorAll?.('.contact-email') || []);
+
+    emailActions.forEach((action) => {
+      if (action.dataset.contactFormTrigger === 'true') return;
+      action.dataset.contactFormTrigger = 'true';
+      action.setAttribute('href', '#contact-form');
+      action.setAttribute('aria-haspopup', 'dialog');
+      action.addEventListener('click', (event) => {
+        event.preventDefault();
+        openProjectContactModal();
+      });
+    });
+  }
+
   function enhanceFooterCredit() {
     const footer = document.querySelector('footer');
     if (!footer) return;
@@ -1060,6 +1082,7 @@
     enhanceProjectGrid();
     enhanceServices();
     enhanceContactCopy();
+    enhanceContactActions();
     enhanceFooterCredit();
     removeBehanceConnections();
     enhanceMorphText();
