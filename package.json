@@ -9,7 +9,7 @@
     "dev": "vite static --host 127.0.0.1 --port 3000",
     "build": "node scripts/build-static.mjs",
     "deploy": "wrangler pages deploy dist --project-name brendabaltieridsgn --branch main",
-    "start": "vite dist --host 127.0.0.1 --port 3000",
+    "start": "node scripts/preview-static.mjs dist 3000",
     "lint": "oxlint",
     "format": "oxfmt"
   },

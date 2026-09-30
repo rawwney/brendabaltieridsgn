@@ -15,6 +15,24 @@ html.portfolio-booting::before {
   transition: opacity 260ms cubic-bezier(.22, 1, .36, 1);
 }
 
+/* Project tags use one consistent, text-only underline interaction. */
+.project-grid .project-tag-link {
+  background-image: linear-gradient(currentColor, currentColor) !important;
+  background-position: left 100% !important;
+  background-repeat: no-repeat !important;
+  background-size: 0 1px !important;
+  text-decoration: none !important;
+  transform: none !important;
+  transition: background-size var(--interaction-duration) var(--interaction-ease) !important;
+}
+
+.project-grid .project-tag-link:is(:hover, :focus-visible) {
+  color: inherit !important;
+  background-size: 100% 1px !important;
+  text-decoration: none !important;
+  transform: none !important;
+}
+
 html.portfolio-booting.portfolio-revealing::before {
   opacity: 0;
   pointer-events: none;
@@ -3688,5 +3706,252 @@ html {
     .case-nav button
   )::before {
     transition-duration: 0.01ms;
+  }
+}
+
+/* Project popup editorial opening: denser hierarchy, Inter body copy and
+   compact navigation without changing the site's existing interaction layers. */
+.project-popup {
+  --popup-body-font: "inter-18pt", "Inter", sans-serif;
+  --popup-gutter: clamp(28px, 3.25vw, 62px);
+}
+
+.project-popup .popup-case > header {
+  padding: clamp(34px, 4vw, 68px) var(--popup-gutter) 0;
+}
+
+.project-popup .popup-case > header > p {
+  margin: 0;
+  color: var(--acid);
+  font-size: clamp(10px, .72vw, 12px);
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.project-popup .popup-case > header h2 {
+  max-width: 100%;
+  margin: clamp(24px, 2.6vw, 42px) 0 clamp(28px, 3.2vw, 52px);
+  font-size: clamp(42px, 5.25vw, 84px);
+  line-height: .88;
+  letter-spacing: -.075em;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.project-popup .case-meta {
+  grid-template-columns: minmax(130px, .8fr) minmax(260px, 1.7fr) minmax(90px, .5fr);
+  gap: clamp(20px, 3vw, 54px);
+  padding: clamp(17px, 1.6vw, 25px) 0 clamp(21px, 2vw, 32px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.project-popup .case-meta span {
+  min-width: 0;
+  font-size: 10px;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.project-popup .case-meta b {
+  margin-top: 7px;
+  font-family: var(--popup-body-font) !important;
+  font-optical-sizing: auto;
+  font-size: clamp(12px, .86vw, 15px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.project-popup .case-intro {
+  grid-template-columns: minmax(130px, .7fr) minmax(0, 2fr);
+  align-items: start;
+  gap: clamp(30px, 5vw, 92px);
+  padding: clamp(34px, 4vw, 68px) var(--popup-gutter) clamp(48px, 5.5vw, 88px);
+}
+
+.project-popup .case-intro p {
+  margin: .2em 0 0;
+  color: var(--acid);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.project-popup .case-intro h3 {
+  max-width: 58rem;
+  margin: 0;
+  font-family: var(--popup-body-font) !important;
+  font-optical-sizing: auto;
+  font-size: clamp(20px, 1.75vw, 29px);
+  font-weight: 430;
+  line-height: 1.34;
+  letter-spacing: -.025em;
+  text-wrap: pretty;
+}
+
+.project-popup .popup-slide figcaption,
+.project-popup .popup-gallery-summary {
+  font-family: var(--popup-body-font) !important;
+  font-optical-sizing: auto;
+  font-weight: 430;
+  line-height: 1.55;
+}
+
+.project-popup .case-nav {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: clamp(48px, 6vw, 96px);
+}
+
+.project-popup .case-nav button {
+  display: flex;
+  min-width: 0;
+  min-height: clamp(112px, 12vw, 170px);
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  padding: clamp(20px, 2.2vw, 34px) var(--popup-gutter);
+  overflow: hidden;
+  white-space: normal;
+  font-size: clamp(10px, .8vw, 13px);
+  line-height: 1.2;
+}
+
+/* The compact previous/next controls intentionally opt out of the global
+   sweep. Their long labels wrap inside the button instead of leaking out. */
+.project-popup .case-nav button::before {
+  content: none !important;
+}
+
+.project-popup .case-nav button:is(:hover, :focus-visible) {
+  color: var(--acid) !important;
+  background: var(--ink) !important;
+}
+
+.project-popup .case-nav button:last-child {
+  align-items: flex-end;
+}
+
+.project-popup .case-nav strong {
+  max-width: min(100%, 30ch);
+  margin: 0;
+  font-size: clamp(16px, 1.65vw, 27px);
+  line-height: 1;
+  letter-spacing: -.035em;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* Give the primary navigation underline a small, deliberate breathing space. */
+.header nav > a {
+  padding-bottom: 3px;
+  margin-bottom: -3px;
+  background-position: left 100%;
+}
+
+/* Language controls mirror the primary navigation underline and spacing. */
+.header .language-switch button,
+.mobile-menu .language-switch button {
+  display: inline-block;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  padding: 0 0 3px;
+  margin-bottom: -3px;
+  isolation: auto;
+  overflow: visible;
+  color: inherit;
+  background-color: transparent !important;
+  background-image: linear-gradient(currentColor, currentColor) !important;
+  background-position: left 100% !important;
+  background-repeat: no-repeat !important;
+  background-size: 0 1px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition-property: color, background-size, opacity !important;
+}
+
+.header .language-switch button::before,
+.mobile-menu .language-switch button::before {
+  content: none !important;
+}
+
+.header .language-switch button:is(:hover, :focus-visible),
+.mobile-menu .language-switch button:is(:hover, :focus-visible) {
+  color: var(--acid) !important;
+  opacity: 1;
+  background-size: 100% 1px !important;
+}
+
+.header .language-switch button.active,
+.mobile-menu .language-switch button.active {
+  color: var(--acid) !important;
+  opacity: 1;
+  background-size: 100% 1px !important;
+}
+
+@media (max-width: 760px) {
+  .project-popup {
+    --popup-gutter: 16px;
+  }
+
+  .mobile-menu > a {
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: baseline;
+  }
+
+  .project-popup .popup-case > header {
+    padding: 30px var(--popup-gutter) 0;
+  }
+
+  .project-popup .popup-case > header h2 {
+    margin: 24px 0 28px;
+    font-size: clamp(36px, 12vw, 62px);
+    line-height: .9;
+  }
+
+  .project-popup .case-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 14px;
+  }
+
+  .project-popup .case-meta span:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .project-popup .case-intro {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 28px var(--popup-gutter) 42px;
+  }
+
+  .project-popup .case-intro h3 {
+    max-width: 42rem;
+    font-size: clamp(18px, 5vw, 23px);
+    line-height: 1.38;
+  }
+
+  .project-popup .case-nav button {
+    min-height: 120px;
+    gap: 8px;
+    padding: 20px 16px;
+    font-size: 10px;
+  }
+
+  .project-popup .case-nav strong {
+    max-width: 100%;
+    font-size: clamp(13px, 4vw, 18px);
+    line-height: 1.05;
   }
 }
