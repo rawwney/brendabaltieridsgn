@@ -15,22 +15,36 @@ html.portfolio-booting::before {
   transition: opacity 260ms cubic-bezier(.22, 1, .36, 1);
 }
 
-/* Project tags use one consistent, text-only underline interaction. */
+/* Project tags use one consistent, text-only underline interaction. Keep
+   them above the card sweep and out of the shared button fill animation. */
+.project-grid .project-tags {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
 .project-grid .project-tag-link {
-  background-image: linear-gradient(currentColor, currentColor) !important;
-  background-position: left 100% !important;
-  background-repeat: no-repeat !important;
-  background-size: 0 1px !important;
+  background-image: none !important;
   text-decoration: none !important;
   transform: none !important;
-  transition: background-size var(--interaction-duration) var(--interaction-ease) !important;
+  transition: none !important;
+  position: relative;
+  z-index: 3;
+  overflow: visible !important;
+  isolation: auto !important;
+  box-shadow: none;
+}
+
+.project-grid .project-tag-link::before {
+  content: none !important;
+  display: none !important;
 }
 
 .project-grid .project-tag-link:is(:hover, :focus-visible) {
   color: inherit !important;
-  background-size: 100% 1px !important;
   text-decoration: none !important;
   transform: none !important;
+  box-shadow: inset 0 -1px 0 currentColor;
 }
 
 html.portfolio-booting.portfolio-revealing::before {
