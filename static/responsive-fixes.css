@@ -2255,7 +2255,7 @@ section.skills,
     position: relative;
     width: 100%;
     height: var(--footer-face-height);
-    margin: 0 0 calc(var(--footer-compressed-size) * -.09);
+    margin: 0;
     color: var(--white);
     font-synthesis: none;
     text-align: center;
