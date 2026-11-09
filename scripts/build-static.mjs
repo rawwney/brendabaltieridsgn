@@ -481,6 +481,11 @@ const assetRevision = async (fileName) => createHash('sha256')
 
 const responsiveRevision = await assetRevision('responsive-fixes.css');
 const performanceRevision = await assetRevision('performance.js');
+const baseCssRevision = await assetRevision('_next/static/css/index.RpOZUcmN.css');
+indexHtml = indexHtml.replace(
+  /\/_next\/static\/css\/index\.RpOZUcmN\.css(?:\?v=[^"']*)?/g,
+  `/_next/static/css/index.RpOZUcmN.css?v=${baseCssRevision}`,
+);
 indexHtml = indexHtml.replace(
   /\/responsive-fixes\.css(?:\?v=[^"']*)?/g,
   `/responsive-fixes.css?v=${responsiveRevision}`,

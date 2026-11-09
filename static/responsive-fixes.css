@@ -36,40 +36,6 @@ html.portfolio-revealing .site-loader.portfolio-boot-loader {
   pointer-events: none;
 }
 
-/* Project tags use one consistent, text-only underline interaction. Keep
-   them above the card sweep and out of the shared button fill animation. */
-.project-grid .project-tags {
-  position: relative;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-.project-grid .project-tag-link {
-  background-image: none !important;
-  text-decoration: none !important;
-  transform: none !important;
-  transition: none !important;
-  position: relative;
-  z-index: 3;
-  overflow: visible !important;
-  isolation: auto !important;
-  box-shadow: none;
-}
-
-.project-grid .project-tag-link::before {
-  content: none !important;
-  display: none !important;
-}
-
-.project-grid .project-tag-link:is(:hover, :focus, :focus-visible, :active) {
-  color: inherit !important;
-  text-decoration-line: underline !important;
-  text-decoration-thickness: 1px !important;
-  text-underline-offset: 3px;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
 html.portfolio-booting.portfolio-revealing::before {
   opacity: 0;
   pointer-events: none;
@@ -189,12 +155,9 @@ footer a {
   backdrop-filter: blur(8px);
   transition: color .18s ease, background-color .18s ease, transform .18s ease;
 }
-.project-like:hover,
-.project-like:focus-visible,
 .project-like[aria-pressed="true"] {
   background: var(--acid);
   color: var(--ink);
-  transform: translateY(-2px);
 }
 .project-like-icon { font-size: 17px; line-height: 1; }
 .project-like-count {
@@ -572,27 +535,9 @@ footer a {
   transition: color 200ms ease, background-color 200ms ease, opacity 200ms ease;
 }
 
-.project-carousel-button:is(:hover, :focus-visible) {
-  color: var(--ink);
-  background: var(--white);
-  border-color: var(--white);
-  outline: 0;
-}
-
-.project-carousel-button:focus-visible {
-  box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--acid);
-}
-
 .project-carousel-button:disabled {
   opacity: .6;
   cursor: default;
-}
-
-.project-carousel-button:disabled:is(:hover, :focus-visible) {
-  color: var(--ink);
-  background: var(--acid);
-  border-color: var(--acid);
-  box-shadow: none;
 }
 
 .work-horizontal-shell .project-grid {
@@ -1676,22 +1621,6 @@ footer a {
   width: clamp(34px, 3.5vw, 52px);
   height: clamp(34px, 3.5vw, 52px);
 }
-.about-cv-download:is(:hover, :focus-visible) {
-  background: var(--ink);
-  color: var(--white);
-  border-color: var(--white);
-  box-shadow: inset 0 0 0 1px var(--white);
-  outline: 0;
-}
-.about-cv-download:is(:hover, :focus-visible) .about-cv-label {
-  transform: translateX(4px);
-}
-.about-cv-download:is(:hover, :focus-visible) .about-cv-arrow {
-  transform: translate(4px, 4px);
-}
-.about-cv-download:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--white), 0 0 0 3px var(--violet), 0 0 0 6px var(--white);
-}
 .about .about-photo-layout .about-copy {
   grid-column: 2;
   grid-row: 2;
@@ -1871,12 +1800,6 @@ section.skills,
   background: var(--acid);
   color: var(--ink);
 }
-.hero .hero-value-cta:is(:hover, :focus-visible) {
-  background: var(--white);
-  color: var(--violet);
-  outline: 0;
-  transform: translateY(-2px);
-}
 .hero .hero-value-rule {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -1966,15 +1889,6 @@ section.skills,
   color: var(--acid);
   font-size: 28px;
   transition: transform .22s ease;
-}
-.hero-contact-option:is(:hover, :focus-visible) {
-  background: var(--acid);
-  color: var(--ink);
-  outline: 0;
-}
-.hero-contact-option:is(:hover, :focus-visible) > span {
-  color: var(--ink);
-  transform: translate(4px, -4px);
 }
 .hero-contact-whatsapp {
   width: 100%;
@@ -2073,8 +1987,6 @@ section.skills,
 }
 .hero-contact-back { justify-self: start; }
 .hero-contact-submit { border-color: var(--acid); background: var(--acid); color: var(--ink); }
-.hero-contact-back:hover { border-color: var(--acid); color: var(--acid); }
-.hero-contact-submit:hover { background: var(--white); border-color: var(--white); }
 
 .work-intro {
   width: min(48%, 720px);
@@ -2434,7 +2346,6 @@ section.skills,
     overflow-wrap: anywhere;
   }
   .mobile-menu > a::before { counter-increment: mobile-link; content: counter(mobile-link, decimal-leading-zero); color: var(--acid); font: 400 12px/1 monospace; flex: 0 0 20px; }
-  .mobile-menu > a:is(:hover, :focus-visible) { color: var(--acid); }
   .header .menu-button { min-height: 44px; min-width: 76px; padding: 10px 8px; font: 700 12px/1.2 'roc-grotesk', sans-serif; color: var(--white); border: 1px solid #ffffff40; }
   .mobile-menu .language-switch { padding-top: 24px; border-top: 0; }
 }
@@ -2952,10 +2863,6 @@ section.skills,
   transform: none !important;
 }
 
-.tag-project-actions > :is(button, a):is(:hover, :focus-visible) {
-  transform: none !important;
-}
-
 @media (max-width: 900px) {
   .hero-value-side {
     grid-column: 1;
@@ -3469,78 +3376,14 @@ section.skills,
   }
 }
 
-/* Navigation offsets and a shared interaction rhythm. Contextual colors stay
-   intact; only timing, movement and the text/arrow response are normalized. */
-:root {
-  --interaction-duration: 220ms;
-  --interaction-ease: cubic-bezier(.22, 1, .36, 1);
-  --interaction-shift: 4px;
-  --arrow-white: url('/icons/arrow-white.svg');
-  --arrow-acid: url('/icons/arrow-acid.svg');
-  --arrow-purple: url('/icons/arrow-purple.svg');
-  --arrow-black: url('/icons/arrow-black.svg');
-}
-
-.site-arrow {
-  --site-arrow-image: var(--arrow-acid);
-  --site-arrow-rotation: 0deg;
-  display: inline-block;
-  flex: 0 0 auto;
-  width: .82em;
-  height: .82em;
-  margin-left: .42em;
-  background: var(--site-arrow-image) center / contain no-repeat;
-  transform: rotate(var(--site-arrow-rotation));
-  transform-origin: center;
-  transition: transform var(--interaction-duration) var(--interaction-ease),
-    background-image var(--interaction-duration) var(--interaction-ease);
-}
-
-.site-arrow--north-east { --site-arrow-rotation: -90deg; }
-.site-arrow--east { --site-arrow-rotation: -45deg; }
-.site-arrow--south { --site-arrow-rotation: 45deg; }
-.site-arrow--north { --site-arrow-rotation: -135deg; }
-.site-arrow--west { --site-arrow-rotation: 135deg; }
-
-.hero-value-cta-secondary .site-arrow--south {
-  --site-arrow-rotation: 0deg;
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  background: currentColor;
-  -webkit-mask: url('/icons/arrow-down.svg') center / contain no-repeat;
-  mask: url('/icons/arrow-down.svg') center / contain no-repeat;
-}
-
-.site-arrow--large {
-  width: clamp(32px, 2.8vw, 42px);
-  height: clamp(32px, 2.8vw, 42px);
-  margin-left: 0;
-}
-
-:is(.hero-value-cta-secondary, .about-cv-download, footer a) .site-arrow {
-  --site-arrow-image: var(--arrow-white);
-}
-
-:is(.hero-value-cta-primary, .hero-contact-submit, .hero-contact-option:is(:hover, :focus-visible)) .site-arrow,
-.project-grid > .project:is(:hover, :focus-within) .project-cta .site-arrow {
-  --site-arrow-image: var(--arrow-black);
-}
-
-:is(.hero-value-cta-primary, .hero-contact-submit):is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-purple);
-}
-
+/* Layout helpers shared by action links (interaction states live in the
+   interaction system at the end of this file). */
 :is(.hero-value-cta, .project-cta, .hero-contact-option, .hero-contact-submit, .contact-option, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, .case-nav button, footer a) {
   align-items: center;
 }
 
 :is(.hero-value-cta, .hero-contact-submit, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, footer a) {
   display: inline-flex !important;
-}
-
-:is(.hero-value-cta, .project-cta, .hero-contact-option, .hero-contact-submit, .contact-option, .contact-copy-button, .socials a, .tag-project-actions a, .project-tag-link, .case-nav button, footer a):is(:hover, :focus-visible) .site-arrow {
-  transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1)) rotate(var(--site-arrow-rotation));
 }
 
 .hero-contact-option > .site-arrow {
@@ -3553,243 +3396,12 @@ html {
   scroll-padding-top: 70px;
 }
 
-:is(
-  .header nav a,
-  .mobile-menu > a,
-  .socials a,
-  footer a,
-  .hero-value-cta,
-  .project-like,
-  .project-tag-link,
-  .about-cv-download,
-  .contact-option,
-  .contact-copy-button,
-  .hero-contact-option,
-  .hero-contact-back,
-  .hero-contact-submit,
-  .tag-project-actions > *,
-  .case-nav button,
-  .modal-top button
-) {
-  transition-duration: var(--interaction-duration) !important;
-  transition-timing-function: var(--interaction-ease) !important;
-}
-
-:is(.header nav a, .mobile-menu > a, .socials a, footer a) {
-  display: inline-block;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: left calc(100% - 1px);
-  background-repeat: no-repeat;
-  background-size: 0 1px;
-  text-decoration: none;
-  transition-property: color, background-size !important;
-}
-
-:is(.header nav a, .mobile-menu > a, .socials a, footer a):is(:hover, :focus-visible) {
-  background-size: 100% 1px;
-  transform: none;
-}
-
-:is(.hero-value-cta, .project-like, .project-tag-link, .contact-copy-button, .hero-contact-back, .hero-contact-submit, .tag-project-actions > *, .modal-top button):is(:hover, :focus-visible) {
-  transform: translateY(-2px);
-}
-
-.project-grid > .project :is(.project-title, .project-cta),
-.services-grid article h3,
-.services-extras li,
-.contact-option :is(strong, small),
-.hero-contact-option :is(strong, small),
-.tag-project-actions > * > :last-child,
-.case-nav button strong,
-.about-cv-label,
-.about-cv-arrow {
-  transition-duration: var(--interaction-duration) !important;
-  transition-timing-function: var(--interaction-ease) !important;
-}
-
-.project-grid > .project:is(:hover, :focus-within) :is(.project-title, .project-cta),
-.services-grid article:is(:hover, :focus-within) h3,
-.contact-option:is(:hover, :focus-visible) :is(strong, small),
-.hero-contact-option:is(:hover, :focus-visible) :is(strong, small),
-.case-nav button:is(:hover, :focus-visible) strong {
-  transform: translateX(var(--interaction-shift));
-}
-
-.services-extras li {
-  transition-property: background-color, color, padding-left !important;
-}
-
-.services-extras li:is(:hover, :focus-within) {
-  padding-left: calc(clamp(14px, 1.6vw, 26px) + var(--interaction-shift));
-}
-
-.contact-option small,
-.hero-contact-option > span,
-.about-cv-arrow {
-  transition-property: color, transform !important;
-}
-
-.contact-option:is(:hover, :focus-visible) small,
-.hero-contact-option:is(:hover, :focus-visible) > span:not(.site-arrow),
-.about-cv-download:is(:hover, :focus-visible) .about-cv-arrow {
-  transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1));
-}
-
 .about-underlay {
   pointer-events: none;
 }
 
 @media (max-width: 760px) {
   html { scroll-padding-top: 86px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :is(a, button, .project-title, .project-cta, .services-grid h3, .services-extras li, .contact-option strong, .contact-option small) {
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* One shared upward sweep for action links. Context variables preserve the
-   existing black, white, acid and violet relationships in each section. */
-:where(
-  .hero-value-cta,
-  .about-cv-download,
-  .hero-contact-option,
-  .hero-contact-submit,
-  .contact-option,
-  .contact-copy-button,
-  .hero-contact-back,
-  .menu-button,
-  .language-switch button,
-  .project-like,
-  .project-tag-link,
-  .modal-top button,
-  .copy-confirmation button,
-  .tag-project-actions > *,
-  .case-nav button
-) {
-  --sweep-base: transparent;
-  --sweep-fill: var(--acid);
-  --sweep-text: var(--ink);
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-:where(
-  .hero-value-cta,
-  .about-cv-download,
-  .hero-contact-option,
-  .hero-contact-submit,
-  .contact-option,
-  .contact-copy-button,
-  .hero-contact-back,
-  .menu-button,
-  .language-switch button,
-  .project-like,
-  .project-tag-link,
-  .modal-top button,
-  .copy-confirmation button,
-  .tag-project-actions > *,
-  .case-nav button
-)::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -1px;
-  background: var(--sweep-fill);
-  transform: translateY(101%);
-  transform-origin: center bottom;
-  transition: transform var(--interaction-duration) var(--interaction-ease);
-  pointer-events: none;
-}
-
-:where(
-  .hero-value-cta,
-  .about-cv-download,
-  .hero-contact-option,
-  .hero-contact-submit,
-  .contact-option,
-  .contact-copy-button,
-  .hero-contact-back,
-  .menu-button,
-  .language-switch button,
-  .project-like,
-  .project-tag-link,
-  .modal-top button,
-  .copy-confirmation button,
-  .tag-project-actions > *,
-  .case-nav button
-):is(:hover, :focus-visible) {
-  background: var(--sweep-base) !important;
-  color: var(--sweep-text) !important;
-}
-
-:where(
-  .hero-value-cta,
-  .about-cv-download,
-  .hero-contact-option,
-  .hero-contact-submit,
-  .contact-option,
-  .contact-copy-button,
-  .hero-contact-back,
-  .menu-button,
-  .language-switch button,
-  .project-like,
-  .project-tag-link,
-  .modal-top button,
-  .copy-confirmation button,
-  .tag-project-actions > *,
-  .case-nav button
-):is(:hover, :focus-visible)::before {
-  transform: translateY(0);
-}
-
-.hero-value-cta-primary,
-.hero-contact-submit {
-  --sweep-base: var(--acid);
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
-}
-
-.hero-value-cta-secondary {
-  --sweep-base: transparent;
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
-}
-
-.about-cv-download {
-  --sweep-base: var(--ink);
-  --sweep-fill: #171717;
-  --sweep-text: var(--white);
-}
-
-.about-cv-download:hover {
-  border-color: var(--ink) !important;
-  box-shadow: none !important;
-}
-
-.about-cv-download:focus-visible {
-  border-color: var(--ink) !important;
-  box-shadow: 0 0 0 3px var(--violet), 0 0 0 6px var(--white) !important;
-}
-
-.contact-whatsapp {
-  --sweep-base: var(--acid);
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
-}
-
-.contact-email {
-  --sweep-base: var(--violet);
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
-}
-
-.contact-copy-button {
-  --sweep-base: var(--acid);
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
 }
 
 .hero-contact-whatsapp {
@@ -3809,66 +3421,6 @@ html {
 
 .project-like {
   position: absolute;
-  --sweep-base: #050505d9;
-  --sweep-fill: var(--acid);
-  --sweep-text: var(--ink);
-}
-
-.modal-top button {
-  --sweep-base: var(--acid);
-  --sweep-fill: var(--white);
-  --sweep-text: var(--violet);
-}
-
-.hero-value-cta-secondary:is(:hover, :focus-visible) .site-arrow,
-:is(.hero-value-cta-primary, .hero-contact-submit):is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-purple);
-}
-
-:is(.hero-contact-option, .contact-option):is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-black);
-}
-
-.about-cv-download:is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-white);
-}
-
-.contact-whatsapp .site-arrow {
-  --site-arrow-image: var(--arrow-black);
-}
-
-.contact-email .site-arrow {
-  --site-arrow-image: var(--arrow-white);
-}
-
-.contact-email:is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-purple);
-}
-
-.contact-whatsapp:is(:hover, :focus-visible) .site-arrow {
-  --site-arrow-image: var(--arrow-purple);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :where(
-    .hero-value-cta,
-    .about-cv-download,
-    .hero-contact-option,
-    .hero-contact-submit,
-    .contact-option,
-    .contact-copy-button,
-    .hero-contact-back,
-    .menu-button,
-    .language-switch button,
-    .project-like,
-    .project-tag-link,
-    .modal-top button,
-    .copy-confirmation button,
-    .tag-project-actions > *,
-    .case-nav button
-  )::before {
-    transition-duration: 0.01ms;
-  }
 }
 
 /* Project popup editorial opening: denser hierarchy, Inter body copy and
@@ -3995,17 +3547,6 @@ html {
   line-height: 1.2;
 }
 
-/* The compact previous/next controls intentionally opt out of the global
-   sweep. Their long labels wrap inside the button instead of leaking out. */
-.project-popup .case-nav button::before {
-  content: none !important;
-}
-
-.project-popup .case-nav button:is(:hover, :focus-visible) {
-  color: var(--acid) !important;
-  background: var(--ink) !important;
-}
-
 .project-popup .case-nav button:last-child {
   align-items: flex-end;
 }
@@ -4050,11 +3591,6 @@ html {
   box-shadow: none !important;
   transform: none !important;
   transition-property: color, background-size, opacity !important;
-}
-
-.header .language-switch button::before,
-.mobile-menu .language-switch button::before {
-  content: none !important;
 }
 
 .header .language-switch button:is(:hover, :focus-visible),
@@ -4141,11 +3677,6 @@ html {
   transform: none !important;
   transition: none !important;
   overflow: visible !important;
-}
-
-.project-grid .project-tags .project-tag-link::before {
-  content: none !important;
-  display: none !important;
 }
 
 .project-grid .project-tags .project-tag-link:is(:hover, :focus, :focus-visible, :active) {
@@ -4348,10 +3879,6 @@ html {
   text-wrap: balance;
 }
 
-.contact-main-frame .contact-option::before {
-  content: none !important;
-}
-
 .contact-main-frame .contact-whatsapp {
   color: var(--ink);
   background: var(--acid);
@@ -4360,33 +3887,6 @@ html {
 .contact-main-frame .contact-email {
   color: var(--white);
   background: var(--violet);
-}
-
-.contact-main-frame .contact-whatsapp:is(:hover, :focus-visible, :active) {
-  color: var(--white) !important;
-  background: var(--violet) !important;
-}
-
-.contact-main-frame .contact-email:is(:hover, :focus-visible, :active) {
-  color: var(--ink) !important;
-  background: var(--acid) !important;
-}
-
-.contact-main-frame .contact-option:focus-visible {
-  outline: 3px solid var(--white);
-  outline-offset: -6px;
-}
-
-.contact-main-frame .contact-option:is(:hover, :focus-visible) strong {
-  transform: none;
-}
-
-.contact-main-frame .contact-whatsapp:is(:hover, :focus-visible, :active) .site-arrow {
-  --site-arrow-image: var(--arrow-white);
-}
-
-.contact-main-frame .contact-email:is(:hover, :focus-visible, :active) .site-arrow {
-  --site-arrow-image: var(--arrow-black);
 }
 
 .contact.contact-with-gif > .contact-action-strip {
@@ -4424,17 +3924,9 @@ html {
 }
 
 .contact-action-strip > .contact-copy-button {
-  --sweep-base: var(--acid);
-  --sweep-fill: var(--acid);
-  --sweep-text: var(--ink);
   color: var(--ink);
   background: var(--acid);
   border: 1px solid var(--acid);
-}
-
-.contact-action-strip > .contact-copy-button:is(:hover, :focus-visible, :active) {
-  color: var(--ink) !important;
-  background: var(--acid) !important;
 }
 
 .contact-action-strip > .contact-secondary-socials {
@@ -4451,22 +3943,6 @@ html {
   background: var(--ink);
   border: 1px solid color-mix(in srgb, var(--white) 38%, transparent);
   border-left: 0;
-  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease;
-}
-
-.contact-action-strip .contact-secondary-socials a:is(:hover, :focus-visible, :active) {
-  color: var(--ink);
-  background: var(--acid);
-  border-color: var(--acid);
-}
-
-.contact-action-strip .contact-secondary-socials a:is(:hover, :focus-visible, :active) .site-arrow {
-  --site-arrow-image: var(--arrow-black);
-}
-
-.contact-action-strip :is(.contact-copy-button, .contact-secondary-socials a):focus-visible {
-  outline: 2px solid var(--white);
-  outline-offset: 3px;
 }
 
 @media (max-width: 820px) {
@@ -4543,6 +4019,242 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .contact-main-frame .contact-option,
   .contact-action-strip :is(.contact-copy-button, .contact-secondary-socials a) {
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Interaction system
+   Every hover and focus state for controls lives here, at the end of the
+   cascade. Three kinds of control:
+
+   1. Primary buttons    filled. Hover sweeps a white fill up; text turns black.
+   2. Secondary buttons  outlined. Hover sweeps acid up; text turns black.
+   3. Text links         navigation, footer, language, popup prev/next.
+                         Hover grows a 1px underline and turns the text acid.
+
+   Cards (projects, services, skills) keep their own reveal, defined in their
+   sections; only their shared timing is set below.
+   To recolour a button, change its --btn-hover-fill / --btn-hover-text.
+   ========================================================================== */
+
+:root {
+  --interaction-duration: 220ms;
+  --interaction-ease: cubic-bezier(.22, 1, .36, 1);
+  --interaction-shift: 4px;
+}
+
+/* Arrows take the text colour, so they never need per-state swaps. */
+.site-arrow {
+  --site-arrow-rotation: 0deg;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: .82em;
+  height: .82em;
+  margin-left: .42em;
+  background: currentColor;
+  -webkit-mask: url('/icons/arrow-white.svg') center / contain no-repeat;
+  mask: url('/icons/arrow-white.svg') center / contain no-repeat;
+  transform: rotate(var(--site-arrow-rotation));
+  transform-origin: center;
+  transition: transform var(--interaction-duration) var(--interaction-ease);
+}
+
+.site-arrow--north-east { --site-arrow-rotation: -90deg; }
+.site-arrow--east { --site-arrow-rotation: -45deg; }
+.site-arrow--south { --site-arrow-rotation: 45deg; }
+.site-arrow--north { --site-arrow-rotation: -135deg; }
+.site-arrow--west { --site-arrow-rotation: 135deg; }
+
+.site-arrow--large {
+  width: clamp(32px, 2.8vw, 42px);
+  height: clamp(32px, 2.8vw, 42px);
+  margin-left: 0;
+}
+
+.hero-value-cta-secondary .site-arrow--south {
+  --site-arrow-rotation: 0deg;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  -webkit-mask-image: url('/icons/arrow-down.svg');
+  mask-image: url('/icons/arrow-down.svg');
+}
+
+/* ---- 1 + 2. Buttons ---------------------------------------------------- */
+
+:is(
+  .hero-value-cta-primary,
+  .hero-contact-submit,
+  .hero-contact-option,
+  .contact-option,
+  .contact-copy-button,
+  .project-carousel-button,
+  .modal-top button,
+  .copy-confirmation button
+) {
+  --btn-hover-fill: var(--white);
+  --btn-hover-text: var(--ink);
+}
+
+:is(
+  .hero-value-cta-secondary,
+  .hero-contact-back,
+  .about-cv-download,
+  .contact-secondary-socials a,
+  .tag-project-actions > *,
+  .behance-case-link,
+  .language-card > form button,
+  .menu-button,
+  .project-like
+) {
+  --btn-hover-fill: var(--acid);
+  --btn-hover-text: var(--ink);
+}
+
+/* Secondary buttons sitting on an acid surface fill white instead. */
+.about .about-cv-download {
+  --btn-hover-fill: var(--white);
+}
+
+:is(
+  .hero-value-cta, .hero-contact-submit, .hero-contact-option, .contact-option,
+  .contact-copy-button, .project-carousel-button, .modal-top button,
+  .copy-confirmation button, .hero-contact-back, .about-cv-download,
+  .contact-secondary-socials a, .tag-project-actions > *, .behance-case-link,
+  .language-card > form button, .menu-button, .project-like
+) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color var(--interaction-duration) var(--interaction-ease),
+    border-color var(--interaction-duration) var(--interaction-ease);
+}
+
+:is(
+  .hero-value-cta, .hero-contact-submit, .hero-contact-option, .contact-option,
+  .contact-copy-button, .project-carousel-button, .modal-top button,
+  .copy-confirmation button, .hero-contact-back, .about-cv-download,
+  .contact-secondary-socials a, .tag-project-actions > *, .behance-case-link,
+  .language-card > form button, .menu-button, .project-like
+)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  background: var(--btn-hover-fill);
+  transform: translateY(101%);
+  transition: transform var(--interaction-duration) var(--interaction-ease);
+  pointer-events: none;
+}
+
+:is(
+  .hero-value-cta, .hero-contact-submit, .hero-contact-option, .contact-option,
+  .contact-copy-button, .project-carousel-button, .modal-top button,
+  .copy-confirmation button, .hero-contact-back, .about-cv-download,
+  .contact-secondary-socials a, .tag-project-actions > *, .behance-case-link,
+  .language-card > form button, .menu-button, .project-like
+):is(:hover, :focus-visible):not(:disabled) {
+  color: var(--btn-hover-text);
+  border-color: var(--btn-hover-fill);
+}
+
+:is(
+  .hero-value-cta, .hero-contact-submit, .hero-contact-option, .contact-option,
+  .contact-copy-button, .project-carousel-button, .modal-top button,
+  .copy-confirmation button, .hero-contact-back, .about-cv-download,
+  .contact-secondary-socials a, .tag-project-actions > *, .behance-case-link,
+  .language-card > form button, .menu-button, .project-like
+):is(:hover, :focus-visible):not(:disabled)::before {
+  transform: translateY(0);
+}
+
+/* Inner labels and glyphs follow the button's text colour on hover. */
+:is(.hero-contact-option, .contact-option, .language-card > form button):is(:hover, :focus-visible) * {
+  color: inherit;
+}
+
+/* The only movement: arrows nudge toward where they point. */
+:is(
+  .hero-value-cta, .hero-contact-submit, .hero-contact-option, .contact-option,
+  .contact-copy-button, .contact-secondary-socials a, .tag-project-actions > *,
+  .behance-case-link, .socials a, footer a
+):is(:hover, :focus-visible) .site-arrow {
+  transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1)) rotate(var(--site-arrow-rotation));
+}
+
+.hero-contact-option:is(:hover, :focus-visible) > span:not(.site-arrow),
+.about-cv-download:is(:hover, :focus-visible) .about-cv-arrow {
+  transform: translate(var(--interaction-shift), calc(var(--interaction-shift) * -1));
+}
+
+.hero-contact-option > span,
+.about-cv-arrow {
+  transition: transform var(--interaction-duration) var(--interaction-ease);
+}
+
+/* ---- 3. Text links ----------------------------------------------------- */
+
+:is(.header nav a, .mobile-menu > a, footer a, .socials:not(.contact-secondary-socials) a) {
+  display: inline-block;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: left calc(100% - 1px);
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  text-decoration: none;
+  transition: color var(--interaction-duration) var(--interaction-ease),
+    background-size var(--interaction-duration) var(--interaction-ease);
+}
+
+:is(.header nav a, .mobile-menu > a, footer a, .socials:not(.contact-secondary-socials) a):is(:hover, :focus-visible) {
+  color: var(--acid);
+  background-size: 100% 1px;
+}
+
+.project-popup .case-nav button {
+  transition: color var(--interaction-duration) var(--interaction-ease);
+}
+
+.project-popup .case-nav button:is(:hover, :focus-visible) {
+  color: var(--acid);
+}
+
+/* ---- Cards: shared timing only ---------------------------------------- */
+
+.project-grid > .project :is(.project-title, .project-cta),
+.services-grid article h3 {
+  transition: transform var(--interaction-duration) var(--interaction-ease);
+}
+
+.project-grid > .project:is(:hover, :focus-within) :is(.project-title, .project-cta),
+.services-grid article:is(:hover, :focus-within) h3 {
+  transform: translateX(var(--interaction-shift));
+}
+
+.services-extras li {
+  transition: background-color var(--interaction-duration) var(--interaction-ease),
+    color var(--interaction-duration) var(--interaction-ease),
+    padding-left var(--interaction-duration) var(--interaction-ease);
+}
+
+.services-extras li:is(:hover, :focus-within) {
+  padding-left: calc(clamp(14px, 1.6vw, 26px) + var(--interaction-shift));
+}
+
+/* ---- Focus and reduced motion ----------------------------------------- */
+
+:is(a, button):focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+
+.project-popup :is(a, button):focus-visible {
+  outline-color: var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(a, button, .site-arrow, .project-title, .services-grid h3, .services-extras li),
+  :is(a, button)::before {
     transition-duration: .01ms !important;
   }
 }
