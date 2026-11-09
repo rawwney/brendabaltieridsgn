@@ -1,5 +1,6 @@
 const PROJECTS = new Set([
   'morning-evening-night',
+  'vistas-do-itaqueri',
   'casamar',
   'ryzon',
   'labirinto-noir',

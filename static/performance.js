@@ -1,7 +1,48 @@
 (() => {
   // The build also installs this class inline in <head>, before first paint.
-  // Keeping the assignment here makes direct/static previews fail safe too.
+  // React hydration reconciles the <html> class list and can remove the cover
+  // before the enhanced hero is ready. Keep it synchronized until reveal.
+  window.__portfolioBootActive = true;
   document.documentElement.classList.add('portfolio-booting');
+  if (!window.__portfolioBootObserver) {
+    const holdBootCover = () => {
+      if (
+        window.__portfolioBootActive
+        && !document.documentElement.classList.contains('portfolio-booting')
+      ) {
+        document.documentElement.classList.add('portfolio-booting');
+      }
+    };
+    window.__portfolioBootObserver = new MutationObserver(holdBootCover);
+    window.__portfolioBootObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
+  const ensureBootLoader = () => {
+    if (window.__portfolioBootLoader) return window.__portfolioBootLoader;
+    const source = document.querySelector('.site-loader');
+    if (!source) return null;
+    const loader = source.cloneNode(true);
+    loader.classList.add('portfolio-boot-loader');
+    loader.removeAttribute('role');
+    loader.removeAttribute('aria-live');
+    loader.setAttribute('aria-hidden', 'true');
+    window.__portfolioBootLoader = loader;
+    const continueBootLoader = () => {
+      if (
+        !window.__portfolioBootActive
+        || loader.isConnected
+        || document.querySelector('.site-loader:not(.portfolio-boot-loader)')
+      ) return;
+      document.body.append(loader);
+    };
+    window.__portfolioBootLoaderObserver = new MutationObserver(continueBootLoader);
+    window.__portfolioBootLoaderObserver.observe(document.body, { childList: true });
+    continueBootLoader();
+    return loader;
+  };
+  ensureBootLoader();
   const projectImagePattern = /^\/projects\/.*\.(?:webp|png)$/i;
   const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
   const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
@@ -13,12 +54,13 @@
         Promise.allSettled([
           document.fonts.load('800 100px "roc-grotesk"', 'BRENDA BALTIERI'),
           document.fonts.load('900 100px "roc-grotesk-extrawide"', 'BRENDA BALTIERI'),
+          document.fonts.ready,
         ]),
-        wait(650),
+        wait(3500),
       ])
       : Promise.resolve();
     const heroReadiness = (async () => {
-      const deadline = performance.now() + 650;
+      const deadline = performance.now() + 3500;
       while (
         heroTitle?.isConnected
         && !heroTitle.classList.contains('hero-inflate-ready')
@@ -34,10 +76,14 @@
 
     // Allow layout and canvas sizing to settle before the cover fades away.
     await nextFrame();
+    window.__portfolioBootActive = false;
+    window.__portfolioBootObserver?.disconnect();
+    window.__portfolioBootLoaderObserver?.disconnect();
     clearTimeout(window.__portfolioBootTimeout);
     document.documentElement.dataset.portfolioEnhanced = 'true';
     document.documentElement.classList.add('portfolio-revealing');
     window.setTimeout(() => {
+      window.__portfolioBootLoader?.remove();
       document.documentElement.classList.remove('portfolio-booting', 'portfolio-revealing');
     }, 180);
   }
@@ -449,6 +495,7 @@
 
   const projectOrder = [
     'MORNING / EVENING / NIGHT',
+    'VISTAS DO ITAQUERI',
     'CASAMAR',
     'RYZON',
     'LABIRINTO NOIR',
@@ -784,20 +831,18 @@
     const english = document.documentElement.lang.startsWith('en');
     const copy = english
       ? {
-        headline: 'BRAND SYSTEMS, FROM CONCEPT TO APPLICATION.',
-        headlineLines: ['BRAND SYSTEMS, FROM', 'CONCEPT TO APPLICATION.'],
-        subhead: 'Branding, visual identity and social media design for brands that want to stop reinventing their communication with every post.',
+        headline: 'CONCEPT. CONSISTENCY. PRESENCE.',
+        headlineLines: ['CONCEPT. CONSISTENCY.', 'PRESENCE.'],
+        subhead: 'I create consistent visual systems for brands, spanning branding, visual identity, social media design, packaging and editorial projects.',
         primary: 'I HAVE A PROJECT',
         secondary: 'VIEW PROJECTS ↓',
-        tags: ['BRANDING', 'VISUAL IDENTITY', 'SOCIAL MEDIA DESIGN', 'PACKAGING', 'EDITORIAL'],
       }
       : {
-        headline: 'MARCA COM SISTEMA, DO CONCEITO À APLICAÇÃO.',
-        headlineLines: ['MARCA COM SISTEMA, DO', 'CONCEITO À APLICAÇÃO.'],
-        subhead: 'Branding, identidade visual e design para redes sociais para marcas que querem parar de reinventar a comunicação a cada post.',
+        headline: 'CONCEITO, CONSISTÊNCIA E PRESENÇA.',
+        headlineLines: ['CONCEITO, CONSISTÊNCIA E', 'PRESENÇA.'],
+        subhead: 'Sistemas visuais consistentes para marcas, do branding e identidade visual ao design para redes sociais, embalagens e projetos editoriais.',
         primary: 'TENHO UM PROJETO',
         secondary: 'VER PROJETOS ↓',
-        tags: ['BRANDING', 'IDENTIDADE VISUAL', 'DESIGN PARA REDES SOCIAIS', 'EMBALAGENS', 'EDITORIAL'],
       };
     const signature = `${document.documentElement.lang}|${copy.headline}`;
     if (bottom.dataset.copySignature === signature && bottom.querySelector('.hero-value-headline')) return;
@@ -831,10 +876,10 @@
     const side = document.createElement('div');
     side.className = 'hero-value-side';
     side.append(subhead, actions);
-    const tags = document.createElement('p');
-    tags.className = 'hero-value-tags';
-    tags.textContent = copy.tags.join(' / ');
-    bottom.replaceChildren(headline, side, tags);
+    const rule = document.createElement('div');
+    rule.className = 'hero-value-rule';
+    rule.setAttribute('aria-hidden', 'true');
+    bottom.replaceChildren(headline, side, rule);
     bottom.dataset.copySignature = signature;
   }
 
@@ -907,7 +952,7 @@
     const work = document.querySelector('.work');
     const count = work?.querySelector('.section-label span');
     if (count) {
-      const desired = english ? 'ARCHIVE [ 13 ]' : 'ARQUIVO [ 13 ]';
+      const desired = english ? 'ARCHIVE [ 14 ]' : 'ARQUIVO [ 14 ]';
       if (count.textContent !== desired) count.textContent = desired;
     }
     const mega = work?.querySelector(':scope > .mega');
@@ -1060,6 +1105,107 @@
     });
   }
 
+  function enhanceContactLayout() {
+    const contact = document.querySelector('.contact');
+    const options = contact?.querySelector('.contact-options');
+    if (!contact || !options) return;
+    const english = document.documentElement.lang.startsWith('en');
+
+    // Keep the artwork file available in the project, but remove the figure
+    // from this composition (including any copy restored by a React render).
+    contact.querySelectorAll('.contact-gif').forEach((gif) => gif.remove());
+
+    let frame = contact.querySelector(':scope > .contact-main-frame');
+    if (!frame) {
+      frame = document.createElement('div');
+      frame.className = 'contact-main-frame';
+      options.before(frame);
+    }
+
+    let editorial = frame.querySelector(':scope > .contact-panel-editorial');
+    if (!editorial) {
+      editorial = document.createElement('div');
+      editorial.className = 'contact-panel-editorial';
+      frame.prepend(editorial);
+    }
+
+    let eyebrow = editorial.querySelector(':scope > .contact-panel-eyebrow');
+    if (!eyebrow) {
+      eyebrow = document.createElement('p');
+      eyebrow.className = 'contact-panel-eyebrow';
+      editorial.append(eyebrow);
+    }
+
+    let title = editorial.querySelector(':scope > .contact-panel-title');
+    if (!title) {
+      title = document.createElement('h3');
+      title.className = 'contact-panel-title';
+      editorial.append(title);
+    }
+
+    let copy = editorial.querySelector(':scope > .contact-panel-copy');
+    if (!copy) {
+      copy = document.createElement('p');
+      copy.className = 'contact-panel-copy';
+      editorial.append(copy);
+    }
+
+    const eyebrowText = english
+      ? 'CONTACT / NEW PROJECTS / COLLABORATIONS'
+      : 'CONTATO / NOVOS PROJETOS / COLABORAÇÕES';
+    const titleText = english ? 'TELL ME YOUR IDEA.' : 'ME CONTA SUA IDEIA.';
+    const copyText = english
+      ? "If you are building a brand, repositioning a project or need a more consistent visual direction, send me a message and let's talk."
+      : 'Se você está construindo uma marca, reposicionando um projeto ou precisa de uma direção visual mais consistente, me envie uma mensagem e vamos conversar.';
+
+    // This enhancer also runs from the global MutationObserver. Replacing the
+    // same text node on every pass would schedule another mutation forever and
+    // lock scrolling and pointer interactions across the page.
+    if (eyebrow.textContent !== eyebrowText) eyebrow.textContent = eyebrowText;
+    if (title.textContent !== titleText) title.textContent = titleText;
+    if (copy.textContent !== copyText) copy.textContent = copyText;
+
+    if (options.parentElement !== frame) frame.append(options);
+
+    const copyRow = contact.querySelector('.contact-copy-row');
+    const copyButton = copyRow?.querySelector('.contact-copy-button');
+    const socials = contact.querySelector('.socials') || document.querySelector('.socials');
+    if (copyRow && copyButton && socials) {
+      copyRow.classList.add('contact-action-strip');
+      const copyLabel = copyRow.querySelector(':scope > span');
+      if (copyLabel && !copyLabel.hidden) {
+        copyLabel.hidden = true;
+        copyLabel.setAttribute('aria-hidden', 'true');
+      }
+      socials.classList.add('contact-secondary-socials');
+      if (socials.parentElement !== copyRow) copyRow.append(socials);
+      if (copyRow.parentElement !== contact || frame.nextElementSibling !== copyRow) frame.after(copyRow);
+
+      if (copyButton.dataset.contactCopyEnhanced !== 'true') {
+        copyButton.dataset.contactCopyEnhanced = 'true';
+        let feedbackTimer = 0;
+        copyButton.addEventListener('click', async () => {
+          const email = 'brenda.baltieri01@gmail.com';
+          let copied = false;
+          try {
+            await navigator.clipboard.writeText(email);
+            copied = true;
+          } catch {
+            copied = false;
+          }
+          if (!copied) return;
+          window.clearTimeout(feedbackTimer);
+          copyButton.textContent = document.documentElement.lang.startsWith('en') ? 'COPIED' : 'COPIADO';
+          feedbackTimer = window.setTimeout(() => {
+            if (copyButton.isConnected) {
+              copyButton.textContent = document.documentElement.lang.startsWith('en') ? 'COPY EMAIL' : 'COPIAR EMAIL';
+            }
+          }, 1800);
+        });
+      }
+    }
+  }
+
   function enhanceFooterCredit() {
     const footer = document.querySelector('footer');
     if (!footer) return;
@@ -1083,6 +1229,7 @@
     enhanceServices();
     enhanceContactCopy();
     enhanceContactActions();
+    enhanceContactLayout();
     enhanceFooterCredit();
     removeBehanceConnections();
     enhanceMorphText();
@@ -1121,18 +1268,7 @@
   function enhanceContact(root = document) {
     const sections = root.matches?.('.contact') ? [root] : Array.from(root.querySelectorAll?.('.contact') || []);
     sections.forEach((section) => {
-      const heading = section.querySelector(':scope > .mega');
-      if (!heading || section.querySelector('.contact-gif')) return;
-      const figure = document.createElement('figure');
-      figure.className = 'contact-gif';
-      figure.setAttribute('aria-hidden', 'true');
-      const image = document.createElement('img');
-      image.src = '/brand/brenda-about.gif';
-      image.alt = '';
-      image.loading = 'lazy';
-      image.decoding = 'async';
-      figure.append(image);
-      heading.after(figure);
+      section.querySelectorAll('.contact-gif').forEach((gif) => gif.remove());
       section.classList.add('contact-with-gif');
     });
   }
@@ -1187,7 +1323,7 @@
 
     const contact = document.querySelector('.contact');
     const socials = document.querySelector('.socials');
-    if (contact && socials && socials.parentElement !== contact) {
+    if (contact && socials && !contact.contains(socials)) {
       const copyRow = contact.querySelector('.contact-copy-row');
       if (copyRow) copyRow.after(socials);
       else contact.append(socials);
@@ -1230,11 +1366,11 @@
         const baseTotal = metrics.reduce((sum, glyph) => sum + glyph.base, 0) + tracking * (letters.length - 1);
         const compressedTotal = metrics.reduce((sum, glyph) => sum + glyph.compressed, 0) + tracking * (letters.length - 1);
         const measure = () => {
-          const sideInset = Math.min(76, Math.max(32, signature.clientWidth * .04));
+          const sideInset = Math.min(24, Math.max(14, signature.clientWidth * .012));
           const available = Math.max(1, signature.clientWidth - sideInset * 2);
           if (baseTotal <= 0 || compressedTotal <= 0) return;
 
-          const signatureScale = .88;
+          const signatureScale = .985;
           const baseSize = available / baseTotal * signatureScale;
           const compressedSize = available / compressedTotal * signatureScale;
           const heightScale = compressedSize / baseSize;
@@ -1959,7 +2095,19 @@
   function buildHorizontalArchive() {
     const work = document.querySelector('.work');
     const grid = work?.querySelector('.project-grid');
-    if (!work || !grid || grid.closest('.work-horizontal-shell')) return;
+    if (!work || !grid) return;
+
+    const existingControls = work.querySelector('.project-carousel-controls');
+    if (grid.closest('.work-horizontal-shell')) {
+      const english = document.documentElement.lang.startsWith('en');
+      existingControls?.setAttribute('aria-label', english ? 'Project navigation' : 'Navegação dos projetos');
+      const buttons = existingControls?.querySelectorAll('button');
+      if (buttons?.length === 2) {
+        buttons[0].setAttribute('aria-label', english ? 'Previous projects' : 'Projetos anteriores');
+        buttons[1].setAttribute('aria-label', english ? 'Next projects' : 'Próximos projetos');
+      }
+      return;
+    }
 
     const projects = Array.from(grid.querySelectorAll(':scope > .project'));
     if (!projects.length) return;
@@ -1970,6 +2118,25 @@
     const sticky = document.createElement('div');
     sticky.className = 'work-horizontal-sticky';
 
+    const english = document.documentElement.lang.startsWith('en');
+    const controls = document.createElement('div');
+    controls.className = 'project-carousel-controls';
+    controls.setAttribute('aria-label', english ? 'Project navigation' : 'Navegação dos projetos');
+
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.className = 'project-carousel-button project-carousel-previous';
+    previous.setAttribute('aria-label', english ? 'Previous projects' : 'Projetos anteriores');
+    previous.textContent = '←';
+
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'project-carousel-button project-carousel-next';
+    next.setAttribute('aria-label', english ? 'Next projects' : 'Próximos projetos');
+    next.textContent = '→';
+
+    controls.append(previous, next);
+
     projects.forEach((project, index) => {
       project.id = `projeto-${String(index + 1).padStart(2, '0')}`;
       project.dataset.archiveIndex = String(index);
@@ -1978,40 +2145,41 @@
 
     grid.before(shell);
     sticky.append(grid);
-    shell.append(sticky);
+    shell.append(sticky, controls);
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
 
-    const updatePosition = () => {
+    const updateControls = () => {
       frame = 0;
       if (!shell.isConnected) return;
-
-      const horizontal = window.innerWidth > 900 && !reducedMotion.matches;
-      shell.classList.toggle('is-horizontal', horizontal);
-      if (!horizontal) {
-        shell.style.removeProperty('--horizontal-distance');
-        grid.style.removeProperty('transform');
-        return;
-      }
-
-      const distance = Math.max(0, grid.scrollWidth - sticky.clientWidth);
-      shell.style.setProperty('--horizontal-distance', `${distance}px`);
-      const travel = Math.max(1, shell.offsetHeight - sticky.offsetHeight);
-      const progress = Math.max(0, Math.min(1, (66 - shell.getBoundingClientRect().top) / travel));
-      grid.style.transform = `translate3d(${-distance * progress}px, 0, 0)`;
+      const maximum = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      previous.disabled = grid.scrollLeft <= 2;
+      next.disabled = grid.scrollLeft >= maximum - 2;
     };
 
-    const requestUpdate = () => {
-      if (!frame) frame = window.requestAnimationFrame(updatePosition);
+    const requestControlsUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateControls);
     };
 
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate, { passive: true });
-    reducedMotion.addEventListener?.('change', requestUpdate);
-    if ('ResizeObserver' in window) new ResizeObserver(requestUpdate).observe(grid);
-    window.requestAnimationFrame(updatePosition);
-    window.setTimeout(updatePosition, 600);
+    const move = (direction) => {
+      const firstProject = projects[0];
+      const styles = getComputedStyle(grid);
+      const gap = parseFloat(styles.columnGap || styles.gap) || 0;
+      const distance = (firstProject?.getBoundingClientRect().width || grid.clientWidth) + gap;
+      grid.scrollBy({
+        left: direction * distance,
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+    };
+
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    grid.addEventListener('scroll', requestControlsUpdate, { passive: true });
+    window.addEventListener('resize', requestControlsUpdate, { passive: true });
+    if ('ResizeObserver' in window) new ResizeObserver(requestControlsUpdate).observe(grid);
+    window.requestAnimationFrame(updateControls);
+    window.setTimeout(updateControls, 600);
   }
 
   const observer = new MutationObserver((records) => {

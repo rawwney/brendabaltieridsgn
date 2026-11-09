@@ -224,6 +224,25 @@ for (const [currentCopy, nextCopy] of projectEnglishCopyReplacements) {
   clientBundle = clientBundle.replace(currentCopy, nextCopy);
 }
 
+const vistasProjectPt = '{id:14,slug:`vistas-do-itaqueri`,title:`VISTAS DO ITAQUERI`,year:`2025`,category:`BRANDING / IDENTIDADE VISUAL`,client:`Vistas do Itaqueri`,services:[`Branding`,`Identidade Visual`,`Direção de Arte`,`Design Editorial`],software:[],skills:[`BRANDING`,`IDENTIDADE VISUAL`,`DIREÇÃO DE ARTE`,`TIPOGRAFIA`],shortDescription:`Paisagem e território traduzidos em um sistema visual contínuo.`,description:`Projeto de branding e identidade visual desenvolvido para Vistas do Itaqueri. A identidade foi construída para traduzir a relação da marca com a paisagem e o território: o símbolo sintetiza o perfil da serra em um traço contínuo, combinado a uma tipografia serifada e uma paleta inspirada em tons naturais. Símbolo, tipografia, sistema cromático e aplicações trabalham de forma integrada para construir uma presença reconhecível, sofisticada e consistente em diferentes pontos de contato.`,cover:`/projects/vistas-do-itaqueri/slide-01.webp`,gallery:[`/projects/vistas-do-itaqueri/slide-01.webp`,`/projects/vistas-do-itaqueri/slide-02.webp`,`/projects/vistas-do-itaqueri/slide-03.webp`,`/projects/vistas-do-itaqueri/slide-04.webp`,`/projects/vistas-do-itaqueri/slide-05.webp`],galleryAlt:[`Logotipo Vistas do Itaqueri em branco sobre fundo verde-escuro`,`Prancha editorial Sobre o Projeto do Vistas do Itaqueri`,`Mapa de implantação do Vistas do Itaqueri com glebas residenciais, comerciais e acessos`,`Prancha editorial de contexto e posicionamento do Vistas do Itaqueri`,`Apresentação do conceito do símbolo e da identidade visual Vistas do Itaqueri`],featured:!0}';
+const vistasProjectEn = '"vistas-do-itaqueri":{category:`BRANDING / VISUAL IDENTITY`,services:[`Branding`,`Visual Identity`,`Art Direction`,`Editorial Design`],shortDescription:`Landscape and place translated into a cohesive visual system.`,description:`Branding and visual identity project developed for Vistas do Itaqueri. The identity was designed to express the brand’s relationship with landscape and place: a continuous-line symbol abstracts the profile of the mountain range, paired with serif typography and a palette drawn from natural tones. Symbol, typography, color system and applications work together to create a recognizable, sophisticated and consistent presence across different touchpoints.`,galleryAlt:[`Vistas do Itaqueri logo in white on a dark green background`,`Vistas do Itaqueri About the Project editorial board`,`Vistas do Itaqueri site map showing residential and commercial plots and access routes`,`Vistas do Itaqueri context and positioning editorial board`,`Presentation of the Vistas do Itaqueri symbol concept and visual identity`]}';
+const vistasInsertionPoint = 'featured:!0},{id:2,slug:`guru-spirit-folder`';
+if (!clientBundle.includes(vistasInsertionPoint)) {
+  throw new Error('Missing project insertion point for Vistas do Itaqueri.');
+}
+clientBundle = clientBundle.replace(
+  vistasInsertionPoint,
+  `featured:!0},${vistasProjectPt},{id:2,slug:\`guru-spirit-folder\``,
+);
+const vistasEnglishInsertionPoint = 'g={"sadhu-morning-evening-night":{';
+if (!clientBundle.includes(vistasEnglishInsertionPoint)) {
+  throw new Error('Missing English project insertion point for Vistas do Itaqueri.');
+}
+clientBundle = clientBundle.replace(
+  vistasEnglishInsertionPoint,
+  `g={${vistasProjectEn},"sadhu-morning-evening-night":{`,
+);
+
 const projectQuoteMarkup = ',(0,u.jsxs)(`div`,{className:`gallery-quote`,children:[`“`,o.shortDescription,`”`]})';
 if (!clientBundle.includes(projectQuoteMarkup)) {
   throw new Error('Missing project closing quote markup during build.');
@@ -232,7 +251,7 @@ clientBundle = clientBundle.replace(projectQuoteMarkup, '');
 
 clientBundle = clientBundle.replace(
   '];c.sort((e,t)=>e.id-t.id),Array.from',
-  '];var bbOrder=[`sadhu-morning-evening-night`,`casamar`,`ryzon`,`labirinto-noir`,`guru-spirit-packaging`,`guru-spirit-folder`,`grupo-pirasa`,`deposito-23`,`epj-corrida`,`malhafil`,`agencia-trees`,`fluis`,`vies`];c.sort((e,t)=>{let n=bbOrder.indexOf(e.slug),r=bbOrder.indexOf(t.slug);return(n<0?bbOrder.length:n)-(r<0?bbOrder.length:r)||e.id-t.id}),c.forEach((e,t)=>e.id=t+1),Array.from',
+  '];var bbOrder=[`sadhu-morning-evening-night`,`vistas-do-itaqueri`,`casamar`,`ryzon`,`labirinto-noir`,`guru-spirit-packaging`,`guru-spirit-folder`,`grupo-pirasa`,`deposito-23`,`epj-corrida`,`malhafil`,`agencia-trees`,`fluis`,`vies`];c.sort((e,t)=>{let n=bbOrder.indexOf(e.slug),r=bbOrder.indexOf(t.slug);return(n<0?bbOrder.length:n)-(r<0?bbOrder.length:r)||e.id-t.id}),c.forEach((e,t)=>e.id=t+1),Array.from',
 );
 clientBundle = clientBundle.replace(
   'shortDescription:`Informação institucional transformada em uma narrativa visual de marca.`,description:`Folder institucional desenvolvido para distribuidores da Guru Spirit. A peça organiza portfólio, posicionamento e argumentos comerciais em um sistema editorial direto e visualmente consistente.`',
@@ -270,9 +289,78 @@ clientBundle = clientBundle.replace(
   'cover:`/projects/pdf/agencia-trees-01.png`,gallery:[`/projects/pdf/agencia-trees-01.png`,`/projects/pdf/agencia-trees-02.png`]',
   'cover:`/projects/agencia-trees/cover.webp`,gallery:[`/projects/agencia-trees/cover.webp`,`/projects/agencia-trees/slide-02.webp`,`/projects/agencia-trees/slide-03.webp`,`/projects/agencia-trees/slide-04.webp`,`/projects/agencia-trees/slide-05.webp`,`/projects/agencia-trees/slide-06.webp`,`/projects/agencia-trees/slide-07.webp`]',
 );
+const projectYearOverrides = [
+  [`sadhu-morning-evening-night`, `2026`],
+  [`guru-spirit-packaging`, `2026`],
+  [`guru-spirit-folder`, `2026`],
+  [`casamar`, `2026`],
+  [`epj-corrida`, `2025`],
+  [`malhafil`, `2025`],
+  [`deposito-23`, `2025`],
+  [`fluis`, `2025`],
+  [`agencia-trees`, `2025`],
+  [`grupo-pirasa`, `2025`],
+  [`labirinto-noir`, `2024`],
+  [`vies`, `2024`],
+  [`ryzon`, `2024`],
+];
+for (const [slug, year] of projectYearOverrides) {
+  clientBundle = clientBundle.replace(
+    new RegExp('(slug:`' + slug + '`,title:`[^`]+`,year:`)\\d{4}(`)', 'g'),
+    `$1${year}$2`,
+  );
+}
+clientBundle = clientBundle.replaceAll(
+  'services:[`Mídias Sociais`,`Campanha`,`Tratamento de Imagem`,`Imagens com IA`]',
+  'services:[`Mídias Sociais`,`Campanha`,`Tratamento de Imagem`]',
+);
+clientBundle = clientBundle.replaceAll(
+  'services:[`Social Media`,`Campaign`,`Image Retouching`,`AI-generated Images`]',
+  'services:[`Social Media`,`Campaign`,`Image Retouching`]',
+);
+clientBundle = clientBundle.replace(
+  'galleryTitles:[`CAMPANHA VALISERE — IMAGENS COM IA`,`NOVA LINHA DE BOLSAS`,`DIA DOS NAMORADOS — MALHAFIL × HOPE`,`CAMPANHA DE DIA DOS PAIS`,`LANÇAMENTO — PRIMAVERA/VERÃO 2026`]',
+  'galleryTitles:[`MALHAFIL X VALISERE - DESCONTOS E PRESENTES`,`NOVA LINHA DE BOLSAS`,`DIA DOS NAMORADOS MALHAFIL`,`DIA DOS PAIS MALHAFIL`,`LANÇAMENTO — PRIMAVERA/VERÃO 2026`,`BLACK FRIDAY MALHAFIL`,``,`VÍDEOS CURTOS MALHAFIL`,``]',
+);
+clientBundle = clientBundle.replace(
+  'gallery:[`/projects/malhafil/slide-01.webp`,`/projects/malhafil/slide-02.webp`,`/projects/malhafil/slide-03.webp`,`/projects/malhafil/slide-04.webp`,`/projects/malhafil/slide-05.webp`]',
+  'gallery:[`/projects/malhafil/slide-01.webp`,`/projects/malhafil/slide-02.webp`,`/projects/malhafil/slide-03.webp`,`/projects/malhafil/slide-04.webp`,`/projects/malhafil/slide-05.webp`,`/projects/malhafil/slide-06.webp`,`/projects/malhafil/black-friday-video.mp4`,`/projects/malhafil/short-video-01.mp4`,`/projects/malhafil/short-video-02.mp4`]',
+);
+clientBundle = clientBundle.replace(
+  'Projeto de social media desenvolvido para a Malhafil na Agência Trêes. A direção de arte integra imagens dos produtos geradas com inteligência artificial, a partir dos materiais fornecidos, ao universo visual do feed da marca — garantindo coerência, apelo comercial e continuidade entre as peças.',
+  'Campanha promocional Malhafil × Valisere para o Mês Premiado, desenvolvida na Agência Trêes. As peças combinam fotografias oficiais das modelos e dos produtos da Valisere com a identidade visual da Malhafil para comunicar descontos, brindes e sorteios com clareza e unidade no feed.',
+);
+clientBundle = clientBundle.replace(
+  'Campanha de Dia dos Namorados desenvolvida para a Malhafil em parceria com a Hope, na Agência Trêes. O trabalho envolveu o tratamento das imagens e a criação da tag visual da campanha, desdobrada em versões verticais e horizontais para diferentes formatos de publicação.',
+  'Campanha de Dia dos Namorados da Malhafil, criada na Agência Trêes para reunir ofertas de Hope, Lupo e Valisere em uma mesma narrativa visual. O trabalho incluiu o tratamento das imagens e o desdobramento da identidade da campanha em diferentes formatos para redes sociais.',
+);
+clientBundle = clientBundle.replace(
+  'Trio de posts criado para apresentar a coleção Primavera/Verão 2026 da Malhafil. A direção de arte constrói uma abertura leve e contemporânea, com gradientes quentes, tipografia expressiva e composições que conectam as três peças em uma narrativa visual única para o lançamento.',
+  'Trio de posts criado para apresentar a coleção Primavera/Verão 2026 da Malhafil. A direção de arte constrói uma abertura leve e contemporânea, com gradientes quentes, tipografia expressiva e composições que conectam as três peças em uma narrativa visual única para o lançamento.`,`` ,`Campanha de Black Friday da Malhafil, criada na Agência Trêes com descontos progressivos de 10%, 20% e 30% conforme a quantidade de peças. A direção de arte combina alto contraste, tipografia expressiva e a paleta da marca para comunicar a oferta de forma direta e fácil de entender.`,``,`',
+);
+clientBundle = clientBundle.replace(
+  'galleryTitles:[`VALISERE CAMPAIGN — AI IMAGERY`,`NEW BAG COLLECTION`,`VALENTINE\'S DAY — MALHAFIL × HOPE`,`FATHER\'S DAY CAMPAIGN`,`SPRING/SUMMER 2026 — COLLECTION LAUNCH`]',
+  'galleryTitles:[`MALHAFIL X VALISERE - DISCOUNTS AND GIFTS`,`NEW BAG COLLECTION`,`MALHAFIL VALENTINE\'S DAY`,`MALHAFIL FATHER\'S DAY`,`SPRING/SUMMER 2026 — COLLECTION LAUNCH`,`MALHAFIL BLACK FRIDAY`,``,`MALHAFIL SHORT VIDEOS`,``]',
+);
+clientBundle = clientBundle.replace(
+  'Social media project developed for Malhafil at Agência Trêes. The art direction integrates AI-generated product imagery, created from the supplied materials, into the brand\'s feed — ensuring consistency, commercial appeal and visual continuity across the campaign.',
+  'A Malhafil × Valisere promotional campaign for Mês Premiado, developed at Agência Trêes. The pieces combine official photographs of Valisere models and products with Malhafil\'s visual identity to communicate discounts, gifts and prize draws clearly and consistently across the feed.',
+);
+clientBundle = clientBundle.replace(
+  'Valentine\'s Day campaign developed at Agência Trêes for Malhafil in partnership with Hope. The work included image treatment and the creation of the campaign\'s visual tag, adapted into vertical and horizontal versions for different publication formats.',
+  'Malhafil\'s Valentine\'s Day campaign, created at Agência Trêes to bring offers from Hope, Lupo and Valisere into one visual narrative. The work included image treatment and adapting the campaign identity across different social media formats.',
+);
+clientBundle = clientBundle.replace(
+  'A trio of posts created to introduce Malhafil’s Spring/Summer 2026 collection. The art direction builds a light, contemporary opening through warm gradients, expressive typography and connected compositions that turn the three pieces into a unified visual narrative for the launch.',
+  'A trio of posts created to introduce Malhafil’s Spring/Summer 2026 collection. The art direction builds a light, contemporary opening through warm gradients, expressive typography and connected compositions that turn the three pieces into a unified visual narrative for the launch.`,`` ,`Malhafil Black Friday campaign created at Agência Trêes with progressive discounts of 10%, 20% and 30% based on the number of items purchased. The art direction combines high contrast, expressive typography and the brand palette to make the offer direct and easy to understand.`,``,`',
+);
 clientBundle = clientBundle.replace(
   'description:`Identity created for a beachfront guesthouse in Arraial do Cabo. The brand translates a calm, exclusive and nature-connected experience through a sensory, sophisticated and intimate language.`}',
   'description:`Identity created for a beachfront guesthouse in Arraial do Cabo. The brand translates a calm, exclusive and nature-connected experience through a sensory, sophisticated and intimate language.`,galleryCaptions:[``,`The CasaMar symbol unites architecture and nature in a simple, organic form. Its outline evokes a portal or shelter, while the central element represents the natural movement of the sea and coastal vegetation. The composition reinforces the idea of a retreat integrated into the landscape.`,``,``,``]}',
+);
+clientBundle = clientBundle.replace(
+  'function D(e){return E(e)||e.toLowerCase().endsWith(`.gif`)?e:',
+  'function D(e){return E(e)||e.includes(`/projects/vistas-do-itaqueri/`)||e.toLowerCase().endsWith(`.gif`)?e:',
 );
 clientBundle = clientBundle.replace(
   'd=o.behanceUrl?l.slice(0,2):l',
@@ -280,7 +368,7 @@ clientBundle = clientBundle.replace(
 );
 clientBundle = clientBundle.replace(
   'p=[`malhafil`,`guru-spirit-packaging`,`sadhu-morning-evening-night`,`deposito-23`].includes(o.slug)',
-  'p=[`malhafil`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`ryzon`,`sadhu-morning-evening-night`,`deposito-23`,`vies`,`labirinto-noir`].includes(o.slug)',
+  'p=[`malhafil`,`vistas-do-itaqueri`,`casamar`,`guru-spirit-folder`,`guru-spirit-packaging`,`ryzon`,`sadhu-morning-evening-night`,`deposito-23`,`vies`,`labirinto-noir`].includes(o.slug)',
 );
 clientBundle = clientBundle.replace(
   'o.behanceUrl&&(0,u.jsx)(`a`,{className:`behance-case-link`',
@@ -293,6 +381,14 @@ clientBundle = clientBundle.replace(
 clientBundle = clientBundle.replace(
   'loading:`eager`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
   'loading:t===0?`eager`:`lazy`,decoding:`async`,fetchPriority:t===0?`high`:`auto`',
+);
+clientBundle = clientBundle.replace(
+  'alt:`${o.title} — ${s.slide.toLowerCase()} ${t+1}`,loading:t===0?`eager`:`lazy`',
+  'alt:o.galleryAlt?.[t]||`${o.title} — ${s.slide.toLowerCase()} ${t+1}`,loading:t===0?`eager`:`lazy`',
+);
+clientBundle = clientBundle.replace(
+  'ref:a,className:`modal project-popup`,role:',
+  'ref:a,className:`modal project-popup project-popup-${o.slug}`,role:',
 );
 clientBundle = clientBundle.replace(
   '[D,P]=(0,r.useState)(!0),[F,I]',
@@ -321,7 +417,7 @@ indexHtml = indexHtml.replace(
 // measurements are ready; the timeout prevents a permanent cover if JS fails.
 indexHtml = indexHtml.replace(
   '<head>',
-  '<head><script>document.documentElement.classList.add("portfolio-booting");try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")document.documentElement.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>document.documentElement.classList.remove("portfolio-booting","portfolio-revealing"),2500);</script><style>html.portfolio-booting,html.portfolio-booting body{background:#000}html.portfolio-booting::before{content:"";position:fixed;z-index:250;inset:0;background:#000;opacity:1;pointer-events:auto;transition:opacity 260ms cubic-bezier(.22,1,.36,1)}html.portfolio-booting.portfolio-revealing::before{opacity:0;pointer-events:none}</style>',
+  '<head><script>(()=>{const root=document.documentElement;window.__portfolioBootActive=true;const hold=()=>{if(window.__portfolioBootActive&&!root.classList.contains("portfolio-booting"))root.classList.add("portfolio-booting")};const prepareLoader=()=>{if(window.__portfolioBootLoader)return;const source=document.querySelector(".site-loader");if(!source)return;const loader=source.cloneNode(true);loader.classList.add("portfolio-boot-loader");loader.removeAttribute("role");loader.removeAttribute("aria-live");loader.setAttribute("aria-hidden","true");window.__portfolioBootLoader=loader;const continueLoader=()=>{if(!window.__portfolioBootActive||loader.isConnected||document.querySelector(".site-loader:not(.portfolio-boot-loader)"))return;document.body.append(loader)};window.__portfolioBootLoaderObserver=new MutationObserver(continueLoader);window.__portfolioBootLoaderObserver.observe(document.body,{childList:true});continueLoader()};hold();window.__portfolioBootObserver=new MutationObserver(hold);window.__portfolioBootObserver.observe(root,{attributes:true,attributeFilter:["class"]});if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",prepareLoader,{once:true});else prepareLoader();try{const savedLanguage=localStorage.getItem("brenda-portfolio-language");if(savedLanguage==="pt"||savedLanguage==="en")root.lang=savedLanguage==="pt"?"pt-BR":"en"}catch{}window.__portfolioBootTimeout=setTimeout(()=>{window.__portfolioBootActive=false;window.__portfolioBootObserver?.disconnect();window.__portfolioBootLoaderObserver?.disconnect();window.__portfolioBootLoader?.remove();root.classList.remove("portfolio-booting","portfolio-revealing")},8000)})();</script><style>html.portfolio-booting,html.portfolio-booting body{background:#000}html.portfolio-booting::before{content:"";position:fixed;z-index:250;inset:0;background:#000;opacity:1;pointer-events:auto;transition:opacity 260ms cubic-bezier(.22,1,.36,1)}html.portfolio-booting:not(.portfolio-revealing) body>:not(.site-loader):not(.language-gate){visibility:hidden!important}.site-loader.portfolio-boot-loader{z-index:401;opacity:1;visibility:visible!important;transition:opacity 260ms cubic-bezier(.22,1,.36,1)}html.portfolio-booting.portfolio-revealing::before,html.portfolio-revealing .site-loader.portfolio-boot-loader{opacity:0;pointer-events:none}</style>',
 );
 
 if (!indexHtml.includes('https://use.typekit.net/ndf7wpk.css')) {
@@ -342,8 +438,10 @@ const projectMarkupByTitle = new Map(projectMarkup.map((article) => {
   const title = article.match(/class="project-title">([^<]+)<\/span>/)?.[1];
   return [title, article];
 }));
+projectMarkupByTitle.set('VISTAS DO ITAQUERI', '<article class="project featured"><figure class="poster project-image "><img src="/projects/vistas-do-itaqueri/slide-01.webp" alt="Capa do projeto VISTAS DO ITAQUERI" loading="lazy"/><span class="poster-index">BB—<!-- -->02</span></figure><div class="project-info"><button type="button" class="project-open" aria-label="VER PROJETO VISTAS DO ITAQUERI"></button><span class="project-number">02</span><span class="project-title">VISTAS DO ITAQUERI</span><span class="project-tags" aria-label="Softwares e habilidades"><button type="button" class="project-tag-link" data-kind="skill">#<!-- -->BRANDING</button><button type="button" class="project-tag-link" data-kind="skill">#<!-- -->IDENTIDADE VISUAL</button><button type="button" class="project-tag-link" data-kind="skill">#<!-- -->DIREÇÃO DE ARTE</button><button type="button" class="project-tag-link" data-kind="skill">#<!-- -->TIPOGRAFIA</button></span><span class="project-meta">BRANDING / IDENTIDADE VISUAL<br/>2025</span></div></article>');
 const staticProjectOrder = [
   'MORNING / EVENING / NIGHT',
+  'VISTAS DO ITAQUERI',
   'CASAMAR',
   'RYZON',
   'LABIRINTO NOIR',
@@ -371,8 +469,8 @@ indexHtml = indexHtml.replace(projectMarkupPattern, () => {
   return projectMarkupIndex === 1 ? orderedProjectMarkup.join('') : '';
 });
 indexHtml = indexHtml.replace(
-  'ARQUIVO<!-- --> [<!-- -->14<!-- -->]',
   'ARQUIVO<!-- --> [<!-- -->13<!-- -->]',
+  'ARQUIVO<!-- --> [<!-- -->14<!-- -->]',
 );
 indexHtml = indexHtml.replace(/<span class="project-cta">[^<]*<\/span>/g, '');
 
